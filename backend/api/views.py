@@ -1,3 +1,4 @@
+import datetime
 from .ienum import FILETYPE
 import subprocess
 from .pdfreader import PdfReader
@@ -20,8 +21,8 @@ from .ocr.chineseocr import OCR
 from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
 from django.conf import settings
-from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordListSerializer, HistoryRecordDetailSerializer
-from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord, HistoryRecordList
+from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
+from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
 import os
 import shutil
 import uuid
@@ -903,28 +904,10 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class HistoryRecordListViewSet(viewsets.ModelViewSet):
-
-    queryset = HistoryRecordList.objects.all()
-    serializer_class = HistoryRecordListSerializer
-    parser_classes = (MultiPartParser, FormParser,)
-
-    def perform_create(self, serializer):
-
-        iserializer = serializer.save()
-        dataMap = {}
-        ret = 0
-        msg = "成功"
-
-        serializer.save(data=dataMap, ret=ret, msg=msg)
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class HistoryRecordDetailViewSet(viewsets.ModelViewSet):
+class HistoryRecordViewSet(viewsets.ModelViewSet):
 
     queryset = HistoryRecord.objects.all()
-    serializer_class = HistoryRecordDetailSerializer
+    serializer_class = HistoryRecordSerializer
     parser_classes = (MultiPartParser, FormParser,)
 
     def retrieve(self, request, pk=None):
@@ -937,3 +920,49 @@ class HistoryRecordDetailViewSet(viewsets.ModelViewSet):
         dataMap['msg'] = "成功"
         dataMap['data'] = serializer.data
         return Response(data=dataMap, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        # 获取参数
+        requestData = request.query_params
+        system_id = requestData.get('system_id')
+        channel_id = requestData.get('channel_id')
+        user_id = requestData.get('user_id')
+        begin_time = requestData.get('begin_time')
+        end_time = requestData.get('end_time')
+        file_name = requestData.get('file_name')
+        file_type = requestData.get('file_type')
+        
+        # 根据条件过滤
+        conditions = {}
+        if system_id is not None:
+            conditions['system_id'] = system_id
+        
+        if channel_id is not None:
+            conditions['channel_id'] = channel_id
+        
+        if user_id is not None:
+            conditions['user_id'] = user_id
+        
+        if file_name is not None:
+            conditions['file_name'] = file_name
+        
+        if file_type is not None:
+            conditions['file_type'] = file_type
+        
+        if begin_time is not None:
+            begin_time_date = datetime.datetime.strptime(begin_time, "%Y-%m-%d %H:%M:%S")
+            conditions['upload_time__gte'] = begin_time_date
+        
+        if end_time is not None:
+            end_time_date = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+            conditions['upload_time__lte'] = end_time_date
+        
+        queryset = HistoryRecord.objects.filter(**conditions)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

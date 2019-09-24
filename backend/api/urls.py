@@ -21,8 +21,7 @@ router.register(r'ocr/get_vehicleplate_ocr', views.OcrVehicleplateViewSet)
 router.register(r'audio/get_chinese_speech', views.AudioFileUploadViewSet)
 router.register(r'audio/get_chinese_speech_inspection', views.AudioFileInspectionViewSet)
 router.register(r'video/get_video_inspection', views.VideoFileUploadViewSet)
-router.register(r'history/get_historyrecord_list', views.HistoryRecordListViewSet)
-router.register(r'history/get_historyrecord_detail', views.HistoryRecordDetailViewSet)
+router.register(r'history/get_historyrecord', views.HistoryRecordViewSet)
 
 image = routers.DefaultRouter()
 image.register(r'get_violence_identify', views.FileImageTerrorismUploadViewSet)
@@ -50,8 +49,7 @@ video = routers.DefaultRouter()
 video.register(r'get_video_inspection', views.VideoFileUploadViewSet)
 
 history = routers.DefaultRouter()
-history.register(r'get_historyrecord_list', views.HistoryRecordListViewSet)
-history.register(r'get_historyrecord_detail', views.HistoryRecordDetailViewSet)
+history.register(r'get_historyrecord', views.HistoryRecordViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

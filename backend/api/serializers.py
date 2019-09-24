@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import FileUpload, FileImageTerrorismUpload, FileVisionPornUpload
 from .models import VideoFileUpload, AudioFileUpload, AudioFileInspection, ImageFileUpload, WordRecognitionInspection
-from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, HistoryRecord, HistoryRecordList
+from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, HistoryRecord
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -265,24 +265,7 @@ class OcrVehicleplateSerializer(serializers.HyperlinkedModelSerializer):
         return obj.ret, obj.msg, obj.data
 
 
-class HistoryRecordListSerializer(serializers.HyperlinkedModelSerializer):
-
-    ret = serializers.JSONField(True)
-    msg = serializers.JSONField(True)
-    data = serializers.JSONField(True)
-
-    class Meta:
-        model = HistoryRecordList
-        fields = ('system_id', 'channel_id', 'user_id',
-                  'begin_time', 'end_time', 'file_name',
-                  'file_type', 'current_page', 'page_size',
-                  'ret', 'msg', 'data')
-
-    def clean_json(self, obj):
-        return obj.ret, obj.msg, obj.data
-
-
-class HistoryRecordDetailSerializer(serializers.HyperlinkedModelSerializer):
+class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
 
     ret = serializers.JSONField(True)
     msg = serializers.JSONField(True)

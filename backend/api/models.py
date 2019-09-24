@@ -321,23 +321,3 @@ class HistoryRecord(models.Model):
     channel_id = models.IntegerField(_('channel_id'), null=True, blank=True)
     user_id = models.CharField(
         _('user_id'), max_length=64, null=True, blank=True)
-    ret = models.IntegerField(_('ret'), null=True, blank=True)
-    msg = models.TextField(max_length=255, null=True, default='')
-    data = models.TextField(max_length=2048, null=True, default='')
-
-class HistoryRecordList(models.Model):
-    system_id = models.IntegerField(_('system_id'), null=True, blank=True)
-    channel_id = models.IntegerField(_('channel_id'), null=True, blank=True)
-    user_id = models.CharField(
-        _('user_id'), max_length=64, null=True, blank=True)
-    begin_time = models.DateTimeField(auto_now=True, blank=True)
-    end_time = models.DateTimeField(auto_now=True, blank=True)
-    file_name = models.CharField(
-        _('file_name'), max_length=128, null=True, blank=True)
-    file_type = models.IntegerField(_('file_type'), null=True, blank=True)
-    current_page = models.IntegerField(_('current_page'), null=True, blank=True)
-    page_size = models.IntegerField(_('page_size'), null=True, blank=True)
-    history_records = SortedManyToManyField(HistoryRecord, blank=True)
-    ret = models.IntegerField(_('ret'), null=True, blank=True)
-    msg = models.TextField(max_length=255, null=True, default='')
-    data = models.TextField(max_length=2048, null=True, default='')
