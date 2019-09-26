@@ -53,6 +53,53 @@ def get_two_float(f_str, n):
     return ".".join([a, c])
 
 
+def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
+    file_id = serializer.id
+    file_name = serializer.image.name.split('/')[1]
+    file_url = settings.FILE_URL + serializer.image.url
+    file_type = filetype
+    inspection_result = result
+
+    violence_percent = "0"
+    violence_sensitivity_level = "0"
+    if violence is not None:
+        violence_percent = get_two_float(float(violence) * 100, 2)
+        if (float(violence) < 0.5):
+            violence_sensitivity_level = "0"
+        if (float(violence) >= 0.5 and float(violence) <= 0.9):
+            violence_sensitivity_level = "1"
+        if (float(violence) > 0.9):
+            violence_sensitivity_level = "2"
+
+    porn_percent = "0"
+    porn_sensitivity_level = "0"
+    if porn is not None:
+        porn_percent = get_two_float(float(porn) * 100, 2)
+        if (float(porn) < 0.5):
+            porn_sensitivity_level = "0"
+        if (float(porn) >= 0.5 and float(porn) <= 0.9):
+            porn_sensitivity_level = "1"
+        if (float(porn) > 0.9):
+            porn_sensitivity_level = "2"
+
+    max_sensitivity_type = maxtype
+    max_sensitivity_level = violence_sensitivity_level
+    process_status = 2
+    system_id = serializer.system_id
+    channel_id = serializer.channel_id
+    user_id = serializer.user_id
+
+    HistoryRecord.objects.create(
+        file_id=file_id, file_name=file_name,
+        file_url=file_url, file_type=file_type,
+        inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
+        max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
+        violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
+        porn_sensitivity_level=porn_sensitivity_level,process_status=process_status,
+        system_id=system_id, channel_id=channel_id, user_id=user_id
+    )
+
+
 def RunShellWithReturnCode(command):
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)
@@ -333,7 +380,7 @@ class OcrGeneralViewSet(viewsets.ModelViewSet):
         dataArr = []
         for each in arr:
             dataArr.append(each["text"])
-        #result = check_result
+        # result = check_result
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -388,8 +435,8 @@ class OcrIDCardViewSet(viewsets.ModelViewSet):
                 name = "address"
                 count = count + 1
             dataMap[name] = each['text']
-            #dataMap[each['name']] = each['text']
-        #result = check_result
+            # dataMap[each['name']] = each['text']
+        # result = check_result
         if (len(arr) == 0 or count < 3):
             ret = 1
             msg = "请上传身份证图片"
@@ -426,35 +473,8 @@ class FileImageTerrorismUploadViewSet(viewsets.ModelViewSet):
                         msg=msg, image=iserializer.image)
 
         # 更新历史记录
-        file_id = iserializer.id
-        file_name = iserializer.image.name.split('/')[1]
-        file_url = settings.FILE_URL + iserializer.image.url
-        file_type = FILETYPE.Image.value
-        inspection_result = resultMap
-        
-        violence_percent = get_two_float(float(violence) * 100, 2)
-        violence_sensitivity_level = "0"
-        if (float(violence) < 0.5):
-            violence_sensitivity_level = "0"
-        if (float(violence) >= 0.5 and float(violence) <= 0.9):
-            violence_sensitivity_level = "1"
-        if (float(violence) > 0.9):
-            violence_sensitivity_level = "2"
-        max_sensitivity_type = 'violence'
-        max_sensitivity_level = violence_sensitivity_level
-        process_status = 2
-        system_id = iserializer.system_id
-        channel_id = iserializer.channel_id
-        user_id = iserializer.user_id
-
-        HistoryRecord.objects.create(
-            file_id=file_id, file_name=file_name,
-            file_url=file_url, file_type=file_type,
-            inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
-            max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
-            violence_sensitivity_level=violence_sensitivity_level, process_status=process_status,
-            system_id=system_id, channel_id=channel_id, user_id=user_id
-        )
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            resultMap, 'violence', violence, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -485,6 +505,11 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
         # print (check_result)
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
+        
+        # 更新历史记录
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            resultMap, 'porn', None, scores[1])
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -719,8 +744,8 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
                 count = count + 1
 
             dataMap[name] = each['text']
-            #dataMap[each['name']] = each['text']
-        #result = check_result
+            # dataMap[each['name']] = each['text']
+        # result = check_result
         # if (len(arr) == 0 or count < 1):
         if(dataMap["license_type"] != "中华人民共和国机动车驾驶证"):
             ret = 1
@@ -767,8 +792,8 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
                 name = "license_no"
                 count = count + 1
             dataMap[name] = each['text']
-            #dataMap[each['name']] = each['text']
-        #result = check_result
+            # dataMap[each['name']] = each['text']
+        # result = check_result
         if (len(arr) == 0 or count < 1):
             ret = 1
             msg = "请上传行驶证图片"
@@ -814,8 +839,8 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
                 name = "bank_cardno"
                 count = count + 1
             dataMap[name] = each['text']
-            #dataMap[each['name']] = each['text']
-        #result = check_result
+            # dataMap[each['name']] = each['text']
+        # result = check_result
         if (len(arr) == 0 or count < 1):
             ret = 1
             msg = "请上传银行卡图片"
@@ -853,7 +878,7 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         dataArr = []
         for each in arr:
             dataArr.append(each["text"])
-        #result = check_result
+        # result = check_result
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -893,8 +918,8 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
                 name = "plate_no"
                 count = count + 1
             dataMap[name] = each['text']
-            #dataMap[each['name']] = each['text']
-        #result = check_result
+            # dataMap[each['name']] = each['text']
+        # result = check_result
         if (len(arr) == 0 or count < 1):
             ret = 1
             msg = "请上传车牌图片"
@@ -931,32 +956,34 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         end_time = requestData.get('end_time')
         file_name = requestData.get('file_name')
         file_type = requestData.get('file_type')
-        
+
         # 根据条件过滤
         conditions = {}
         if system_id is not None:
             conditions['system_id'] = system_id
-        
+
         if channel_id is not None:
             conditions['channel_id'] = channel_id
-        
+
         if user_id is not None:
             conditions['user_id'] = user_id
-        
+
         if file_name is not None:
             conditions['file_name'] = file_name
-        
+
         if file_type is not None:
             conditions['file_type'] = file_type
-        
+
         if begin_time is not None:
-            begin_time_date = datetime.datetime.strptime(begin_time, "%Y-%m-%d %H:%M:%S")
+            begin_time_date = datetime.datetime.strptime(
+                begin_time, "%Y-%m-%d %H:%M:%S")
             conditions['upload_time__gte'] = begin_time_date
-        
+
         if end_time is not None:
-            end_time_date = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+            end_time_date = datetime.datetime.strptime(
+                end_time, "%Y-%m-%d %H:%M:%S")
             conditions['upload_time__lte'] = end_time_date
-        
+
         queryset = HistoryRecord.objects.filter(**conditions)
 
         page = self.paginate_queryset(queryset)
