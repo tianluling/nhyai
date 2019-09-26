@@ -12,167 +12,186 @@ class vehiclelicense:
         self.N = len(self.result)
         self.res = {}
         self.license_type()
-        self.license_no()
-        self.full_name()
+        self.plate_no()
+        self.vehicle_type()
+        self.owner()
         self.address()
-        self.birthday()
-        self.first_issue()
-        self.be_class()
-        self.valid_period()
-        print("999999999999999999999999   result====",result)
+        self.use_character()
+        self.model()
+        self.vin()
+        self.engine_no()
+        self.register_date()
+        self.issue_date()
 
     def license_type(self):
         """
-        证号 
+        类型 
         """
         license_type={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("中华人民共和国机动车驾驶证[\u4e00-\u9fa5]+",txt)
+            res = re.findall("中华人民共和国机动车行驶证",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                license_type['中华人民共和国机动车驾驶证']  =res[0].replace('中华人民共和国机动车驾驶证','')
+                license_type['类型']  ='中华人民共和国机动车行驶证'
                 self.res.update(license_type) 
                 break  
 
-    def license_no(self):
+    def plate_no(self):
         """
-        证号 
+        号牌号码
         """
-        license_no={}
+        plate_no={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("证号[\u4e00-\u9fa5]{1,4}",txt)
+            res = re.findall("号牌号码[\u4E00-\u9FA5A-Za-z0-9]{1,7}",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                license_no['证号']  =res[0].replace('证号','')
-                self.res.update(license_no) 
-                break    
-            res = re.findall("远号[\u4e00-\u9fa5]{1,4}",txt)
+                plate_no['号牌号码']  = res[0].replace('号牌号码','')
+                self.res.update(plate_no) 
+            res = re.findall("号肿号码[\u4E00-\u9FA5A-Za-z0-9]{1,7}",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                license_no['证号']  =res[0].replace('远号','')
-                self.res.update(license_no) 
-                break    
+                plate_no['号牌号码']  =res[0].replace('号肿号码','')
+                self.res.update(plate_no) 
+                break  
 
-
-    def full_name(self):
+    def vehicle_type(self):
         """
-        驾驶证姓名
+        车辆类型
         """
-        name={}
+        vehicle_type={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            ##匹配姓名
-            res = re.findall("姓名[\u4e00-\u9fa5]+",txt)
+            res = re.findall(".*车辆类型[\u4E00-\u9FA5]{1,4}",txt)
             if len(res)>0:
-                name['姓名']  =res[0].replace('姓名','')
-            res = re.findall("始名[\u4e00-\u9fa5]+",txt)
-            if len(res)>0:
-                name['姓名']  =res[0].replace('始名','')
-                # self.res.update(name) 
-                # break
-            if '男'  in txt:
-                    name["性别"] = '男'
-                    # self.res.update(sex) 
-                    # break
-            elif '女'  in txt:
-                    name["性别"] = '女'
+                #vehicle_type['车辆类型']  =res[0].replace('.*车辆类型','')
+                vehicle_type["车辆类型"] = res[0].split('车辆类型')[-1]
+                self.res.update(vehicle_type) 
+                break  
 
-            res = re.findall(".*国籍[\u4e00-\u9fa5]+",txt)
+    def owner(self):
+        """
+        所有人
+        """
+        owner={}
+        for i in range(self.N):
+            txt = self.result[i]['text'].replace(' ','')
+            txt = txt.replace(' ','')
+            res = re.findall("所有人[\u4E00-\u9FA5]{1,4}",txt)
             if len(res)>0:
-                name["国籍"] = res[0].split('国籍')[-1]
-                self.res.update(name) 
-                break
-   
+                owner['所有人']  =res[0].replace('所有人','')
+                self.res.update(owner) 
+                break  
+
     def address(self):
         """
         住址
-        ##此处地址匹配还需完善
         """
-        add={}
-        addString=[]
+        address={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            
-            ##住址
-            if '住址' in txt or '省' in txt or '市' in txt or '县' in txt or '街' in txt or '村' in txt or "镇" in txt or "区" in txt or "城" in txt or "室" in txt or "房" in txt:
-                addString.append(txt.replace('住址',''))
-            else:
-                ##增加地址第二行判断
-                res = re.findall(r'\d+号',txt)
-            
+            res = re.findall("住址[\u4E00-\u9FA5\0-9]+",txt)
             if len(res)>0:
-                addString.append(txt.replace('住址',''))
-            
-        if len(addString)>0:
-            add['住址']  =''.join(addString)
-            self.res.update(add) 
+                address['住址']  =res[0].replace('住址','')
+                self.res.update(address) 
 
-    def birthday(self):
+            res = re.findall("主广址[\u4E00-\u9FA5\0-9]+",txt)
+            if len(res)>0:
+                address['住址']  =res[0].replace('主广址','')
+                self.res.update(address) 
+                break  
+
+    def use_character(self):
         """
-        出生日期
+        使用性质
         """
-        birth={}
+        use_character={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            ##出生日期
-            res = re.findall(r'出生日期\d*-\d*-\d*-',txt)
-            res = re.findall(r'\d*-\d*-\d*-',txt)
-            
+            res = re.findall("使用性质[\u4E00-\u9FA5]{1,3}",txt)
             if len(res)>0:
-                birth['出生日期']  =res[0].replace('出生日期','')
-                self.res.update(birth) 
-                break
-             
-    
-    def first_issue(self):
+                use_character['使用性质']  =res[0].replace('使用性质','')
+                self.res.update(use_character) 
+                break  
+
+    def model(self):
         """
-        初次领证日期
+        品牌型号
         """
-        first_issue={}
+        model={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("初次领证日期[\u4e00-\u9fa5]+",txt)
+            res = re.findall(".*品牌型号[\u4E00-\u9FA5]+",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                first_issue['初次领证日期']  =res[0].replace('初次领证日期','')
-                self.res.update(first_issue) 
-                break    
-    
-    def be_class(self):
+                model["品牌型号"] = res[0].split('品牌型号')[-1]
+                self.res.update(model) 
+                break  
+
+    def vin(self):
         """
-        准驾车型
+        车辆识别代号
         """
-        be_class={}
+        vin={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("准驾车型[\u4e00-\u9fa5]+",txt)
+            res = re.findall(".*车辆识别代号[A-Za-z0-9]+",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                be_class['准驾车型']  =res[0].replace('准驾车型','')
-                self.res.update(be_class) 
-                break    
-    
-    def valid_period(self):
+                vin["车辆识别代号"] = res[0].split('车辆识别代号')[-1]
+                self.res.update(vin) 
+            res = re.findall(".*辆识别代号[A-Za-z0-9]+",txt)
+            if len(res)>0:
+                vin["车辆识别代号"] = res[0].split('辆识别代号')[-1]
+                self.res.update(vin) 
+                break  
+    def engine_no(self):
         """
-        有效期限
+        发动机号码
         """
-        valid_period={}
+        engine_no={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("有效期限[\u4e00-\u9fa5]+",txt)
+            res = re.findall(".*发动机号码[A-Za-z0-9]+",txt)
             if len(res)>0:
-                print("111111111111111111  =",txt)
-                valid_period['有效期限']  =res[0].replace('有效期限','')
-                self.res.update(valid_period) 
-                break    
-        
+                engine_no["发动机号码"] = res[0].split('发动机号码')[-1]
+                self.res.update(engine_no) 
+                break  
+
+    def register_date(self):
+        """
+        注册日期
+        """
+        register_date={}
+        for i in range(self.N):
+            txt = self.result[i]['text'].replace(' ','')
+            txt = txt.replace(' ','')
+            res = re.findall(".*注册日期[0-9\-]{1,10}",txt)
+            if len(res)>0:
+                register_date["注册日期"] = res[0].replace('.*注册日期','')
+                self.res.update(register_date) 
+                break  
+            res = re.findall(".*注进日期[0-9\-]{1,10}",txt)
+            if len(res)>0:
+                register_date["注册日期"] = res[0].split('注进日期')[-1][0:9] 
+                self.res.update(register_date) 
+                break  
+
+    def issue_date(self):
+        """
+        发证日期
+        """
+        issue_date={}
+        for i in range(self.N):
+            txt = self.result[i]['text'].replace(' ','')
+            txt = txt.replace(' ','')
+            res = re.findall(".*发证日期[0-9\-]{1,10}",txt)
+            if len(res)>0:
+                issue_date["发证日期"] = res[0].split('发证日期')[-1]
+                self.res.update(issue_date) 
+                break  
+
