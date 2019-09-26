@@ -9,16 +9,16 @@ import router from './store/router'
 import common from './store/common'
 import fileUtil from './store/fileUtil'
 import axios from 'axios'
-import {post,fetch,patch,put} from './store/https'
+import { post, fetch, patch, put } from './store/https'
 import AudioRecorder from 'vue-audio-recorder'
 import "babel-polyfill"
 
 //定义全局变量
-Vue.prototype.$post=post;
-Vue.prototype.$fetch=fetch;
-Vue.prototype.$patch=patch;
-Vue.prototype.$put=put;
-Vue.prototype.$axios=axios;
+Vue.prototype.$post = post;
+Vue.prototype.$fetch = fetch;
+Vue.prototype.$patch = patch;
+Vue.prototype.$put = put;
+Vue.prototype.$axios = axios;
 
 Vue.use(ElementUI);
 Vue.use(common);
@@ -30,7 +30,22 @@ Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-    router,
+  router,
   components: { App },
   template: '<App/>'
 })
+
+router.afterEach((to, from, next) => {
+  setTimeout(() => {
+    var _hmt = _hmt || [];
+    (function () {
+      //每次执行前，先移除上次插入的代码
+      document.getElementById('baidu_tj') && document.getElementById('baidu_tj').remove();
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?11168791855c1b5ac5bcb8c26e91fd1b";
+      hm.id = "baidu_tj"
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  }, 0);
+});
