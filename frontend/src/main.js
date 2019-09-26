@@ -11,7 +11,7 @@ import fileUtil from './store/fileUtil'
 import axios from 'axios'
 import {post,fetch,patch,put} from './store/https'
 import AudioRecorder from 'vue-audio-recorder'
-
+import "babel-polyfill"
 
 //定义全局变量
 Vue.prototype.$post=post;
