@@ -190,3 +190,22 @@ PORNSCORE_MAX = 0.8
 
 #文件服务地址
 FILE_URL = 'http://172.31.20.59:8000'
+
+#增加SQL语句打印
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level':'DEBUG',
+        },
+    }
+}

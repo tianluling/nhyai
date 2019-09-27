@@ -1,3 +1,5 @@
+from django.db.models.functions import TruncMonth
+from django.db.models import Count
 import datetime
 from .ienum import FILETYPE
 import subprocess
@@ -21,8 +23,8 @@ from .ocr.chineseocr import OCR
 from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
 from django.conf import settings
-from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer,OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
-from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense,OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
+from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
+from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
 import os
 import shutil
 import uuid
@@ -95,7 +97,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
         max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
         violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
-        porn_sensitivity_level=porn_sensitivity_level,process_status=process_status,
+        porn_sensitivity_level=porn_sensitivity_level, process_status=process_status,
         system_id=system_id, channel_id=channel_id, user_id=user_id
     )
 
@@ -505,7 +507,7 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
         # print (check_result)
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
-        
+
         # 更新历史记录
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             resultMap, 'porn', None, scores[1])
@@ -824,7 +826,7 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
             dataMap[name] = each['text']
             #dataMap[each['name']] = each['text']
         #result = check_result
-        #if (len(arr) == 0 or count < 1):
+        # if (len(arr) == 0 or count < 1):
         if(dataMap["license_type"] != "中华人民共和国机动车行驶证"):
             ret = 1
             msg = "请上传行驶证图片"
@@ -832,6 +834,7 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         return Response(status=status.HTTP_201_CREATED)
+
 
 class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
 
@@ -1053,6 +1056,8 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         end_time = requestData.get('end_time')
         file_name = requestData.get('file_name')
         file_type = requestData.get('file_type')
+        is_group = requestData.get('is_group')
+        query_date = requestData.get('query_date')
 
         # 根据条件过滤
         conditions = {}
@@ -1081,7 +1086,56 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                 end_time, "%Y-%m-%d %H:%M:%S")
             conditions['upload_time__lte'] = end_time_date
 
-        queryset = HistoryRecord.objects.filter(**conditions)
+        if is_group is not None and is_group == 'true':
+            historygroups = HistoryRecord.objects.filter().extra(
+                {'day': "strftime('%Y-%m-%d',upload_time)"}).values_list('day').annotate(Count('id')).order_by('-day')
+            print(historygroups)
+            result = {}
+            results = {}
+            line = []
+            if len(historygroups) > 0:
+                if query_date is not None and int(query_date) > 0:
+                    group_index = 0
+                    for historygroup in historygroups:
+                        if group_index < int(query_date):
+                            historydate = historygroup[0]
+                            print(historydate)
+                            conditions["upload_time__year"] = historydate.split(
+                                '-')[0]
+                            conditions["upload_time__month"] = historydate.split(
+                                '-')[1]
+                            conditions["upload_time__day"] = historydate.split(
+                                '-')[2]
+                            historylist = HistoryRecord.objects.filter(
+                                **conditions)
+                            serializer_group = self.get_serializer(
+                                historylist, many=True)
+                            result[historydate] = serializer_group.data
+                            group_index += 1
+                        else:
+                            results['results'] = result
+                            return Response(results)
+                else:
+                    for historygroup in historygroups:
+                        historydate = historygroup[0]
+                        print(historydate)
+                        conditions["upload_time__year"] = historydate.split(
+                            '-')[0]
+                        conditions["upload_time__month"] = historydate.split(
+                            '-')[1]
+                        conditions["upload_time__day"] = historydate.split(
+                            '-')[2]
+                        historylist = HistoryRecord.objects.filter(
+                            **conditions)
+                        serializer_group = self.get_serializer(
+                            historylist, many=True)
+                        result[historydate] = serializer_group.data
+                    results['results'] = result
+                    return Response(results)
+            else:
+                return Response([])
+        else:
+            queryset = HistoryRecord.objects.filter(**conditions)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
