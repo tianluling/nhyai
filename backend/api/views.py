@@ -767,7 +767,7 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         iserializer = serializer.save()
         ret = 0
         msg = "成功"
-        bill_model = "驾驶证"
+        bill_model = "行驶证"
 
         # 增加网络URL文件上传
         if iserializer.image_url and not iserializer.image:
@@ -785,16 +785,47 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         count = 0
         for each in arr:
             name = ""
-            if(each['name'] == '中华人民共和国机动车行驶证'):
+            if(each['name'] == '类型'):
                 name = "license_type"
                 count = count + 1
             if(each['name'] == '证号'):
                 name = "license_no"
                 count = count + 1
+            if(each['name'] == '号牌号码'):
+                name = "plate_no"
+                count = count + 1
+            if(each['name'] == '车辆类型'):
+                name = "vehicle_type"
+                count = count + 1
+            if(each['name'] == '所有人'):
+                name = "owner"
+                count = count + 1
+            if(each['name'] == '住址'):
+                name = "address"
+                count = count + 1
+            if(each['name'] == '使用性质'):
+                name = "use_character"
+                count = count + 1
+            if(each['name'] == '品牌型号'):
+                name = "model"
+                count = count + 1
+            if(each['name'] == '车辆识别代号'):
+                name = "vin"
+                count = count + 1
+            if(each['name'] == '发动机号码'):
+                name = "engine_no"
+                count = count + 1
+            if(each['name'] == '注册日期'):
+                name = "register_date"
+                count = count + 1
+            if(each['name'] == '发证日期'):
+                name = "issue_date"
+                count = count + 1
             dataMap[name] = each['text']
-            # dataMap[each['name']] = each['text']
-        # result = check_result
-        if (len(arr) == 0 or count < 1):
+            #dataMap[each['name']] = each['text']
+        #result = check_result
+        #if (len(arr) == 0 or count < 1):
+        if(dataMap["license_type"] != "中华人民共和国机动车行驶证"):
             ret = 1
             msg = "请上传行驶证图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
