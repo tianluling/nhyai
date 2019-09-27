@@ -21,8 +21,8 @@ from .ocr.chineseocr import OCR
 from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
 from django.conf import settings
-from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
-from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
+from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer,OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
+from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense,OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
 import os
 import shutil
 import uuid
@@ -828,6 +828,72 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         if(dataMap["license_type"] != "中华人民共和国机动车行驶证"):
             ret = 1
             msg = "请上传行驶证图片"
+        serializer.save(data=dataMap, ret=ret, msg=msg,
+                        image=iserializer.image)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
+
+    queryset = OcrBusinesslicense.objects.all()
+    serializer_class = OcrBusinesslicenseSerializer
+    parser_classes = (MultiPartParser, FormParser,)
+
+    def perform_create(self, serializer):
+
+        iserializer = serializer.save()
+        ret = 0
+        msg = "成功"
+        bill_model = "营业执照"
+
+        # 增加网络URL文件上传
+        if iserializer.image_url and not iserializer.image:
+            img_temp = NamedTemporaryFile(delete=True)
+            img_temp.write(urlopen(iserializer.image_url).read())
+            img_temp.flush()
+            iserializer.image.save(os.path.basename(
+                iserializer.image_url), File(img_temp))
+
+        file_path = iserializer.image.path
+        check_result = OCR().getWordRecognition(file_path, bill_model)
+        arr = check_result['res']
+        dataMap = {}
+        count = 0
+        for each in arr:
+            name = ""
+            if(each['name'] == '营业执照'):
+                name = "license_type"
+                count = count + 1
+            if(each['name'] == '统一社会信用代码'):
+                name = "business_id"
+                count = count + 1
+            if(each['name'] == '名称'):
+                name = "business_name"
+                count = count + 1
+            if(each['name'] == '类型'):
+                name = "business_type"
+                count = count + 1
+            if(each['name'] == '住所'):
+                name = "address"
+                count = count + 1
+            if(each['name'] == '法定代表人'):
+                name = "operator"
+                count = count + 1
+            if(each['name'] == '注册资本'):
+                name = "registered_capital"
+                count = count + 1
+            if(each['name'] == '成立日期'):
+                name = "register_date"
+                count = count + 1
+            if(each['name'] == '营业期限'):
+                name = "business_term"
+                count = count + 1
+            if(each['name'] == '经营范围'):
+                name = "scope"
+            dataMap[name] = each['text']
+        if(dataMap["license_type"] != "营业执照"):
+            ret = 1
+            msg = "请上传营业执照图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 

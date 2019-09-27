@@ -234,6 +234,18 @@ class OcrVehiclelicense(models.Model):
     msg = models.TextField(max_length=255, default='')
     data = models.TextField(max_length=2048, default='')
 
+class OcrBusinesslicense(models.Model):
+    image = models.ImageField(
+        upload_to=path_and_rename, max_length=255, null=True, blank=True)
+    image_url = models.URLField(_('image_url'), null=True, blank=True)
+    system_id = models.IntegerField(_('system_id'), null=True, blank=True)
+    channel_id = models.IntegerField(_('channel_id'), null=True, blank=True)
+    user_id = models.CharField(
+        _('user_id'), max_length=64, null=True, blank=True)
+    ret = models.IntegerField(_('ret'), null=True, blank=True)
+    msg = models.TextField(max_length=255, default='')
+    data = models.TextField(max_length=2048, default='')
+
 
 class OcrBankcard(models.Model):
     image = models.ImageField(
