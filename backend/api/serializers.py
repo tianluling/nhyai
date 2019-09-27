@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import FileUpload, FileImageTerrorismUpload, FileVisionPornUpload
 from .models import VideoFileUpload, AudioFileUpload, AudioFileInspection, ImageFileUpload, WordRecognitionInspection
-from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, HistoryRecord, HistoryRecordList
+from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBankcard, HistoryRecord
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -265,32 +265,49 @@ class OcrVehicleplateSerializer(serializers.HyperlinkedModelSerializer):
         return obj.ret, obj.msg, obj.data
 
 
-class HistoryRecordListSerializer(serializers.HyperlinkedModelSerializer):
+class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
 
     ret = serializers.JSONField(True)
     msg = serializers.JSONField(True)
     data = serializers.JSONField(True)
-
-    class Meta:
-        model = HistoryRecordList
-        fields = ('system_id', 'channel_id', 'user_id',
-                  'begin_time', 'end_time', 'file_name',
-                  'file_type', 'current_page', 'page_size',
-                  'ret', 'msg', 'data')
-
-    def clean_json(self, obj):
-        return obj.ret, obj.msg, obj.data
-
-
-class HistoryRecordDetailSerializer(serializers.HyperlinkedModelSerializer):
-
-    ret = serializers.JSONField(True)
-    msg = serializers.JSONField(True)
-    data = serializers.JSONField(True)
+    file_id = serializers.JSONField(True)
+    file_name = serializers.JSONField(True)
+    file_url = serializers.JSONField(True)
+    file_type = serializers.JSONField(True)
+    inspection_result = serializers.JSONField(True)
+    max_sensitivity_type = serializers.JSONField(True)
+    max_sensitivity_level = serializers.JSONField(True)
+    violence_percent = serializers.JSONField(True)
+    violence_sensitivity_level = serializers.JSONField(True)
+    porn_percent = serializers.JSONField(True)
+    porn_sensitivity_level = serializers.JSONField(True)
+    politics_percent = serializers.JSONField(True)
+    politics_sensitivity_level = serializers.JSONField(True)
+    public_percent = serializers.JSONField(True)
+    public_character_level = serializers.JSONField(True)
+    content = serializers.JSONField(True)
+    upload_time = serializers.JSONField(True)
+    process_status = serializers.JSONField(True)
+    system_id = serializers.JSONField(True)
+    channel_id = serializers.JSONField(True)
+    user_id = serializers.JSONField(True)
 
     class Meta:
         model = HistoryRecord
-        fields = ('file_id', 'ret', 'msg', 'data')
+        fields = ('id', 'file_id', 'file_name', 'file_url',
+                  'file_type', 'inspection_result', 'max_sensitivity_type',
+                  'max_sensitivity_level', 'violence_percent', 'violence_sensitivity_level',
+                  'porn_percent', 'porn_sensitivity_level', 'politics_percent',
+                  'politics_sensitivity_level', 'public_percent', 'public_character_level',
+                  'content', 'upload_time', 'process_status', 'system_id',
+                  'channel_id', 'user_id',
+                  'ret', 'msg', 'data')
 
     def clean_json(self, obj):
-        return obj.ret, obj.msg, obj.data
+        return obj.ret, obj.msg, obj.data, obj.file_id, obj.file_name, obj.file_url,
+        obj.file_type, obj.inspection_result, obj.max_sensitivity_type,
+        obj.max_sensitivity_level, obj.violence_percent, obj.violence_sensitivity_level,
+        obj.porn_percent, obj.porn_sensitivity_level, obj.politics_percent,
+        obj.politics_sensitivity_level, obj.public_percent, obj.public_character_level,
+        obj.content, obj.upload_time, obj.process_status, obj.system_id,
+        obj.channel_id, obj.user_id

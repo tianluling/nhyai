@@ -360,7 +360,7 @@
 	.functional_experience .title{text-align: center;color: #333333;margin: 40px 0;font-size: 36px;}
 
 	.top_suggest{color: #999999;font-size: 14px;line-height: 40px;height: 30px;margin-bottom: 25px;}
-	.init_url_style{flex: 1;height: 35px;line-height: 35px;border: 1px solid #E2ECFC;font-size: 15px;padding-left: 10px;background-color: #FAFCFE;width: 685px;color: #666666;}
+	.init_url_style{height: 35px;line-height: 35px;border: 1px solid #E2ECFC;font-size: 15px;padding-left: 10px;background-color: #FAFCFE;width: 685px;color: #666666;}
 	/*.init_url_style:hover{border: 1px solid #C0C4CC;border-right: none;}*/
 	/*.init_url_style:focus{border: 1px solid #409EFF;border-right: none;}*/
 	.check_style{display:inline-block;height: 33px;line-height: 33px;font-size: 16px;color: #316DFF;border: 2px solid #316DFF;width: 100px;text-align: center;cursor:pointer;}
