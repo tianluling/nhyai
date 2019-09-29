@@ -1106,12 +1106,11 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                 {'day': "strftime('%Y-%m-%d',upload_time)"}).values_list('day').annotate(Count('id')).order_by('-day')
             result = {}
             results = {}
-            line = []
             if len(historygroups) > 0:
                 if query_date is not None and int(query_date) > 0:
                     group_index = 0
                     for historygroup in historygroups:
-                        if group_index < int(query_date):
+                        if group_index < int(query_date) and group_index < len(historygroups):
                             historydate = historygroup[0]
                             print(historydate)
                             conditions["upload_time__year"] = historydate.split(
@@ -1127,9 +1126,10 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             if len(serializer_group.data) > 0:
                                 result[historydate] = serializer_group.data
                             group_index += 1
-                        else:
-                            results['results'] = result
-                            return Response(results)
+                    if len(result) > 0:
+                        result = [v for v in sorted(result.items(),reverse=True)]
+                    results['results'] = result
+                    return Response(results)
                 else:
                     for historygroup in historygroups:
                         historydate = historygroup[0]
@@ -1146,6 +1146,8 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             historylist, many=True)
                         if len(serializer_group.data) > 0:
                             result[historydate] = serializer_group.data
+                    if len(result) > 0:
+                        result = [v for v in sorted(result.items(),reverse=True)]
                     results['results'] = result
                     return Response(results)
             else:
