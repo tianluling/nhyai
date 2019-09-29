@@ -1104,15 +1104,19 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         if is_group is not None and is_group == 'true':
             historygroups = HistoryRecord.objects.filter().extra(
                 {'day': "strftime('%Y-%m-%d',upload_time)"}).values_list('day').annotate(Count('id')).order_by('-day')
-            result = {}
-            results = {}
+            results = []
+            dataMap = {}
+            dataMap['ret'] = 0
+            dataMap['msg'] = "成功"
+            dataMap['results'] = {}
             if len(historygroups) > 0:
                 if query_date is not None and int(query_date) > 0:
                     group_index = 0
                     for historygroup in historygroups:
                         if group_index < int(query_date) and group_index < len(historygroups):
+                            result = {}
                             historydate = historygroup[0]
-                            print(historydate)
+                            result["upload_time"] = historydate
                             conditions["upload_time__year"] = historydate.split(
                                 '-')[0]
                             conditions["upload_time__month"] = historydate.split(
@@ -1124,16 +1128,16 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             serializer_group = self.get_serializer(
                                 historylist, many=True)
                             if len(serializer_group.data) > 0:
-                                result[historydate] = serializer_group.data
+                                result["upload_datas"] = serializer_group.data
+                            results.append(result)
                             group_index += 1
-                    if len(result) > 0:
-                        result = [v for v in sorted(result.items(),reverse=True)]
-                    results['results'] = result
-                    return Response(results)
+                    dataMap['results'] = results
+                    return Response(dataMap)
                 else:
                     for historygroup in historygroups:
+                        result = {}
                         historydate = historygroup[0]
-                        print(historydate)
+                        result["upload_time"] = historydate
                         conditions["upload_time__year"] = historydate.split(
                             '-')[0]
                         conditions["upload_time__month"] = historydate.split(
@@ -1145,13 +1149,13 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                         serializer_group = self.get_serializer(
                             historylist, many=True)
                         if len(serializer_group.data) > 0:
-                            result[historydate] = serializer_group.data
-                    if len(result) > 0:
-                        result = [v for v in sorted(result.items(),reverse=True)]
-                    results['results'] = result
-                    return Response(results)
+                            result["upload_datas"] = serializer_group.data
+                        results.append(result)
+
+                    dataMap['results'] = results
+                    return Response(dataMap)
             else:
-                return Response([])
+                return Response(dataMap)
         else:
             queryset = HistoryRecord.objects.filter(**conditions)
 
