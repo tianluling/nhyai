@@ -1104,7 +1104,6 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         if is_group is not None and is_group == 'true':
             historygroups = HistoryRecord.objects.filter().extra(
                 {'day': "strftime('%Y-%m-%d',upload_time)"}).values_list('day').annotate(Count('id')).order_by('-day')
-            print(historygroups)
             result = {}
             results = {}
             line = []
@@ -1125,7 +1124,8 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                                 **conditions)
                             serializer_group = self.get_serializer(
                                 historylist, many=True)
-                            result[historydate] = serializer_group.data
+                            if len(serializer_group.data) > 0:
+                                result[historydate] = serializer_group.data
                             group_index += 1
                         else:
                             results['results'] = result
@@ -1144,7 +1144,8 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             **conditions)
                         serializer_group = self.get_serializer(
                             historylist, many=True)
-                        result[historydate] = serializer_group.data
+                        if len(serializer_group.data) > 0:
+                            result[historydate] = serializer_group.data
                     results['results'] = result
                     return Response(results)
             else:
