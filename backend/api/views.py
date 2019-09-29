@@ -1129,7 +1129,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                                 historylist, many=True)
                             if len(serializer_group.data) > 0:
                                 result["upload_datas"] = serializer_group.data
-                            results.append(result)
+                                results.append(result)
                             group_index += 1
                     dataMap['results'] = results
                     return Response(dataMap)
@@ -1150,7 +1150,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             historylist, many=True)
                         if len(serializer_group.data) > 0:
                             result["upload_datas"] = serializer_group.data
-                        results.append(result)
+                            results.append(result)
 
                     dataMap['results'] = results
                     return Response(dataMap)
