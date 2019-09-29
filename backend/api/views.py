@@ -1058,6 +1058,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         file_type = requestData.get('file_type')
         is_group = requestData.get('is_group')
         query_date = requestData.get('query_date')
+        group_type = requestData.get('group_type')
 
         # 根据条件过滤
         conditions = {}
@@ -1085,6 +1086,20 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             end_time_date = datetime.datetime.strptime(
                 end_time, "%Y-%m-%d %H:%M:%S")
             conditions['upload_time__lte'] = end_time_date
+
+        if group_type is not None:
+            if int(group_type) == 0:
+                channel_ids = [1,2,5,6,7,8,9,10,11,12,13,15]
+            elif int(group_type) == 1:
+                channel_ids = [2,3]
+            elif int(group_type) == 2:
+                channel_ids = [5,6,7,8,9,10,11,12,13]
+            elif int(group_type) == 3:
+                channel_ids = [15]
+            else:
+                channel_ids = [4,14,99]
+            conditions['channel_id__in'] = channel_ids
+
 
         if is_group is not None and is_group == 'true':
             historygroups = HistoryRecord.objects.filter().extra(
