@@ -5,4 +5,5 @@ class FILETYPE(Enum):
     Video = 2
     Audio = 3
     Text = 4
+    Content = 5
     Other = 99

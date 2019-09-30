@@ -301,6 +301,8 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
     public_percent = serializers.JSONField(True)
     public_character_level = serializers.JSONField(True)
     content = serializers.JSONField(True)
+    web_text = serializers.JSONField(True)
+    app_text = serializers.JSONField(True)
     upload_time = serializers.JSONField(True)
     process_status = serializers.JSONField(True)
     system_id = serializers.JSONField(True)
@@ -314,8 +316,8 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
                   'max_sensitivity_level', 'violence_percent', 'violence_sensitivity_level',
                   'porn_percent', 'porn_sensitivity_level', 'politics_percent',
                   'politics_sensitivity_level', 'public_percent', 'public_character_level',
-                  'content', 'upload_time', 'process_status', 'system_id',
-                  'channel_id', 'user_id',
+                  'content', 'web_text', 'app_text', 'upload_time', 'process_status', 
+                  'system_id','channel_id', 'user_id',
                   'ret', 'msg', 'data')
 
     def clean_json(self, obj):
@@ -324,5 +326,5 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
         obj.max_sensitivity_level, obj.violence_percent, obj.violence_sensitivity_level,
         obj.porn_percent, obj.porn_sensitivity_level, obj.politics_percent,
         obj.politics_sensitivity_level, obj.public_percent, obj.public_character_level,
-        obj.content, obj.upload_time, obj.process_status, obj.system_id,
-        obj.channel_id, obj.user_id
+        obj.content, obj.web_text, obj.app_text, obj.upload_time, obj.process_status, 
+        obj.system_id, obj.channel_id, obj.user_id

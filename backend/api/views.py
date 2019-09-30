@@ -57,9 +57,26 @@ def get_two_float(f_str, n):
 
 def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     file_id = serializer.id
-    file_name = serializer.image.name.split('/')[1]
-    file_url = settings.FILE_URL + serializer.image.url
     file_type = filetype
+    if filetype == FILETYPE.Image.value:
+        file_name = serializer.image.name.split('/')[1]
+        file_url = settings.FILE_URL + serializer.image.url
+    elif file_type == FILETYPE.Video.value:
+        file_name = serializer.video.name.split('/')[1]
+        file_url = settings.FILE_URL + serializer.video.url
+    elif file_type == FILETYPE.Audio.value:
+        file_name = serializer.audio.name.split('/')[1]
+        file_url = settings.FILE_URL + serializer.audio.url
+    elif file_type == FILETYPE.Text.value:
+        file_name = serializer.text.name.split('/')[1]
+        file_url = settings.FILE_URL + serializer.text.url
+    elif file_type == FILETYPE.Content.value:
+        file_name = ""
+        file_url = ""
+    else:
+        file_name = "other"
+        file_url = "other"
+    
     inspection_result = result
 
     violence_percent = "0"
@@ -85,7 +102,29 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             porn_sensitivity_level = "2"
 
     max_sensitivity_type = maxtype
-    max_sensitivity_level = violence_sensitivity_level
+
+    content = ""
+    web_text = ""
+    app_text = ""
+    if maxtype == 'violence':
+        max_sensitivity_level = violence_sensitivity_level
+    elif maxtype == 'porn':
+        max_sensitivity_level = porn_sensitivity_level
+    elif maxtype == 'violence_porn':
+        max_sensitivity_level = violence_sensitivity_level
+    elif maxtype == 'text' and file_type == FILETYPE.Text.value:
+        max_sensitivity_level = None
+        content = result["text_content"]
+        web_text = result["sensitive_info"]["web_text"]
+        app_text = result["sensitive_info"]["app_text"]
+    elif maxtype == 'text' and file_type == FILETYPE.Content.value:
+        max_sensitivity_level = None
+        content = serializer.text
+        web_text = result["web_text"]
+        app_text = result["app_text"]
+    else:
+        max_sensitivity_level = None
+
     process_status = 2
     system_id = serializer.system_id
     channel_id = serializer.channel_id
@@ -97,7 +136,8 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
         max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
         violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
-        porn_sensitivity_level=porn_sensitivity_level, process_status=process_status,
+        porn_sensitivity_level=porn_sensitivity_level, content=content,
+        web_text=web_text, app_text=app_text, process_status=process_status,
         system_id=system_id, channel_id=channel_id, user_id=user_id
     )
 
@@ -241,12 +281,18 @@ class WordRecognitionViewSet(viewsets.ModelViewSet):
         if sensitive_list.get('sensitive_hit_flag') == 0:
             ret = 1
             msg = "无匹配记录"
+            max_sensitivity_type = None
         else:
             ret = 0
             msg = "匹配到记录"
+            max_sensitivity_type = 'text'
 
         data = sensitive_list
         serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
+
+        # 更新历史记录
+        UpdateHistoryRecord(iserializer, FILETYPE.Content.value,
+                            data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -281,8 +327,6 @@ class WordRecognitionInspectionViewSet(viewsets.ModelViewSet):
             doc = docx.Document(iserializer.text.path)
             docText = '\n'.join(
                 [paragraph.text for paragraph in doc.paragraphs])
-            msg = "匹配记录"
-            ret = 0
             text_content = docText
         elif filetype == 'wps':
             # 仅支持windows
@@ -297,23 +341,17 @@ class WordRecognitionInspectionViewSet(viewsets.ModelViewSet):
                 doc = docx.Document(docx_path)
                 docText = '\n'.join(
                     [paragraph.text for paragraph in doc.paragraphs])
-                msg = "匹配记录"
-                ret = 0
                 text_content = docText
             else:
                 # 仅支持ubuntu
                 cmd = 'antiword -m UTF-8 ' + iserializer.text.path
                 docText, errText = RunShellWithReturnCode(cmd)
-                msg = "匹配记录"
-                ret = 0
                 if len(errText) > 0:
                     text_content = 'doc文档内容过短，请重新上传'
                 else:
                     text_content = docText
         elif filetype == 'pdf':
             pdfText = PdfReader().parse(iserializer.text.path)
-            msg = "匹配记录"
-            ret = 0
             text_content = pdfText
         else:
             txtfile = iserializer.text.path
@@ -342,14 +380,24 @@ class WordRecognitionInspectionViewSet(viewsets.ModelViewSet):
                 ret = 1
             else:
                 print("Read content successfully!")
-                msg = "匹配记录"
-                ret = 0
 
-        result = sensitiveClass().check_sensitiveWords(text_content)
+        sensitive_list = sensitiveClass().check_sensitiveWords(text_content)
         sensitive_map["text_content"] = text_content
-        sensitive_map["sensitive_info"] = result
+        sensitive_map["sensitive_info"] = sensitive_list
         data = sensitive_map
-        serializer.save(ret=ret, msg=msg, data=result, text=iserializer.text)
+        if sensitive_list.get('sensitive_hit_flag') == 0:
+            ret = 1
+            msg = "无匹配记录"
+            max_sensitivity_type = None
+        else:
+            ret = 0
+            msg = "匹配到记录"
+            max_sensitivity_type = 'text'
+        serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
+
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Text.value,
+                            data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -679,6 +727,18 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
 
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
+        
+        # 更新历史记录
+        if float(violence) > float(scores[1]):
+            max_sensitivity_type = 'violence'
+        elif float(violence) < float(scores[1]):
+            max_sensitivity_type = 'porn'
+        else:
+            max_sensitivity_type = 'violence_porn'
+
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            resultMap, max_sensitivity_type, violence, scores[1])
+
         return Response(status=status.HTTP_201_CREATED)
 
 
