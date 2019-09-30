@@ -1130,6 +1130,23 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
     serializer_class = HistoryRecordSerializer
     parser_classes = (MultiPartParser, FormParser,)
 
+    def destroy(self, request, *args, **kwargs):
+        # 获取参数
+        requestData = request.query_params
+        objecId = requestData.get("id")
+
+        # 根据条件过滤
+        conditions = {}
+        if objecId is not None:
+            conditions['id'] = objecId
+
+        instance = HistoryRecord.objects.filter(**conditions)
+
+        # instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
     def retrieve(self, request, pk=None):
         # 获取实例
         historyRecord = self.get_object()
