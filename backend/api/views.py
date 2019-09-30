@@ -65,8 +65,8 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         file_name = serializer.video.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.video.url
     elif file_type == FILETYPE.Audio.value:
-        file_name = serializer.audio.name.split('/')[1]
-        file_url = settings.FILE_URL + serializer.audio.url
+        file_name = serializer.speech.name.split('/')[1]
+        file_url = settings.FILE_URL + serializer.speech.url
     elif file_type == FILETYPE.Text.value:
         file_name = serializer.text.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.text.url
@@ -125,6 +125,9 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     elif maxtype == 'ocr':
         max_sensitivity_level = None
         content = result
+    elif maxtype == 'audio':
+        max_sensitivity_level = None
+        content = result['text']
     else:
         max_sensitivity_level = None
 
@@ -596,6 +599,12 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         msg = "成功"
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, video=iserializer.video)
+
+        # 更新历史记录
+        UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                            resultMap, resultMap['max_sensitivity_type'], 
+                            resultMap['violence_percent'], resultMap['porn_percent'])
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -628,6 +637,11 @@ class AudioFileUploadViewSet(viewsets.ModelViewSet):
         resultMap['text'] = check_result
         serializer.save(data=resultMap, ret=ret, msg=msg,
                         speech=iserializer.speech)
+
+        # 更新历史记录
+        UpdateHistoryRecord(iserializer, FILETYPE.Audio.value,
+                            resultMap, 'audio', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -683,6 +697,11 @@ class AudioFileInspectionViewSet(viewsets.ModelViewSet):
             resultMap["speech_contents"] = check_result
             serializer.save(data=resultMap, ret=ret, msg=msg,
                             speech=iserializer.speech)
+
+            # 更新历史记录
+            UpdateHistoryRecord(iserializer, FILETYPE.Audio.value,
+                                resultMap, 'audio', None, None)
+
             return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)

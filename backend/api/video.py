@@ -138,6 +138,16 @@ def check_video(file_path):
             porn_sensitivity_level = 2
         resultMap = {}
 
+        # 增加最大敏感类型
+        if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
+            max_sensitivity_type = 'violence'
+            max_sensitivity_level = violenceScoreArr[-1]
+        elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
+            max_sensitivity_type = 'porn'
+            max_sensitivity_level = pornScoreArr[-1]
+        else:
+            max_sensitivity_type = 'violence_porn'
+            max_sensitivity_level = violenceScoreArr[-1]
 
         resultMap['video_url'] = settings.VIDEO_URL + f
         resultMap['violence_sensitivity_level'] = violence_sensitivity_level
@@ -152,6 +162,10 @@ def check_video(file_path):
         endTime = int(round(t * 1000))
         print(endTime - startTime)
         resultMap['taketimes'] = endTime - startTime
+        resultMap['max_sensitivity_type'] = max_sensitivity_type
+        resultMap['max_sensitivity_level'] = max_sensitivity_level
+        resultMap['violence_percent'] = violenceScoreArr[-1]
+        resultMap['porn_percent'] = pornScoreArr[-1]
         #contentMap['politics_ sensitivity_level'] = 
         #shutil.rmtree(temp_path)
         #print(totalCount)
@@ -227,6 +241,18 @@ def check_video(file_path):
             porn_sensitivity_level = 1
         elif (pornScoreArr[-1] > PORNSCORE_MAX):
             porn_sensitivity_level = 2
+
+        # 增加最大敏感类型
+        if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
+            max_sensitivity_type = 'violence'
+            max_sensitivity_level = violenceScoreArr[-1]
+        elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
+            max_sensitivity_type = 'porn'
+            max_sensitivity_level = pornScoreArr[-1]
+        else:
+            max_sensitivity_type = 'violence_porn'
+            max_sensitivity_level = violenceScoreArr[-1]
+        
         resultMap = {}
         resultMap['video_url'] = settings.VIDEO_URL + f
         resultMap['violence_sensitivity_level'] = violence_sensitivity_level
@@ -241,6 +267,10 @@ def check_video(file_path):
         endTime = int(round(t * 1000))
         print(endTime - startTime)
         resultMap['taketimes'] = endTime - startTime
+        resultMap['max_sensitivity_type'] = max_sensitivity_type
+        resultMap['max_sensitivity_level'] = max_sensitivity_level
+        resultMap['violence_percent'] = violenceScoreArr[-1]
+        resultMap['porn_percent'] = pornScoreArr[-1]
     return resultMap
 
     
