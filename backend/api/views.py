@@ -122,6 +122,9 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         content = serializer.text
         web_text = result["web_text"]
         app_text = result["app_text"]
+    elif maxtype == 'ocr':
+        max_sensitivity_level = None
+        content = result
     else:
         max_sensitivity_level = None
 
@@ -434,6 +437,10 @@ class OcrGeneralViewSet(viewsets.ModelViewSet):
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
 
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataArr, 'ocr', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -492,6 +499,10 @@ class OcrIDCardViewSet(viewsets.ModelViewSet):
             msg = "请上传身份证图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
+
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -815,6 +826,10 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -893,6 +908,10 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -960,6 +979,10 @@ class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -1007,6 +1030,10 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
+
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -1041,6 +1068,10 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         # result = check_result
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
+
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataArr, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1085,6 +1116,10 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
             msg = "请上传车牌图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
+
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
