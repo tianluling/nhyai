@@ -177,7 +177,7 @@ class drivinglicense:
             txt = txt.replace(' ','')
             res = re.findall("[0-9\-]{1,10}至",txt)
             if len(res)>0:
-                valid_period['有效起始日期']  =res[0].replace('有效起始日期','')
+                valid_period['有效起始日期']  =res[0].replace('有效起始日期','').replace('至','')
                 self.res.update(valid_period) 
                 # break    
             res = re.findall("至[0-9\-]{1,10}",txt)
