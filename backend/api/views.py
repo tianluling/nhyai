@@ -1220,7 +1220,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
 
         if group_type is not None:
             if int(group_type) == 0:
-                channel_ids = [1,2,5,6,7,8,9,10,11,12,13,15]
+                channel_ids = [1,2,3,5,6,7,8,9,10,11,12,13,15]
             elif int(group_type) == 1:
                 channel_ids = [2,3]
             elif int(group_type) == 2:
