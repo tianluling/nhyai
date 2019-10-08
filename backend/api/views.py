@@ -842,6 +842,12 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         if(dataMap["license_type"] != "中华人民共和国机动车驾驶证"):
             ret = 1
             msg = "请上传驾驶证图片"
+        
+        dataMap["nationnality"] = ""
+        dataMap["sex"] = ""
+        dataMap["birthday"] = ""
+        dataMap["be_class"] = ""
+
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
