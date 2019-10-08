@@ -843,7 +843,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
             ret = 1
             msg = "请上传驾驶证图片"
         
-        dataMap["nationnality"] = ""
+        dataMap["nationality"] = ""
         dataMap["sex"] = ""
         dataMap["birthday"] = ""
         dataMap["be_class"] = ""
