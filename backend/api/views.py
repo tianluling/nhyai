@@ -839,7 +839,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
             # dataMap[each['name']] = each['text']
         # result = check_result
         # if (len(arr) == 0 or count < 1):
-        if(dataMap["license_type"] != "中华人民共和国机动车驾驶证"):
+        if(len(dataMap) <= 4 or dataMap['license_type']  != '中华人民共和国机动车驾驶证'):
             ret = 1
             msg = "请上传驾驶证图片"
         
@@ -927,9 +927,18 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
             #dataMap[each['name']] = each['text']
         #result = check_result
         # if (len(arr) == 0 or count < 1):
-        if(dataMap["license_type"] != "中华人民共和国机动车行驶证"):
+        if(len(dataMap) <= 4 or dataMap['license_type']  != '中华人民共和国机动车行驶证'):
             ret = 1
             msg = "请上传行驶证图片"
+        
+        dataMap["plate_no"] = ""
+        dataMap["vehicle_type"] = ""
+        dataMap["model"] = ""
+        dataMap["vin"] = ""
+        dataMap["engine_no"] = ""
+        dataMap["register_date"] = ""
+        dataMap["issue_date"] = ""
+
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -1159,11 +1168,34 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         # 获取参数
         requestData = request.query_params
         objecId = requestData.get("id")
+        ids = requestData.get('ids')
+        user_id = requestData.get('user_id')
+        group_type = requestData.get('group_type')
 
         # 根据条件过滤
         conditions = {}
         if objecId is not None:
             conditions['id'] = objecId
+
+        if ids is not None:
+           conditions['id__in'] = ids
+
+        if user_id is not None:
+            conditions['user_id'] = user_id
+
+        if group_type is not None:
+            channel_ids = []
+            if int(group_type) == 0:
+                channel_ids = [1,2,3,5,6,7,8,9,10,11,12,13,15]
+            elif int(group_type) == 1:
+                channel_ids = [2,3]
+            elif int(group_type) == 2:
+                channel_ids = [5,6,7,8,9,10,11,12,13]
+            elif int(group_type) == 3:
+                channel_ids = [15]
+            else:
+                channel_ids = [4,14,99]
+            conditions['channel_id__in'] = channel_ids
 
         instance = HistoryRecord.objects.filter(**conditions)
 

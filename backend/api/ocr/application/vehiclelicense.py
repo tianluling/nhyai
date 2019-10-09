@@ -35,7 +35,9 @@ class vehiclelicense:
             if len(res)>0:
                 license_type['类型']  ='中华人民共和国机动车行驶证'
                 self.res.update(license_type) 
-                break  
+                break 
+            else:
+                license_type['类型']  ='其他'
 
     def plate_no(self):
         """
