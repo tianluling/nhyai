@@ -35,7 +35,11 @@ class businesslicense:
             if len(res)>0:
                 license_type['营业执照']  ='营业执照'
                 self.res.update(license_type) 
-                break  
+                break
+            else:
+                license_type['营业执照']  ='其他'
+                self.res.update(license_type)
+                break 
 
     def business_id(self):
         """

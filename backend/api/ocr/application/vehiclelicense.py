@@ -34,10 +34,12 @@ class vehiclelicense:
             res = re.findall("中华人民共和国机动车行驶证",txt)
             if len(res)>0:
                 license_type['类型']  ='中华人民共和国机动车行驶证'
-                self.res.update(license_type) 
+                self.res.update(license_type)
                 break 
             else:
                 license_type['类型']  ='其他'
+                self.res.update(license_type)
+                break
 
     def plate_no(self):
         """
