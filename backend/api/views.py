@@ -799,6 +799,20 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
+
+        dataMap["license_type"] = ""
+        dataMap["card_id"] = ""
+        dataMap["driver"] = ""
+        dataMap["sex"] = ""
+        dataMap["nationality"] = ""
+        dataMap["birthday"] = ""
+        dataMap["issue_date"] = ""
+        dataMap["be_class"] = ""
+        dataMap["valid_start"] = ""
+        dataMap["valid_end"] = ""
+        dataMap["after_five"] = ""
+        dataMap["remark"] = ""
+
         for each in arr:
             name = ""
             if(each['name'] == '类型'):
@@ -826,7 +840,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
                 name = "issue_date"
                 count = count + 1
             if(each['name'] == '准驾车型'):
-                name = "class"
+                name = "be_class"
                 count = count + 1
             if(each['name'] == '有效起始日期'):
                 name = "valid_start"
@@ -842,11 +856,6 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         if(len(dataMap) <= 4 or dataMap['license_type']  != '中华人民共和国机动车驾驶证'):
             ret = 1
             msg = "请上传驾驶证图片"
-        
-        dataMap["nationality"] = ""
-        dataMap["sex"] = ""
-        dataMap["birthday"] = ""
-        dataMap["be_class"] = ""
 
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
@@ -885,6 +894,20 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
+
+        dataMap["license_type"] = ""
+        dataMap["license_no"] = ""
+        dataMap["plate_no"] = ""
+        dataMap["vehicle_type"] = ""
+        dataMap["owner"] = ""
+        dataMap["address"] = ""
+        dataMap["use_character"] = ""
+        dataMap["model"] = ""
+        dataMap["vin"] = ""
+        dataMap["engine_no"] = ""
+        dataMap["register_date"] = ""
+        dataMap["issue_date"] = ""
+
         for each in arr:
             name = ""
             if(each['name'] == '类型'):
@@ -931,14 +954,6 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
             ret = 1
             msg = "请上传行驶证图片"
         
-        dataMap["plate_no"] = ""
-        dataMap["vehicle_type"] = ""
-        dataMap["model"] = ""
-        dataMap["vin"] = ""
-        dataMap["engine_no"] = ""
-        dataMap["register_date"] = ""
-        dataMap["issue_date"] = ""
-
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -975,6 +990,18 @@ class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
+
+        dataMap["license_type"] = ""
+        dataMap["business_id"] = ""
+        dataMap["business_name"] = ""
+        dataMap["business_type"] = ""
+        dataMap["address"] = ""
+        dataMap["operator"] = ""
+        dataMap["registered_capital"] = ""
+        dataMap["register_date"] = ""
+        dataMap["business_term"] = ""
+        dataMap["scope"] = ""
+
         for each in arr:
             name = ""
             if(each['name'] == '营业执照'):
@@ -1047,6 +1074,13 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
+        
+        dataMap["bank_name"] = ""
+        dataMap["bank_cardno"] = ""
+        dataMap["expiry_date"] = ""
+        dataMap["card_type"] = ""
+        dataMap["card_name"] = ""
+
         for each in arr:
             name = ""
             if(each['name'] == '银行名称'):
@@ -1061,6 +1095,7 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
         if (len(arr) == 0 or count < 1):
             ret = 1
             msg = "请上传银行卡图片"
+
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -1097,10 +1132,16 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         check_result = OCR().getWordRecognition(file_path, bill_model)
         arr = check_result['res']
         dataArr = []
+        dataMap = {}
+        dataMap["handwritten_content"] = ""
         for each in arr:
-            dataArr.append(each["text"])
+            if len(arr) >= 0:
+                dataArr.append(each["text"])
+        
+        dataMap["handwritten_content"] = dataArr
+            
         # result = check_result
-        serializer.save(data=dataArr, ret=ret, msg=msg,
+        serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
         # 更新历史记
@@ -1137,15 +1178,18 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
+
+        dataMap["plate_no"] = ""
+
         for each in arr:
             name = ""
-            if(each['name'] == '车牌'):
+            if(each['name'] == '车牌号'):
                 name = "plate_no"
                 count = count + 1
             dataMap[name] = each['text']
             # dataMap[each['name']] = each['text']
         # result = check_result
-        if (len(arr) == 0 or count < 1):
+        if (len(arr) == 0 or count < 1 or dataMap["plate_no"] == "其他"):
             ret = 1
             msg = "请上传车牌图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,

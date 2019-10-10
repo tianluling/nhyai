@@ -11,14 +11,7 @@ class vehicleplate:
         self.result = union_rbox(result,0.2)
         self.N = len(self.result)
         self.res = {}
-        self.license_type()
-        self.license_no()
-        self.full_name()
-        self.address()
-        self.birthday()
-        self.first_issue()
-        self.be_class()
-        self.valid_period()
+        self.plate_no()
 
 
     def plate_no(self):
@@ -29,7 +22,7 @@ class vehicleplate:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("[\u4e00-\u9fa5]+",txt)
+            res = re.findall("^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$",txt)
             if len(res)>0:
                 plate_no["车牌号"] = res[0].split('')[-1]
                 self.res.update(plate_no) 
