@@ -23,8 +23,8 @@ from .ocr.chineseocr import OCR
 from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
 from django.conf import settings
-from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer
-from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord
+from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer, OcrBusinessCardSerializer
+from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord, OcrBusinessCard
 import os
 import shutil
 import uuid
@@ -1192,6 +1192,89 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         if (len(arr) == 0 or count < 1 or dataMap["plate_no"] == "其他"):
             ret = 1
             msg = "请上传车牌图片"
+        serializer.save(data=dataMap, ret=ret, msg=msg,
+                        image=iserializer.image)
+
+        # 更新历史记
+        UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
+                            dataMap, 'ocr', None, None)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class OcrBusinessCardViewSet(viewsets.ModelViewSet):
+
+    queryset = OcrBusinessCard.objects.all()
+    serializer_class = OcrBusinessCardSerializer
+    parser_classes = (MultiPartParser, FormParser,)
+
+    def perform_create(self, serializer):
+
+        iserializer = serializer.save()
+        ret = 0
+        msg = "成功"
+        bill_model = "名片"
+
+        # 增加网络URL文件上传
+        if iserializer.image_url and not iserializer.image:
+            img_temp = NamedTemporaryFile(delete=True)
+            img_temp.write(urlopen(iserializer.image_url).read())
+            img_temp.flush()
+            iserializer.image.save(os.path.basename(
+                iserializer.image_url), File(img_temp))
+
+        file_path = iserializer.image.path
+        # print (file_path)
+        check_result = OCR().getWordRecognition(file_path, bill_model)
+        arr = check_result['res']
+        dataMap = {}
+        count = 0
+
+        dataMap["business_name"] = ""
+        dataMap["position"] = ""
+        dataMap["company"] = ""
+        dataMap["address"] = ""
+        dataMap["email"] = ""
+        dataMap["phone"] = ""
+        dataMap["telephone"] = ""
+        dataMap["qq"] = ""
+        dataMap["webchat"] = ""
+
+        for each in arr:
+            name = ""
+            if(each['name'] == '姓名'):
+                name = "business_name"
+                count = count + 1
+            if(each['name'] == '职位'):
+                name = "position"
+                count = count + 1
+            if(each['name'] == '公司'):
+                name = "company"
+                count = count + 1
+            if(each['name'] == '地址'):
+                name = "address"
+                count = count + 1
+            if(each['name'] == '邮箱'):
+                name = "email"
+                count = count + 1
+            if(each['name'] == '手机'):
+                name = "phone"
+                count = count + 1
+            if(each['name'] == '电话'):
+                name = "telephone"
+                count = count + 1
+            if(each['name'] == 'QQ'):
+                name = "qq"
+                count = count + 1
+            if(each['name'] == '微信'):
+                name = "webchat"
+                count = count + 1
+            dataMap[name] = each['text']
+            # dataMap[each['name']] = each['text']
+        # result = check_result
+        if (len(arr) == 0 or count < 1 or dataMap["business_name"] == "其他"):
+            ret = 1
+            msg = "请上传名片图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 

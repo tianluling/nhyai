@@ -168,14 +168,14 @@ CORS_ORIGIN_REGEX_WHITELIST = (
 DF = pd.read_csv(os.path.join(os.getcwd(),"backend","api","sensitives","sensitiveWords.csv"),encoding='gbk')
 
 #是否支持GPU
-IS_GPU = False
+IS_GPU = True
 
 #视屏检测图片存放路径
 TEMP_PATH = 'capture_out_images/'
 SAVE_PATH = '/var/www/gallery/media/videos/capture_out_images/'
 #按秒或者帧读取视屏（True：按帧  False：按秒）
 FPS_FLAG = False
-VIDEO_URL = 'http://172.31.20.59:8000/media/videos/'
+VIDEO_URL = 'http://172.31.4.31:8000/media/videos/'
 
 #色情模型预加载
 NSFW = nsfw()
@@ -189,7 +189,7 @@ PORNSCORE_MIN = 0.5
 PORNSCORE_MAX = 0.8
 
 #文件服务地址
-FILE_URL = 'http://172.31.20.59:8000'
+FILE_URL = 'http://172.31.4.31:8000'
 
 #增加SQL语句打印
 LOGGING = {
@@ -209,3 +209,6 @@ LOGGING = {
         },
     }
 }
+
+#增加职位字典
+ZW = pd.read_csv(os.path.join(os.getcwd(),"backend","api","ocr","application","position.csv"),encoding='gbk')
