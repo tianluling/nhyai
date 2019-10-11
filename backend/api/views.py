@@ -1305,7 +1305,9 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             conditions['id'] = objecId
 
         if ids is not None:
-           conditions['id__in'] = ids
+            ids = ids.split(',')
+            ids_int = list(map(int,ids))
+            conditions['id__in'] = ids_int
 
         if user_id is not None:
             conditions['user_id'] = user_id
