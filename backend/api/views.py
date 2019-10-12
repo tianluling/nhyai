@@ -18,7 +18,7 @@ from .models import FileUpload, WordRecognition, FileImageTerrorismUpload, FileV
 from PIL import Image
 from io import BytesIO
 import json
-from .video import check_video
+from .video import video
 from .ocr.chineseocr import OCR
 from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
@@ -600,7 +600,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                 iserializer.video_url), File(video_temp))
 
         file_path = iserializer.video.path
-        resultMap = check_video(file_path)
+        orientation = iserializer.orientation
+        resultMap = video().check_video(file_path, orientation)
         ret = 0
         msg = "成功"
         serializer.save(data=resultMap, ret=ret,
