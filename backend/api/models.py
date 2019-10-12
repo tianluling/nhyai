@@ -234,6 +234,7 @@ class OcrVehiclelicense(models.Model):
     msg = models.TextField(max_length=255, default='')
     data = models.TextField(max_length=2048, default='')
 
+
 class OcrBusinesslicense(models.Model):
     image = models.ImageField(
         upload_to=path_and_rename, max_length=255, null=True, blank=True)
@@ -314,7 +315,7 @@ class HistoryRecord(models.Model):
         _('file_id'), max_length=32, null=True, blank=True)
     file_name = models.CharField(
         _('file_name'), max_length=128, null=True, blank=True)
-    file_url = models.URLField(_('image_url'), null=True, blank=True)
+    file_url = models.URLField(_('file_url'), null=True, blank=True)
     file_type = models.IntegerField(_('file_type'), null=True, blank=True)
     inspection_result = models.CharField(
         _('inspection_result'), max_length=32, null=True, blank=True)
@@ -340,12 +341,20 @@ class HistoryRecord(models.Model):
         _('public_percent'), max_length=16, null=True, blank=True)
     public_character_level = models.CharField(
         _('public_character_level'), max_length=4, null=True, blank=True)
-    content = models.CharField(_('content'), max_length=1530, null=True, blank=True)
-    web_text = models.CharField(_('web_text'), max_length=3060, null=True, blank=True)
-    app_text = models.CharField(_('app_text'), max_length=3060, null=True, blank=True)
+    content = models.CharField(
+        _('content'), max_length=1530, null=True, blank=True)
+    web_text = models.CharField(
+        _('web_text'), max_length=3060, null=True, blank=True)
+    app_text = models.CharField(
+        _('app_text'), max_length=3060, null=True, blank=True)
     upload_time = models.DateTimeField(auto_now=True, null=True, blank=True)
-    process_status = models.IntegerField(_('process_status'), null=True, blank=True)
+    process_status = models.IntegerField(
+        _('process_status'), null=True, blank=True)
     system_id = models.IntegerField(_('system_id'), null=True, blank=True)
     channel_id = models.IntegerField(_('channel_id'), null=True, blank=True)
     user_id = models.CharField(
         _('user_id'), max_length=64, null=True, blank=True)
+    screenshot_url = models.URLField(
+        _('screenshot_url'), null=True, blank=True)
+    duration = models.CharField(
+        _('duration'), max_length=8, null=True, blank=True)

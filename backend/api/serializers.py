@@ -323,6 +323,8 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
     system_id = serializers.JSONField(True)
     channel_id = serializers.JSONField(True)
     user_id = serializers.JSONField(True)
+    screenshot_url = serializers.JSONField(True)
+    duration = serializers.JSONField(True)
 
     class Meta:
         model = HistoryRecord
@@ -332,7 +334,7 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
                   'porn_percent', 'porn_sensitivity_level', 'politics_percent',
                   'politics_sensitivity_level', 'public_percent', 'public_character_level',
                   'content', 'web_text', 'app_text', 'upload_time', 'process_status', 
-                  'system_id','channel_id', 'user_id',
+                  'system_id','channel_id', 'user_id', 'screenshot_url', 'duration',
                   'ret', 'msg', 'data')
 
     def clean_json(self, obj):
@@ -342,4 +344,4 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
         obj.porn_percent, obj.porn_sensitivity_level, obj.politics_percent,
         obj.politics_sensitivity_level, obj.public_percent, obj.public_character_level,
         obj.content, obj.web_text, obj.app_text, obj.upload_time, obj.process_status, 
-        obj.system_id, obj.channel_id, obj.user_id
+        obj.system_id, obj.channel_id, obj.user_id, obj.screenshot_url, obj.duration

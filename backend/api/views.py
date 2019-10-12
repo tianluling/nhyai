@@ -58,12 +58,17 @@ def get_two_float(f_str, n):
 def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     file_id = serializer.id
     file_type = filetype
+    screenshot_url = ""
+    duration = ""
+
     if filetype == FILETYPE.Image.value:
         file_name = serializer.image.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.image.url
     elif file_type == FILETYPE.Video.value:
         file_name = serializer.video.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.video.url
+        screenshot_url = result["screenshot_url"]
+        duration = result["duration"]
     elif file_type == FILETYPE.Audio.value:
         file_name = serializer.speech.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.speech.url
@@ -144,7 +149,8 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
         porn_sensitivity_level=porn_sensitivity_level, content=content,
         web_text=web_text, app_text=app_text, process_status=process_status,
-        system_id=system_id, channel_id=channel_id, user_id=user_id
+        system_id=system_id, channel_id=channel_id, user_id=user_id,
+        screenshot_url=screenshot_url, duration=duration
     )
 
 

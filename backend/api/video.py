@@ -166,6 +166,7 @@ def check_video(file_path):
         resultMap['max_sensitivity_level'] = max_sensitivity_level
         resultMap['violence_percent'] = violenceScoreArr[-1]
         resultMap['porn_percent'] = pornScoreArr[-1]
+        resultMap['screenshot_url'] = settings.VIDEO_URL + settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
         #contentMap['politics_ sensitivity_level'] = 
         #shutil.rmtree(temp_path)
         #print(totalCount)
@@ -271,6 +272,7 @@ def check_video(file_path):
         resultMap['max_sensitivity_level'] = max_sensitivity_level
         resultMap['violence_percent'] = violenceScoreArr[-1]
         resultMap['porn_percent'] = pornScoreArr[-1]
+        resultMap['screenshot_url'] = settings.VIDEO_URL + settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
     return resultMap
 
     
