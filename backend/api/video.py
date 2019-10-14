@@ -24,7 +24,7 @@ from django.conf import settings
 from decimal import Decimal
 from decimal import getcontext
 from moviepy.editor import VideoFileClip
-
+import subprocess
 
 class video:
     def __init__(self):
@@ -67,9 +67,46 @@ class video:
 
         return cv2.warpAffine(image, M, (nW, nH), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
+    def RunShellWithReturnCode(self,command):
+        p = subprocess.Popen(command,stdout=subprocess.PIPE)
+        p.wait()
+        output = ""
+        while True:
+            line = p.stdout.read()
+            if not line:
+                break
+            output += line.decode("utf-8")
+        # print(output)
+        return output
+
+    def convert_avi_to_mp4(self, avi_file_path, output_name):
+        cmd = "ffmpeg -i {input} -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 {output}.mp4".format(
+            input=avi_file_path, output=output_name)
+        out = self.RunShellWithReturnCode(cmd)
+        return True
+
+    def convert_mov_to_mp4(self, mov_file_path, output_name):
+        cmd = "ffmpeg -i {input} -q:v 0 -f mp4 {output}.mp4".format(
+            input=mov_file_path, output=output_name)
+        out = self.RunShellWithReturnCode(cmd)
+        return True
+
     def check_video(self, file_path, orientation):
         t = time.time()
         startTime = int(round(t * 1000))
+
+        # 转换视频
+        if file_path.endswith('.avi'):
+            fileNameMp4 = file_path.replace('.avi', '')
+            convertReulst = self.convert_avi_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+        elif file_path.endswith('.mov'):
+            fileNameMp4 = file_path.replace('.mov', '')
+            convertReulst = self.convert_mov_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+
         # 读取视频
         totalCount = 0
         pornTotalCount = 0
@@ -363,6 +400,19 @@ class video:
     def check_video_V2(self, file_path, orientation):
         t = time.time()
         startTime = int(round(t * 1000))
+
+        # 转换视频
+        if file_path.endswith('.avi'):
+            fileNameMp4 = file_path.replace('.avi', '')
+            convertReulst = self.convert_avi_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+        elif file_path.endswith('.mov'):
+            fileNameMp4 = file_path.replace('.mov', '')
+            convertReulst = self.convert_mov_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+
         # 读取视频
         totalCount = 0
         pornTotalCount = 0
@@ -411,8 +461,9 @@ class video:
                 img_paths.append(img_path)
                 COUNT += 1
 
-            COUNT = 0            
-            jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)["result"]
+            COUNT = 0
+            jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)[
+                "result"]
 
             # 若小于总帧数则读一帧图像
             while COUNT < totalFrameNumber:
@@ -537,7 +588,7 @@ class video:
 
         else:
             COUNT_SECOND = 1
-            
+
             if cap.isOpened():  # 判断是否正常打开
                 rval, frame = cap.read()
             else:
@@ -555,10 +606,11 @@ class video:
                     img_paths.append(img_path)
                     COUNT += 1
                 COUNT_SECOND += 1
-            
+
             COUNT_SECOND = 1
             COUNT = 0
-            jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)["result"]
+            jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)[
+                "result"]
 
             while rval:  # 循环读取视频帧
                 #pic_path = temp_path + '/'
@@ -575,7 +627,7 @@ class video:
                             frame = self.rotate_bound(frame, -90.000)
                         elif orientation == 8:
                             frame = self.rotate_bound(frame, 90.000)
-                    
+
                     if jsonResultInfos != False:
                         jsonResultInfo = jsonResultInfos[COUNT]
                         violencePercent = jsonResultInfo.get('violence')
@@ -684,15 +736,16 @@ class video:
 
 
 if __name__ == '__main__':
-    img_file = os.path.join(os.getcwd(),"backend","api","yahoo","open_nsfw","images","auW8xgi.jpg")
+    img_file = os.path.join(os.getcwd(), "backend", "api",
+                            "yahoo", "open_nsfw", "images", "auW8xgi.jpg")
     image = cv2.imread(img_file)
     myvideo = video()
     angle = myvideo.get_minAreaRect(image)[-1]
-    print (angle)
-    print (type(angle))
+    print(angle)
+    print(type(angle))
     rotated = myvideo.rotate_bound(image, angle)
     cv2.putText(rotated, "angle: {:.2f} ".format(angle),
-    (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # show the output image
     print("[INFO] angle: {:.3f}".format(angle))
