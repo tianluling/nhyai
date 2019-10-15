@@ -80,16 +80,36 @@ class video:
         return output
 
     def convert_avi_to_mp4(self, avi_file_path, output_name):
-        cmd = "ffmpeg -i {input} -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 {output}.mp4".format(
-            input=avi_file_path, output=output_name)
-        out = self.RunShellWithReturnCode(cmd)
-        return True
+        try:
+            fsize = os.path.getsize(avi_file_path)
+            if fsize > 0:
+                cmd = "ffmpeg -i {input} -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 {output}.mp4".format(
+                    input=avi_file_path, output=output_name)
+                out = self.RunShellWithReturnCode(cmd)
+                return True
+            else:
+                print("传入的文件格式不对")
+                return False
+        except:
+            print("传入的文件格式不对")
+            return False
+        
+        
 
     def convert_mov_to_mp4(self, mov_file_path, output_name):
-        cmd = "ffmpeg -i {input} -q:v 0 -f mp4 {output}.mp4".format(
-            input=mov_file_path, output=output_name)
-        out = self.RunShellWithReturnCode(cmd)
-        return True
+        try:
+            fsize = os.path.getsize(avi_file_path)
+            if fsize > 0:
+                cmd = "ffmpeg -i {input} -q:v 0 -f mp4 {output}.mp4".format(
+                    input=mov_file_path, output=output_name)
+                out = self.RunShellWithReturnCode(cmd)
+                return True
+            else:
+                print("传入的文件格式不对")
+                return False
+        except:
+            print("传入的文件格式不对")
+            return False
 
     def check_video(self, file_path, orientation):
         t = time.time()
