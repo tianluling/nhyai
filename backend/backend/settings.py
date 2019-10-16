@@ -243,11 +243,13 @@ CACHES = {
         }
     }
 }
+# linux支持异步设置为True, windows暂不支持设置为False
+IS_SUPPORT_RQ=True
+
 RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
-        # linux支持异步设置为True, windows暂不支持设置为False
-        'ASYNC': True
+        'ASYNC': IS_SUPPORT_RQ
     },
 }
 

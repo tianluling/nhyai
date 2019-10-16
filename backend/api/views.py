@@ -607,13 +607,14 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         sync = iserializer.sync
         serial_number = int(time.time())
 
-        if sync:
+        if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
         else:
             # 创建任务
             task_check_video.delay(iserializer, serial_number)
             # 执行任务
-            run_django_rq_task()
+            if settings.IS_SUPPORT_RQ:
+                run_django_rq_task()
             return Response(status=status.HTTP_100_CONTINUE)
         ret = 0
         msg = "成功"
