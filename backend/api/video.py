@@ -26,6 +26,7 @@ from decimal import getcontext
 from moviepy.editor import VideoFileClip
 import subprocess
 
+
 class video:
     def __init__(self):
         self = self
@@ -67,8 +68,8 @@ class video:
 
         return cv2.warpAffine(image, M, (nW, nH), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
-    def RunShellWithReturnCode(self,command):
-        p = subprocess.Popen(command,stdout=subprocess.PIPE)
+    def RunShellWithReturnCode(self, command):
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
         p.wait()
         output = ""
         while True:
@@ -93,8 +94,6 @@ class video:
         except:
             print("传入的文件格式不对")
             return False
-        
-        
 
     def convert_mov_to_mp4(self, mov_file_path, output_name):
         try:
@@ -111,7 +110,7 @@ class video:
             print("传入的文件格式不对")
             return False
 
-    def check_video(self, file_path, orientation):
+    def check_video(self, file_path, orientation, serial_number):
         t = time.time()
         startTime = int(round(t * 1000))
 
@@ -284,6 +283,7 @@ class video:
             resultMap['porn_percent'] = pornScoreArr[-1]
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
             # contentMap['politics_ sensitivity_level'] =
             # shutil.rmtree(temp_path)
             # print(totalCount)
@@ -415,9 +415,10 @@ class video:
             resultMap['porn_percent'] = pornScoreArr[-1]
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
         return resultMap
 
-    def check_video_V2(self, file_path, orientation):
+    def check_video_V2(self, file_path, orientation, serial_number):
         t = time.time()
         startTime = int(round(t * 1000))
 
@@ -605,6 +606,7 @@ class video:
             resultMap['porn_percent'] = pornScoreArr[-1]
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
 
         else:
             COUNT_SECOND = 1
@@ -752,6 +754,7 @@ class video:
             resultMap['porn_percent'] = pornScoreArr[-1]
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
         return resultMap
 
 

@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import pandas as pd
-from  api.yahoo.open_nsfw.classify_nsfw import nsfw
+from api.yahoo.open_nsfw.classify_nsfw import nsfw
 from api.violence import violence
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'api'
+    'api',
+    'django_rq',
+    'background_task'
 ]
 
 MIDDLEWARE = [
@@ -87,6 +89,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -195,10 +198,22 @@ FILE_URL = 'http://172.31.4.31:8000'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    "formatters": {
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+    },
     'handlers': {
         'console':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
+        },
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
         },
     },
     'loggers': {
@@ -207,8 +222,33 @@ LOGGING = {
             'propagate': True,
             'level':'DEBUG',
         },
+        "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "DEBUG"
+        },
     }
 }
 
 #增加职位字典
 ZW = pd.read_csv(os.path.join(os.getcwd(),"backend","api","ocr","application","position.csv"),encoding='gbk')
+
+#Redis队列设置
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+RQ_QUEUES = {
+    'default': {
+        'USE_REDIS_CACHE': 'default',
+        'ASYNC': True
+    },
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+RQ_SHOW_ADMIN_LINK = True

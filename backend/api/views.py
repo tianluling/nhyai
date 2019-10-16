@@ -43,6 +43,9 @@ import filetype
 import docx
 from .filetype import FileType
 import platform
+import time
+from .tasks import task_check_video
+from .crons import run_django_rq_task
 if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
@@ -601,7 +604,17 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
 
         file_path = iserializer.video.path
         orientation = iserializer.orientation
-        resultMap = video().check_video_V2(file_path, orientation)
+        sync = iserializer.sync
+        serial_number = int(time.time())
+
+        if sync:
+            resultMap = video().check_video_V2(file_path, orientation, serial_number)
+        else:
+            # 创建任务
+            task_check_video.delay(iserializer, serial_number)
+            # 执行任务
+            run_django_rq_task()
+            return Response(status=status.HTTP_100_CONTINUE)
         ret = 0
         msg = "成功"
         serializer.save(data=resultMap, ret=ret,

@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.utils.timezone import datetime
 from uuid import uuid4
@@ -162,6 +161,7 @@ class VideoFileUpload(models.Model):
     channel_id = models.IntegerField(_('channel_id'), null=True, blank=True)
     user_id = models.CharField(
         _('user_id'), max_length=64, null=True, blank=True)
+    sync = models.IntegerField(_('sync'), null=True, blank=True)
     orientation = models.IntegerField(_('orientation'), null=True, blank=True)
     ret = models.IntegerField(_('ret'), null=True, blank=True)
     msg = models.TextField(max_length=255, default='')

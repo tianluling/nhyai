@@ -42,7 +42,8 @@ urlpatterns = [
     path('voiceRecognition', TemplateView.as_view(template_name="index.html")),
     path('writeRecognition', TemplateView.as_view(template_name="index.html")),
     path('videoRecognition', TemplateView.as_view(template_name="index.html")),
-    path('api/v1/', include('api.urls'))
+    path('api/v1/', include('api.urls')),
+    path('django-rq/', include('django_rq.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
