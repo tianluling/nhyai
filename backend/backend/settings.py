@@ -243,8 +243,9 @@ CACHES = {
         }
     }
 }
+
 # linux支持异步设置为True, windows暂不支持设置为False
-IS_SUPPORT_RQ=True
+IS_SUPPORT_RQ = True
 
 RQ_QUEUES = {
     'default': {
