@@ -238,6 +238,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
+            "PASSWORD": "rsc123!@#",
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
