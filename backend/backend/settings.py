@@ -177,7 +177,7 @@ IS_GPU = True
 TEMP_PATH = 'capture_out_images/'
 SAVE_PATH = '/var/www/gallery/media/videos/capture_out_images/'
 #按秒或者帧读取视屏（True：按帧  False：按秒）
-FPS_FLAG = False
+FPS_FLAG = True
 VIDEO_URL = 'http://172.31.4.31:8000/media/videos/'
 
 #色情模型预加载
@@ -246,6 +246,7 @@ CACHES = {
 RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
+        # linux支持异步设置为True, windows暂不支持设置为False
         'ASYNC': True
     },
 }
