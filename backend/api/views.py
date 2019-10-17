@@ -145,10 +145,10 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     user_id = serializer.user_id
 
     serial_number = int(time.time())
-    if result.get('serial_number') is not None:
+    if file_type == FILETYPE.Video.value and result.get('serial_number') is not None:
         serial_number = result["serial_number"]
 
-    if result.get('status') is not None and result.get('status') == "3":
+    if file_type == FILETYPE.Video.value and result.get('status') is not None and result.get('status') == "3":
         process_status = 3
 
 
@@ -759,6 +759,7 @@ class AudioFileInspectionViewSet(viewsets.ModelViewSet):
                             speech=iserializer.speech)
 
             # 更新历史记录
+            resultMap['text'] = check_result
             UpdateHistoryRecord(iserializer, FILETYPE.Audio.value,
                                 resultMap, 'audio', None, None)
 
