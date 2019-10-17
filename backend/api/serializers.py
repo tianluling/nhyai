@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import FileUpload, FileImageTerrorismUpload, FileVisionPornUpload
 from .models import VideoFileUpload, AudioFileUpload, AudioFileInspection, ImageFileUpload, WordRecognitionInspection
-from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense,OcrBusinesslicense, OcrBankcard, HistoryRecord, OcrBusinessCard
+from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, HistoryRecord, OcrBusinessCard
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -217,6 +217,7 @@ class OcrVehiclelicenseSerializer(serializers.HyperlinkedModelSerializer):
     def clean_json(self, obj):
         return obj.ret, obj.msg, obj.data
 
+
 class OcrBusinesslicenseSerializer(serializers.HyperlinkedModelSerializer):
 
     #result = serializers.JSONField(True)
@@ -326,6 +327,7 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
     user_id = serializers.JSONField(True)
     screenshot_url = serializers.JSONField(True)
     duration = serializers.JSONField(True)
+    serial_number = serializers.JSONField(True)
 
     class Meta:
         model = HistoryRecord
@@ -334,9 +336,9 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
                   'max_sensitivity_level', 'violence_percent', 'violence_sensitivity_level',
                   'porn_percent', 'porn_sensitivity_level', 'politics_percent',
                   'politics_sensitivity_level', 'public_percent', 'public_character_level',
-                  'content', 'web_text', 'app_text', 'upload_time', 'process_status', 
-                  'system_id','channel_id', 'user_id', 'screenshot_url', 'duration',
-                  'ret', 'msg', 'data')
+                  'content', 'web_text', 'app_text', 'upload_time', 'process_status',
+                  'system_id', 'channel_id', 'user_id', 'screenshot_url', 'duration',
+                  'serial_number', 'ret', 'msg', 'data')
 
     def clean_json(self, obj):
         return obj.ret, obj.msg, obj.data, obj.file_id, obj.file_name, obj.file_url,
@@ -344,5 +346,6 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
         obj.max_sensitivity_level, obj.violence_percent, obj.violence_sensitivity_level,
         obj.porn_percent, obj.porn_sensitivity_level, obj.politics_percent,
         obj.politics_sensitivity_level, obj.public_percent, obj.public_character_level,
-        obj.content, obj.web_text, obj.app_text, obj.upload_time, obj.process_status, 
-        obj.system_id, obj.channel_id, obj.user_id, obj.screenshot_url, obj.duration
+        obj.content, obj.web_text, obj.app_text, obj.upload_time, obj.process_status,
+        obj.system_id, obj.channel_id, obj.user_id, obj.screenshot_url, obj.duration,
+        obj.serial_number

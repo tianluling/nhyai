@@ -103,17 +103,34 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     channel_id = serializer.channel_id
     user_id = serializer.user_id
 
-    HistoryRecord.objects.create(
-        file_id=file_id, file_name=file_name,
-        file_url=file_url, file_type=file_type,
-        inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
-        max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
-        violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
-        porn_sensitivity_level=porn_sensitivity_level, content=content,
-        web_text=web_text, app_text=app_text, process_status=process_status,
-        system_id=system_id, channel_id=channel_id, user_id=user_id,
-        screenshot_url=screenshot_url, duration=duration
-    )
+    if result.get('serial_number') is not None:
+        serial_number = result["serial_number"]
+        iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
+        iHistoryRecord.inspection_result = inspection_result
+        iHistoryRecord.max_sensitivity_type = max_sensitivity_type
+        iHistoryRecord.max_sensitivity_level = max_sensitivity_level
+        iHistoryRecord.violence_percent = violence_percent
+        iHistoryRecord.porn_sensitivity_level = porn_sensitivity_level
+        iHistoryRecord.content = content
+        iHistoryRecord.web_text = web_text
+        iHistoryRecord.app_text = app_text
+        iHistoryRecord.process_status = 2
+        iHistoryRecord.screenshot_url = screenshot_url
+        iHistoryRecord.duration = duration
+        iHistoryRecord.save()
+    else:
+        serial_number = int(time.time())
+        HistoryRecord.objects.create(
+            file_id=file_id, file_name=file_name,
+            file_url=file_url, file_type=file_type,
+            inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
+            max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
+            violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
+            porn_sensitivity_level=porn_sensitivity_level, content=content,
+            web_text=web_text, app_text=app_text, process_status=process_status,
+            system_id=system_id, channel_id=channel_id, user_id=user_id,
+            screenshot_url=screenshot_url, duration=duration
+        )
 
 
 @job

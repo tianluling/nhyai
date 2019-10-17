@@ -359,3 +359,4 @@ class HistoryRecord(models.Model):
         _('screenshot_url'), null=True, blank=True)
     duration = models.CharField(
         _('duration'), max_length=8, null=True, blank=True)
+    serial_number = models.IntegerField(_('serial_number'), null=True, blank=True)

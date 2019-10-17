@@ -84,7 +84,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     else:
         file_name = "other"
         file_url = "other"
-    
+
     inspection_result = result
 
     violence_percent = "0"
@@ -144,6 +144,14 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     channel_id = serializer.channel_id
     user_id = serializer.user_id
 
+    serial_number = int(time.time())
+    if result.get('serial_number') is not None:
+        serial_number = result["serial_number"]
+
+    if result.get('status') is not None and result.get('status') == "3":
+        process_status = 3
+
+
     HistoryRecord.objects.create(
         file_id=file_id, file_name=file_name,
         file_url=file_url, file_type=file_type,
@@ -153,7 +161,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         porn_sensitivity_level=porn_sensitivity_level, content=content,
         web_text=web_text, app_text=app_text, process_status=process_status,
         system_id=system_id, channel_id=channel_id, user_id=user_id,
-        screenshot_url=screenshot_url, duration=duration
+        screenshot_url=screenshot_url, duration=duration, serial_number=serial_number
     )
 
 
@@ -609,22 +617,53 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
 
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
+            ret = 0
+            msg = "成功"
+            serializer.save(data=resultMap, ret=ret,
+                            msg=msg, video=iserializer.video)
+
+            # 更新历史记录
+            UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                                resultMap, resultMap['max_sensitivity_type'],
+                                resultMap['violence_percent'], resultMap['porn_percent'])
         else:
-            # 创建任务
+            ret = 0
+            msg = "成功"
+            resultMap = {}
+            p, f = os.path.split(file_path)
+            resultMap['video_url'] = settings.VIDEO_URL + f
+            resultMap['violence_sensitivity_level'] = ""
+            resultMap['porn_sensitivity_level'] = ""
+            resultMap['video_evidence_information'] = []
+            resultMap['violence_evidence_information'] = []
+            resultMap['porn_evidence_information'] = []
+            resultMap['interval'] = ""
+            resultMap['duration'] = ""
+            resultMap['fps'] = ""
+            resultMap['taketimes'] = ""
+            resultMap['max_sensitivity_type'] = ""
+            resultMap['max_sensitivity_level'] = None
+            resultMap['violence_percent'] = 0
+            resultMap['porn_percent'] = 0
+            resultMap['screenshot_url'] = ""
+            resultMap['serial_number'] = serial_number
+            resultMap['progress'] = "50%"
+            resultMap['status'] = 3
+
+            serializer.save(data=resultMap, ret=ret,
+                            msg=msg, video=iserializer.video)
+
+            # 更新历史记录
+            UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                                resultMap, resultMap['max_sensitivity_type'],
+                                resultMap['violence_percent'], resultMap['porn_percent'])
+
+            # 上传成功，并创建识别任务
             task_check_video.delay(iserializer, serial_number)
+
             # 执行任务
             if settings.IS_SUPPORT_RQ:
                 run_django_rq_task()
-            return Response(status=status.HTTP_100_CONTINUE)
-        ret = 0
-        msg = "成功"
-        serializer.save(data=resultMap, ret=ret,
-                        msg=msg, video=iserializer.video)
-
-        # 更新历史记录
-        UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-                            resultMap, resultMap['max_sensitivity_type'], 
-                            resultMap['violence_percent'], resultMap['porn_percent'])
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -778,7 +817,7 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
 
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
-        
+
         # 更新历史记录
         if float(violence) > float(scores[1]):
             max_sensitivity_type = 'violence'
@@ -874,7 +913,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
             # dataMap[each['name']] = each['text']
         # result = check_result
         # if (len(arr) == 0 or count < 1):
-        if(len(dataMap) <= 4 or dataMap['license_type']  != '中华人民共和国机动车驾驶证'):
+        if(len(dataMap) <= 4 or dataMap['license_type'] != '中华人民共和国机动车驾驶证'):
             ret = 1
             msg = "请上传驾驶证图片"
 
@@ -971,10 +1010,10 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
             #dataMap[each['name']] = each['text']
         #result = check_result
         # if (len(arr) == 0 or count < 1):
-        if(len(dataMap) <= 4 or dataMap['license_type']  != '中华人民共和国机动车行驶证'):
+        if(len(dataMap) <= 4 or dataMap['license_type'] != '中华人民共和国机动车行驶证'):
             ret = 1
             msg = "请上传行驶证图片"
-        
+
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
@@ -1095,7 +1134,7 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
         arr = check_result['res']
         dataMap = {}
         count = 0
-        
+
         dataMap["bank_name"] = ""
         dataMap["bank_cardno"] = ""
         dataMap["expiry_date"] = ""
@@ -1158,9 +1197,9 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         for each in arr:
             if len(arr) >= 0:
                 dataArr.append(each["text"])
-        
+
         dataMap["handwritten_content"] = dataArr
-            
+
         # result = check_result
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
@@ -1327,7 +1366,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
 
         if ids is not None:
             ids = ids.split(',')
-            ids_int = list(map(int,ids))
+            ids_int = list(map(int, ids))
             conditions['id__in'] = ids_int
 
         if user_id is not None:
@@ -1336,15 +1375,15 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         if group_type is not None:
             channel_ids = []
             if int(group_type) == 0:
-                channel_ids = [1,2,3,5,6,7,8,9,10,11,12,13,15]
+                channel_ids = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15]
             elif int(group_type) == 1:
-                channel_ids = [2,3]
+                channel_ids = [2, 3]
             elif int(group_type) == 2:
-                channel_ids = [5,6,7,8,9,10,11,12,13]
+                channel_ids = [5, 6, 7, 8, 9, 10, 11, 12, 13]
             elif int(group_type) == 3:
                 channel_ids = [15]
             else:
-                channel_ids = [4,14,99]
+                channel_ids = [4, 14, 99]
             conditions['channel_id__in'] = channel_ids
 
         instance = HistoryRecord.objects.filter(**conditions)
@@ -1352,7 +1391,6 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         # instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     def retrieve(self, request, pk=None):
         # 获取实例
@@ -1378,6 +1416,8 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
         is_group = requestData.get('is_group')
         query_date = requestData.get('query_date')
         group_type = requestData.get('group_type')
+        serial_number = requestData.get('serial_number')
+
 
         # 根据条件过滤
         conditions = {}
@@ -1406,23 +1446,24 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                 end_time, "%Y-%m-%d %H:%M:%S")
             conditions['upload_time__lte'] = end_time_date
 
+        if serial_number is not None:
+            conditions['serial_number'] = serial_number
+
         if group_type is not None:
             if int(group_type) == 0:
-                channel_ids = [1,2,3,5,6,7,8,9,10,11,12,13,15]
+                channel_ids = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15]
                 conditions['channel_id__in'] = channel_ids
             elif int(group_type) == 1:
-                channel_ids = [2,3]
+                channel_ids = [2, 3]
                 conditions['channel_id__in'] = channel_ids
             elif int(group_type) == 2:
-                channel_ids = [5,6,7,8,9,10,11,12,13]
+                channel_ids = [5, 6, 7, 8, 9, 10, 11, 12, 13]
                 conditions['channel_id__in'] = channel_ids
             elif int(group_type) == 3:
                 conditions['file_type'] = 2
             else:
-                channel_ids = [4,14,99]
+                channel_ids = [4, 14, 99]
                 conditions['channel_id__in'] = channel_ids
-            
-
 
         if is_group is not None and is_group == 'true':
             historygroups = HistoryRecord.objects.filter().extra(
