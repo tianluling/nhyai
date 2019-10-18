@@ -15,3 +15,6 @@ screen python backend/manage_task.py process_tasks
 
 如遇到mysql安装错误，在ubuntu下执行如下命令：
 sudo apt-get install libmysqlclient-dev
+
+创建用户：
+python backend/manage_task.py createsuperuser
