@@ -12,3 +12,6 @@ screen python backend/manage.py runserver 0.0.0.0:8000 --noreload
 
 运行任务:
 screen python backend/manage.py process_tasks
+
+如遇到mysql安装错误，在ubuntu下执行如下命令：
+sudo apt-get install libmysqlclient-dev
