@@ -1468,13 +1468,13 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
 
         if is_group is not None and is_group == 'true':
             historygroups = HistoryRecord.objects.filter().extra(
-                {'day': "strftime('%Y-%m-%d',upload_time)"}).values_list('day').annotate(Count('id')).order_by('-day')
+                {'day': 'cast(upload_time as date)'}).values_list('day').annotate(Count('id')).order_by('-day')
             results = []
             dataMap = {}
             dataMap['ret'] = 0
             dataMap['msg'] = "成功"
             dataMap['results'] = {}
-            if len(historygroups) > 0:
+            if historygroups.exists():
                 if query_date is not None and int(query_date) > 0:
                     group_index = 0
                     for historygroup in historygroups:
@@ -1482,12 +1482,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             result = {}
                             historydate = historygroup[0]
                             result["upload_time"] = historydate
-                            conditions["upload_time__year"] = historydate.split(
-                                '-')[0]
-                            conditions["upload_time__month"] = historydate.split(
-                                '-')[1]
-                            conditions["upload_time__day"] = historydate.split(
-                                '-')[2]
+                            conditions["upload_time__date"] = datetime.date(historydate.year, historydate.month, historydate.day)
                             historylist = HistoryRecord.objects.filter(
                                 **conditions)
                             serializer_group = self.get_serializer(
@@ -1503,12 +1498,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                         result = {}
                         historydate = historygroup[0]
                         result["upload_time"] = historydate
-                        conditions["upload_time__year"] = historydate.split(
-                            '-')[0]
-                        conditions["upload_time__month"] = historydate.split(
-                            '-')[1]
-                        conditions["upload_time__day"] = historydate.split(
-                            '-')[2]
+                        conditions["upload_time__date"] = datetime.date(historydate.year, historydate.month, historydate.day)
                         historylist = HistoryRecord.objects.filter(
                             **conditions)
                         serializer_group = self.get_serializer(

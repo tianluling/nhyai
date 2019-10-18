@@ -318,8 +318,8 @@ class HistoryRecord(models.Model):
         _('file_name'), max_length=128, null=True, blank=True)
     file_url = models.URLField(_('file_url'), null=True, blank=True)
     file_type = models.IntegerField(_('file_type'), null=True, blank=True)
-    inspection_result = models.CharField(
-        _('inspection_result'), max_length=32, null=True, blank=True)
+    inspection_result = models.TextField(
+        _('inspection_result'), max_length=2048, null=True, blank=True)
     max_sensitivity_type = models.CharField(
         _('max_sensitivity_type'), max_length=32, null=True, blank=True)
     max_sensitivity_level = models.CharField(
