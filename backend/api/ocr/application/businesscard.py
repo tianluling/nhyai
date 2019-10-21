@@ -38,7 +38,8 @@ class businesscard:
                 business_name['姓名'] = res[0]
                 self.res.update(business_name)
                 break
-            else:
+
+            if i == self.N-1 and len(res) <=0:
                 business_name['姓名'] = '其他'
                 self.res.update(business_name)
                 break

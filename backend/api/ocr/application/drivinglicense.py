@@ -33,7 +33,8 @@ class drivinglicense:
                 license_type['类型']  = '中华人民共和国机动车驾驶证'
                 self.res.update(license_type)
                 break  
-            else:
+
+            if i == self.N-1 and len(res) <=0:
                 license_type['类型']  = '其他'
                 self.res.update(license_type)
                 break
