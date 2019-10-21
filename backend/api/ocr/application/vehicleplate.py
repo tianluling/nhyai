@@ -24,10 +24,11 @@ class vehicleplate:
             txt = txt.replace(' ','')
             res = re.findall("^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$",txt)
             if len(res)>0:
-                plate_no["车牌号"] = res[0].split('')[-1]
+                plate_no["车牌号"] = res[0]
                 self.res.update(plate_no) 
                 break
-            else:
+
+            if i == self.N-1 and len(res) <=0:
                 plate_no["车牌号"] = "其他"
                 self.res.update(plate_no) 
                 break
