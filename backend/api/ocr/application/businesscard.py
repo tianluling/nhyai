@@ -78,7 +78,7 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("地址[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            res = re.findall("地址:[\u4E00-\u9FA5A-Za-z0-9]+",txt)
             if len(res)>0:
                 address['地址']  = res[0].replace('地址:','')
                 self.res.update(address)
@@ -94,10 +94,10 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("邮箱[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            res = re.findall("(邮箱:[A-Za-z0-9]+)+(@+[a-zA-Z0-9_-]+\.)+([a-zA-Z0-9_-]+)$",txt)
             if len(res)>0:
-                address['邮箱']  = res[0].replace('邮箱:','')
-                self.res.update(address)
+                email['邮箱']  = res[0][0].replace('邮箱:','')+res[0][1]+res[0][2]
+                self.res.update(email)
                 break
 
     def phone(self):
@@ -108,10 +108,10 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("手机[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            res = re.findall("手机:[\u4E00-\u9FA5A-Za-z0-9]+",txt)
             if len(res)>0:
-                address['手机']  = res[0].replace('手机:','')
-                self.res.update(address)
+                phone['手机']  = res[0].replace('手机:','')
+                self.res.update(phone)
                 break
     
     def telephone(self):
@@ -122,10 +122,11 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("电话[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            txt = txt.replace('电话:', '')
+            res = re.findall("^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$",txt)
             if len(res)>0:
-                address['电话']  = res[0].replace('电话:','')
-                self.res.update(address)
+                telephone['电话']  = res[0][0]
+                self.res.update(telephone)
                 break
     
     def qq(self):
@@ -136,10 +137,10 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("QQ[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            res = re.findall("QQ:[\u4E00-\u9FA5A-Za-z0-9]+",txt)
             if len(res)>0:
-                address['QQ']  = res[0].replace('QQ:','')
-                self.res.update(address)
+                qq['QQ']  = res[0].replace('QQ:','')
+                self.res.update(qq)
                 break
     
     def webchat(self):
@@ -150,8 +151,8 @@ class businesscard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("微信[\u4E00-\u9FA5A-Za-z0-9]+:",txt)
+            res = re.findall("微信:[\u4E00-\u9FA5A-Za-z0-9]+",txt)
             if len(res)>0:
-                address['微信']  = res[0].replace('微信:','')
-                self.res.update(address)
+                webchat['微信']  = res[0].replace('微信:','')
+                self.res.update(webchat)
                 break
