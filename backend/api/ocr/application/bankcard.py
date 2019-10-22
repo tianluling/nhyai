@@ -24,12 +24,14 @@ class bankcard:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = txt
+            res = re.findall("[\u4e00-\u9fa5]+",txt)
             if len(res)>0:
-                bankName = banklist().get_bank_name(txt)
-                bank_name['银行名称']  = bankName
-                self.res.update(bank_name) 
-                break    
+                for record in res:
+                    bankName = banklist().get_bank_name(record)
+                    if bankName is not None:
+                        bank_name['银行名称']  = bankName
+                        self.res.update(bank_name) 
+                        break    
 
     def card_number(self):
         """
