@@ -82,15 +82,11 @@ class businesslicense:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("类型[\u4E00-\u9FA5A-Za-z0-9]+",txt)
+            res = re.findall("型[\u4E00-\u9FA5A-Za-z0-9()（）]+",txt)
             if len(res)>0:
-                business_type['类型']  = res[0].replace('类型','')
-                self.res.update(business_type) 
-            res = re.findall("型[\u4E00-\u9FA5A-Za-z0-9]+",txt)
-            if len(res)>0:
-                business_type['类型']  = res[0].replace('型','')
-                self.res.update(business_type) 
-                break  
+                business_type['类型']  = res[0].replace('类型','').replace('型','')
+                self.res.update(business_type)
+                break
 
     def address(self):
         """
@@ -100,15 +96,11 @@ class businesslicense:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("住 所[\u4E00-\u9FA5A-Za-z0-9]+",txt)
+            res = re.findall("所[\u4E00-\u9FA5A-Za-z0-9]+",txt)
             if len(res)>0:
-                address['住 所']  = res[0].replace('住 所','')
-                self.res.update(address) 
-            res = re.findall("样 所[\u4E00-\u9FA5A-Za-z0-9]+",txt)
-            if len(res)>0:
-                address['住 所']  = res[0].replace('样 所','')
-                self.res.update(address) 
-                break  
+                address['住所']  = res[0].replace('所','')
+                self.res.update(address)
+                break 
 
     def operator(self):
         """
@@ -171,15 +163,43 @@ class businesslicense:
         经营范围
         """
         scope={}
+        addString=[]
+        address_cx = 0
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("经营范围[\u4E00-\u9FA5,、;:()【】A-Za-z0-9]+",txt)
+
+            ##增加判断第二行地址X轴的偏移量不能大于40，否则视为其他信息
+            if address_cx == 0:
+                res = re.findall("经营范围[\u4E00-\u9FA5,、;:()（）《》A-Za-z0-9。]+",txt)
+            else:
+                res =  re.findall("[\u4E00-\u9FA5,、;:()（）《》A-Za-z0-9。]+",txt)
+
             if len(res)>0:
-                #scope["经营范围"] = res[0].split('经营范围')[-1]
-                scope["经营范围"] = res[0].replace('经营范围','')
-                self.res.update(scope) 
-                break
+                cx = self.result[i]['cx']
+                if address_cx !=0  and cx > address_cx + 40:
+                    addString.append(res[0].replace(' ',''))
+                else:
+                    if '提示' in res[0]:
+                        addString.append(res[0].split('提示')[-1])
+
+                if address_cx == 0:
+                    if "《" in res[0]:
+                        addString.append(res[0].replace('经营范围','').replace('《','('))
+                    elif "》" in res[0]:
+                        addString.append(res[0].replace('经营范围','').replace('》',')'))
+                    else:
+                        addString.append(res[0].replace('经营范围',''))
+                    address_cx = cx
+                
+                if '。' in res[0]:
+                    break
+
+               
+        
+        if len(addString)>0:
+            scope['经营范围']  =''.join(addString)
+            self.res.update(scope) 
    
     
     
