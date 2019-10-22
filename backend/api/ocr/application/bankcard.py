@@ -14,6 +14,7 @@ class bankcard:
         self.res = {}
         self.bank_name()
         self.card_number()
+        self.card_type()
 
     def bank_name(self):
         """
@@ -44,5 +45,24 @@ class bankcard:
                 self.res.update(card_number) 
                 break    
    
-    
+
+    def card_type(self):
+        """
+        卡类型
+        """
+        card_type={}
+        for i in range(self.N):
+            txt = self.result[i]['text'].replace(' ','')
+            txt = txt.replace(' ','')
+            res = txt
+            if txt.isnumeric() and len(txt)==16:
+                card_type['卡类型'] = '信用卡'
+                self.res.update(card_type)
+                break
+
+            if txt.isnumeric() and len(txt) >16:
+                card_type['卡类型'] = '借记卡'
+                self.res.update(card_type)
+                break
+
     

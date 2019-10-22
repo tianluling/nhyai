@@ -1150,6 +1150,9 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
             if(each['name'] == '卡号'):
                 name = "bank_cardno"
                 count = count + 1
+            if(each['name'] == '卡类型'):
+                name = "card_type"
+                count = count + 1
             dataMap[name] = each['text']
             # dataMap[each['name']] = each['text']
         # result = check_result
