@@ -75,16 +75,34 @@ class businesscard:
         地址
         """
         address = {}
+        addString=[]
+        address_cx = 0
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ', '')
             txt = txt.replace(' ', '')
-            res = re.findall("地址:[\u4E00-\u9FA5A-Za-z0-9]+",txt)
-            if len(res)>0:
-                address['地址']  = res[0].replace('地址:','')
-                self.res.update(address)
-                break
-                
 
+            ##增加判断第二行地址X轴的偏移量不能大于200，否则视为其他信息
+            cx = self.result[i]['cx']
+
+            ##身份证地址
+            if '地址' in txt  or  '省' in txt or '市' in txt or '县' in txt or '街' in txt or '村' in txt or "镇" in txt or "区" in txt or "城" in txt or "室" in txt or "房" in txt or "园" in txt:
+                if address_cx !=0  and cx > address_cx - 200:
+                    addString.append(txt.replace('地址:',''))
+                
+                if address_cx == 0:
+                    addString.append(txt.replace('地址:',''))
+                    address_cx = cx
+            else:
+                ##增加地址第二行判断
+                res = re.findall(r'\d+号',txt)
+            
+            if len(res)>0:
+                addString.append(txt.replace('地址:',''))
+            
+        if len(addString)>0:
+            address['地址']  =''.join(addString)
+            self.res.update(address) 
+            
 
     def email(self):
         """
