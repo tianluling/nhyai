@@ -958,7 +958,6 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         count = 0
 
         dataMap["license_type"] = ""
-        dataMap["license_no"] = ""
         dataMap["plate_no"] = ""
         dataMap["vehicle_type"] = ""
         dataMap["owner"] = ""
@@ -974,9 +973,6 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
             name = ""
             if(each['name'] == '类型'):
                 name = "license_type"
-                count = count + 1
-            if(each['name'] == '证号'):
-                name = "license_no"
                 count = count + 1
             if(each['name'] == '号牌号码'):
                 name = "plate_no"
