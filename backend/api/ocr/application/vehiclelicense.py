@@ -8,6 +8,8 @@ class vehiclelicense:
     驾驶证结构化识别
     """
     def __init__(self,result):
+        self.is_vehiclelicense = False
+        self.is_vehicleplate = False
         self.result = union_rbox(result,0.2)
         self.N = len(self.result)
         self.res = {}
@@ -22,8 +24,6 @@ class vehiclelicense:
         self.engine_no()
         self.register_date()
         self.issue_date()
-        self.is_vehiclelicense = False
-        self.is_vehicleplate = False
 
     def license_type(self):
         """
@@ -142,7 +142,7 @@ class vehiclelicense:
             if len(res) == 0:
                 res = re.findall("品牌型号[\u4E00-\u9FA5]+[A-Za-z0-9]+",txt)
             if len(res)>0:
-                model["品牌型号"] = res[0].replace('品牌型号','').replace('非营运','').replace('使用性质','').replace('营运','').replace('性质','')
+                model["品牌型号"] = res[0].replace('品牌型号','').replace('非营运','').replace('使用性质','').replace('营运','').replace('性质','').replace('品脾型号','')
                 self.res.update(model)
                 break 
 
