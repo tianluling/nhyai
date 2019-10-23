@@ -866,6 +866,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         dataMap["driver"] = ""
         dataMap["sex"] = ""
         dataMap["nationality"] = ""
+        dataMap["address"] = ""
         dataMap["birthday"] = ""
         dataMap["issue_date"] = ""
         dataMap["be_class"] = ""
@@ -889,7 +890,7 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
                 name = "sex"
                 count = count + 1
             if(each['name'] == '国籍'):
-                name = "nationnality"
+                name = "nationality"
                 count = count + 1
             if(each['name'] == '住址'):
                 name = "address"

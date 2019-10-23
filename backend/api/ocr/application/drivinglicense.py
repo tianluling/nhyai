@@ -14,6 +14,7 @@ class drivinglicense:
         self.license_type()
         self.license_no()
         self.full_name()
+        self.nationality()
         self.address()
         self.birthday()
         self.issue_date()
@@ -22,7 +23,7 @@ class drivinglicense:
 
     def license_type(self):
         """
-        证号 
+        类型 
         """
         license_type={}
         for i in range(self.N):
@@ -41,9 +42,12 @@ class drivinglicense:
 
     def license_no(self):
         """
-        证号 
+        证号和性别判断
         """
         license_no={}
+
+        # 身份证号码中倒数第二位为奇数是男性、偶数是女性
+        sex={}
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
@@ -51,16 +55,27 @@ class drivinglicense:
             res += re.findall(r'证号\d*',txt)
             res += re.findall(r'\d{16,18}',txt)
             if len(res)>0:
-                # license_no["证号"] = res[0].split('证号')[-1]
-                license_no['证号']  =res[0].replace('证号','')
-                self.res.update(license_no) 
+                number = res[0].replace('证号','')
+                license_no['证号']  = number
+                self.res.update(license_no)
+                if (int(number[-2]) % 2) == 0:
+                    sex['性别'] = '女'
+                else:
+                    sex['性别'] = '男'
+                self.res.update(sex)
                 break    
             res = re.findall(r'远号\d*[X|x]',txt)
             res += re.findall(r'远号\d*',txt)
             res += re.findall(r'\d{16,18}',txt)
             if len(res)>0:
-                license_no['证号']  =res[0].replace('远号','')
-                self.res.update(license_no) 
+                number = res[0].replace('远号','')
+                license_no['证号']  = number
+                self.res.update(license_no)
+                if (int(number[-2]) % 2) == 0:
+                    sex['性别'] = '女'
+                else:
+                    sex['性别'] = '男'
+                self.res.update(sex)
                 break    
 
 
@@ -73,24 +88,45 @@ class drivinglicense:
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
             ##匹配姓名
-            res = re.findall("姓名[\u4e00-\u9fa5]{1,4}",txt)
-            if len(res)>0:
-                name['姓名']  =res[0].replace('姓名','')
-                self.res.update(name) 
-            res = re.findall("始名[\u4e00-\u9fa5]{1,4}",txt)
-            if len(res)>0:
-                name['姓名']  =res[0].replace('始名','')
-                self.res.update(name) 
-            if '男'  in txt:
-                    name["性别"] = '男'
-            elif '女'  in txt:
-                    name["性别"] = '女'
+            res = re.findall("名[\u4e00-\u9fa5]{1,4}",txt)
+            if len(res) == 0:
+                res = re.findall("^务[\u4e00-\u9fa5]{1,3}",txt)
 
-            res = re.findall(".*国籍[\u4e00-\u9fa5]+",txt)
             if len(res)>0:
-                name["国籍"] = res[0].split('国籍')[-1]
-                self.res.update(name) 
+                if '别男' in res[0]:
+                    name['姓名']  = res[0].replace('名','').replace('别男','')
+                elif '务' in res[0]:
+                    name['姓名']  = res[0].replace('务','')
+                else:
+                    name['姓名']  = res[0].replace('名','')
+                self.res.update(name)
                 break
+
+
+    def nationality(self):
+        """
+        国籍
+        """
+        nationality={}
+        for i in range(self.N):
+            txt = self.result[i]['text'].replace(' ','')
+            txt = txt.replace(' ','')
+            ##匹配国籍
+            res = re.findall("国籍[\u4e00-\u9fa5]{1,4}",txt)
+            if len(res) == 0:
+                res = re.findall("^国[\u4e00-\u9fa5]{1,4}",txt)
+
+            if len(res)>0:
+                nationality['国籍']  =res[0][-2:]
+                self.res.update(nationality)  
+                break
+
+            res = re.findall("Nationaliy.[\u4e00-\u9fa5]+",txt)
+            if len(res)>0:
+                nationality['国籍']  =res[0].replace('Nationaliy.','')
+                self.res.update(nationality)  
+                break
+
    
     def address(self):
         """
@@ -99,20 +135,33 @@ class drivinglicense:
         """
         add={}
         addString=[]
+        address_cy = 0
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
             
+            ##增加判断第二行地址Y轴的偏移量不能大于50，否则视为第二行为空
+            cy = self.result[i]['cy']
+
             ##住址
-            if '住址' in txt or '省' in txt or '市' in txt or '县' in txt or '街' in txt or '村' in txt or "镇" in txt or "区" in txt or "城" in txt or "室" in txt or "房" in txt:
-                addString.append(txt.replace('住址',''))
-            else:
-                ##增加地址第二行判断
-                res = re.findall(r'\d+号',txt)
-            
-            if len(res)>0:
-                addString.append(txt.replace('住址',''))
+            if '址' in txt or '省' in txt or '市' in txt or '县' in txt or '街' in txt or '村' in txt or "镇" in txt or "区" in txt or "城" in txt or "室" in txt or "房" in txt or "号" in txt:
+                res = re.findall("址[\u4e00-\u9fa5]+[0-9]+[\u4e00-\u9fa5]+",txt)
+                if len(res) == 0:
+                    res = re.findall("址[\u4e00-\u9fa5]+[0-9]+",txt)
                 
+                if len(res) == 0:
+                    res = re.findall("址[\u4e00-\u9fa5]+",txt)
+
+                if address_cy !=0  and cy - 50 < address_cy:
+                    addString.append(txt.replace(' ',''))
+                    break
+                
+                if address_cy !=0  and cy - 50 >address_cy:
+                    break
+
+                if len(res) > 0 and address_cy == 0:
+                    addString.append(res[0].replace('址',''))
+                    address_cy = cy        
             
         if len(addString)>0:
             add['住址']  =''.join(addString)
@@ -145,16 +194,13 @@ class drivinglicense:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("初次领证日期[0-9\-]{1,10}",txt)
+            res = re.findall("次[\u4e00-\u9fa5]+[0-9\-]{1,10}",txt)
             if len(res)>0:
-                issue_date['初次领证日期']  =res[0].replace('初次领证日期','')
-                self.res.update(issue_date) 
-                break
-            res = re.findall("问次领证日期[0-9\-]{1,10}",txt)
-            if len(res)>0:
-                issue_date['初次领证日期']  =res[0].replace('问次领证日期','')
-                self.res.update(issue_date) 
-                break 
+                res2 = re.findall("[0-9\-]{1,10}",res[0])
+                if len(res2)>0:
+                    issue_date['初次领证日期']  =res2[0]
+                    self.res.update(issue_date) 
+                    break
     
     def be_class(self):
         """
@@ -164,11 +210,11 @@ class drivinglicense:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("准驾车型[\u4e00-\u9fa5]+",txt)
+            res = re.findall("准驾车型[AaBbcCDdEeFfMmNnPp]+",txt)
             if len(res)>0:
                 be_class['准驾车型']  =res[0].replace('准驾车型','')
-                self.res.update(be_class) 
-                break    
+                self.res.update(be_class)
+                break
     
     def valid_period(self):
         """
