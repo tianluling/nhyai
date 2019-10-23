@@ -31,7 +31,7 @@ class businesslicense:
         for i in range(self.N):
             txt = self.result[i]['text'].replace(' ','')
             txt = txt.replace(' ','')
-            res = re.findall("营业执照",txt)
+            res = re.findall("执照",txt)
             if len(res)>0:
                 license_type['营业执照']  ='营业执照'
                 self.res.update(license_type) 
