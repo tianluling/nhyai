@@ -25,6 +25,7 @@ from decimal import Decimal
 from decimal import getcontext
 from moviepy.editor import VideoFileClip
 import subprocess
+import math
 
 
 class video:
@@ -147,8 +148,8 @@ class video:
         contentList = []
         violenceList = []
         pornList = []
-        violenceScoreArr = [0]*int(totalFrameNumber)
-        pornScoreArr = [0]*int(totalFrameNumber)
+        violenceScoreArr = [0.00]*int(totalFrameNumber)
+        pornScoreArr = [0.00]*int(totalFrameNumber)
         FPS_FLAG = settings.FPS_FLAG  # 为True时，按帧读取；False时，按秒读取
         # 暴恐级别比例
         VIOLENCESCORE_MIN = settings.VIOLENCESCORE_MIN
@@ -255,13 +256,16 @@ class video:
             # 增加最大敏感类型
             if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
                 max_sensitivity_type = 'violence'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
             elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
                 max_sensitivity_type = 'porn'
-                max_sensitivity_level = pornScoreArr[-1]
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
             else:
                 max_sensitivity_type = 'violence_porn'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
 
             resultMap['video_url'] = settings.VIDEO_URL + f
             resultMap['violence_sensitivity_level'] = violence_sensitivity_level
@@ -279,8 +283,8 @@ class video:
             resultMap['taketimes'] = endTime - startTime
             resultMap['max_sensitivity_type'] = max_sensitivity_type
             resultMap['max_sensitivity_level'] = max_sensitivity_level
-            resultMap['violence_percent'] = violenceScoreArr[-1]
-            resultMap['porn_percent'] = pornScoreArr[-1]
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number
@@ -386,13 +390,16 @@ class video:
             # 增加最大敏感类型
             if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
                 max_sensitivity_type = 'violence'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
             elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
                 max_sensitivity_type = 'porn'
-                max_sensitivity_level = pornScoreArr[-1]
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
             else:
                 max_sensitivity_type = 'violence_porn'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
 
             resultMap = {}
             resultMap['video_url'] = settings.VIDEO_URL + f
@@ -411,8 +418,9 @@ class video:
             resultMap['taketimes'] = endTime - startTime
             resultMap['max_sensitivity_type'] = max_sensitivity_type
             resultMap['max_sensitivity_level'] = max_sensitivity_level
-            resultMap['violence_percent'] = violenceScoreArr[-1]
-            resultMap['porn_percent'] = pornScoreArr[-1]
+            resultMap['max_sensitivity_percent'] = max_sensitivity_percent
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1] * 100, 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1] * 100, 2)
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number
@@ -454,8 +462,8 @@ class video:
         contentList = []
         violenceList = []
         pornList = []
-        violenceScoreArr = [0]*int(totalFrameNumber)
-        pornScoreArr = [0]*int(totalFrameNumber)
+        violenceScoreArr = [0.00]*int(totalFrameNumber)
+        pornScoreArr = [0.00]*int(totalFrameNumber)
         FPS_FLAG = settings.FPS_FLAG  # 为True时，按帧读取；False时，按秒读取
         # 暴恐级别比例
         VIOLENCESCORE_MIN = settings.VIOLENCESCORE_MIN
@@ -511,8 +519,9 @@ class video:
 
                     pornPercent = settings.NSFW.caffe_preprocess_and_compute_api(
                         imagePath)
-                    pornScore = "%.2f" % float(pornPercent[1])
-                    pornScore = float(pornScore)
+                    # pornScore = "%.2f" % float(pornPercent[1])
+                    pornScore = math.floor(float(pornPercent[1])*10000)/100
+                    # pornScore = float(pornScore)
                     pornScoreArr[COUNT] = pornScore
 
                     contentMap = {}
@@ -578,13 +587,16 @@ class video:
             # 增加最大敏感类型
             if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
                 max_sensitivity_type = 'violence'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
             elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
                 max_sensitivity_type = 'porn'
-                max_sensitivity_level = pornScoreArr[-1]
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
             else:
                 max_sensitivity_type = 'violence_porn'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
 
             resultMap['video_url'] = settings.VIDEO_URL + f
             resultMap['violence_sensitivity_level'] = violence_sensitivity_level
@@ -602,8 +614,8 @@ class video:
             resultMap['taketimes'] = endTime - startTime
             resultMap['max_sensitivity_type'] = max_sensitivity_type
             resultMap['max_sensitivity_level'] = max_sensitivity_level
-            resultMap['violence_percent'] = violenceScoreArr[-1]
-            resultMap['porn_percent'] = pornScoreArr[-1]
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number
@@ -725,13 +737,16 @@ class video:
             # 增加最大敏感类型
             if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
                 max_sensitivity_type = 'violence'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
             elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
                 max_sensitivity_type = 'porn'
-                max_sensitivity_level = pornScoreArr[-1]
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
             else:
                 max_sensitivity_type = 'violence_porn'
-                max_sensitivity_level = violenceScoreArr[-1]
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
 
             resultMap = {}
             resultMap['video_url'] = settings.VIDEO_URL + f
@@ -750,8 +765,9 @@ class video:
             resultMap['taketimes'] = endTime - startTime
             resultMap['max_sensitivity_type'] = max_sensitivity_type
             resultMap['max_sensitivity_level'] = max_sensitivity_level
-            resultMap['violence_percent'] = violenceScoreArr[-1]
-            resultMap['porn_percent'] = pornScoreArr[-1]
+            resultMap['max_sensitivity_percent'] = max_sensitivity_percent
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number

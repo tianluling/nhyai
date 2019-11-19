@@ -107,7 +107,7 @@ class violence:
         batch_size = len(img_paths)
         workers = 0
         cuda = self.cuda
-        timeout = 1
+        timeout = 3600
         # make dataloader
         try:
             dataset = ProtestDatasetEvals(img_list=img_paths)

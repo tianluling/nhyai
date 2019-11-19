@@ -90,7 +90,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     violence_percent = "0"
     violence_sensitivity_level = "0"
     if violence is not None:
-        violence_percent = get_two_float(float(violence) * 100, 2)
+        violence_percent = get_two_float(float(violence), 2)
         if (float(violence) < 0.5):
             violence_sensitivity_level = "0"
         if (float(violence) >= 0.5 and float(violence) <= 0.9):
@@ -101,7 +101,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     porn_percent = "0"
     porn_sensitivity_level = "0"
     if porn is not None:
-        porn_percent = get_two_float(float(porn) * 100, 2)
+        porn_percent = get_two_float(float(porn), 2)
         if (float(porn) < 0.5):
             porn_sensitivity_level = "0"
         if (float(porn) >= 0.5 and float(porn) <= 0.9):
@@ -110,34 +110,43 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             porn_sensitivity_level = "2"
 
     max_sensitivity_type = maxtype
+    max_sensitivity_percent = "0.00%"
 
     content = ""
     web_text = ""
     app_text = ""
     if maxtype == 'violence':
         max_sensitivity_level = violence_sensitivity_level
+        max_sensitivity_percent = violence_percent
     elif maxtype == 'porn':
         max_sensitivity_level = porn_sensitivity_level
+        max_sensitivity_percent = porn_percent
     elif maxtype == 'violence_porn':
         max_sensitivity_level = violence_sensitivity_level
+        max_sensitivity_percent = violence_percent
     elif maxtype == 'text' and file_type == FILETYPE.Text.value:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00%"
         content = result["text_content"]
         web_text = result["sensitive_info"]["web_text"]
         app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Content.value:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00%"
         content = serializer.text
         web_text = result["web_text"]
         app_text = result["app_text"]
     elif maxtype == 'ocr':
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00%"
         content = result
     elif maxtype == 'audio':
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00%"
         content = result['text']
     else:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00%"
 
     process_status = 2
     system_id = serializer.system_id
@@ -156,7 +165,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         file_id=file_id, file_name=file_name,
         file_url=file_url, file_type=file_type,
         inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
-        max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
+        max_sensitivity_level=max_sensitivity_level, max_sensitivity_percent=max_sensitivity_percent, violence_percent=violence_percent,
         violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
         porn_sensitivity_level=porn_sensitivity_level, content=content,
         web_text=web_text, app_text=app_text, process_status=process_status,
@@ -589,7 +598,7 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
 
         # 更新历史记录
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            resultMap, 'porn', None, scores[1])
+                            resultMap, 'porn', None, scores[1] * 100)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -604,10 +613,6 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
 
         # 增加网络URL文件上传
         if iserializer.video_url and not iserializer.video:
-            if iserializer.is_task == '1':
-                iserializer.video.save(os.path.basename(
-                iserializer.video_url), File(iserializer.video_url))
-            else:
                 video_temp = NamedTemporaryFile(delete=True)
                 video_temp.write(urlopen(iserializer.video_url).read())
                 video_temp.flush()
@@ -617,7 +622,10 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         file_path = iserializer.video.path
         orientation = iserializer.orientation
         sync = iserializer.sync
-        serial_number = int(time.time())
+        if iserializer.is_task == '1':
+            serial_number = int(iserializer.serial_number)
+        else:  
+            serial_number = int(time.time())
 
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
@@ -627,9 +635,10 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                             msg=msg, video=iserializer.video)
 
             # 更新历史记录
-            UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-                                resultMap, resultMap['max_sensitivity_type'],
-                                resultMap['violence_percent'], resultMap['porn_percent'])
+            if iserializer.is_task != '1':
+                UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                                    resultMap, resultMap['max_sensitivity_type'],
+                                    resultMap['violence_percent'], resultMap['porn_percent'])
         else:
             ret = 0
             msg = "成功"
@@ -647,8 +656,9 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['taketimes'] = ""
             resultMap['max_sensitivity_type'] = ""
             resultMap['max_sensitivity_level'] = None
-            resultMap['violence_percent'] = 0
-            resultMap['porn_percent'] = 0
+            resultMap['max_sensitivity_percent'] = "0.00"
+            resultMap['violence_percent'] = "0.00"
+            resultMap['porn_percent'] = "0.00"
             resultMap['screenshot_url'] = ""
             resultMap['serial_number'] = serial_number
             resultMap['progress'] = "50%"

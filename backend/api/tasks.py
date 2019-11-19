@@ -9,6 +9,7 @@ from .ienum import FILETYPE
 from django.conf import settings
 from .video import video
 import requests
+import json
 
 def get_two_float(f_str, n):
     f_str = str(f_str)      # f_str = '{}'.format(f_str) 也可以转换为字符串
@@ -49,7 +50,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     violence_percent = "0"
     violence_sensitivity_level = "0"
     if violence is not None:
-        violence_percent = get_two_float(float(violence) * 100, 2)
+        violence_percent = get_two_float(float(violence), 2)
         if (float(violence) < 0.5):
             violence_sensitivity_level = "0"
         if (float(violence) >= 0.5 and float(violence) <= 0.9):
@@ -60,7 +61,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     porn_percent = "0"
     porn_sensitivity_level = "0"
     if porn is not None:
-        porn_percent = get_two_float(float(porn) * 100, 2)
+        porn_percent = get_two_float(float(porn), 2)
         if (float(porn) < 0.5):
             porn_sensitivity_level = "0"
         if (float(porn) >= 0.5 and float(porn) <= 0.9):
@@ -69,34 +70,43 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             porn_sensitivity_level = "2"
 
     max_sensitivity_type = maxtype
+    max_sensitivity_percent = "0.00"
 
     content = ""
     web_text = ""
     app_text = ""
     if maxtype == 'violence':
         max_sensitivity_level = violence_sensitivity_level
+        max_sensitivity_percent = violence_percent
     elif maxtype == 'porn':
         max_sensitivity_level = porn_sensitivity_level
+        max_sensitivity_percent = porn_percent
     elif maxtype == 'violence_porn':
         max_sensitivity_level = violence_sensitivity_level
+        max_sensitivity_percent = violence_percent
     elif maxtype == 'text' and file_type == FILETYPE.Text.value:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00"
         content = result["text_content"]
         web_text = result["sensitive_info"]["web_text"]
         app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Content.value:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00"
         content = serializer.text
         web_text = result["web_text"]
         app_text = result["app_text"]
     elif maxtype == 'ocr':
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00"
         content = result
     elif maxtype == 'audio':
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00"
         content = result['text']
     else:
         max_sensitivity_level = None
+        max_sensitivity_percent = "0.00"
 
     process_status = 2
     system_id = serializer.system_id
@@ -109,6 +119,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         iHistoryRecord.inspection_result = inspection_result
         iHistoryRecord.max_sensitivity_type = max_sensitivity_type
         iHistoryRecord.max_sensitivity_level = max_sensitivity_level
+        iHistoryRecord.max_sensitivity_percent = max_sensitivity_percent
         iHistoryRecord.violence_percent = violence_percent
         iHistoryRecord.porn_sensitivity_level = porn_sensitivity_level
         iHistoryRecord.content = content
@@ -124,7 +135,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             file_id=file_id, file_name=file_name,
             file_url=file_url, file_type=file_type,
             inspection_result=inspection_result, max_sensitivity_type=max_sensitivity_type,
-            max_sensitivity_level=max_sensitivity_level, violence_percent=violence_percent,
+            max_sensitivity_level=max_sensitivity_level, max_sensitivity_percent=max_sensitivity_percent, violence_percent=violence_percent,
             violence_sensitivity_level=violence_sensitivity_level, porn_percent=porn_percent,
             porn_sensitivity_level=porn_sensitivity_level, content=content,
             web_text=web_text, app_text=app_text, process_status=process_status,
@@ -143,28 +154,37 @@ def task_check_video(iserializer, serial_number):
 
     URL = settings.LOCAL_SERVER + '/api/v1/video/get_video_inspection/'
     data = {
-        'video_url':(None, str(iserializer.video.path)),
+        'csrfmiddlewaretoken': (None, str('')),
+        'video': (None, str('')),
+        'video_url':(None, str(iserializer.data['video_url'])),
         'system_id': (None, str('99')),
         'channel_id': (None, str('15')),
         'sync': (None, str('1')),
-        'is_task': (None, str('1'))
+        'is_task': (None, str('1')),
+        'serial_number': (None, str(iserializer.data['serial_number']))
     }
-    resp = requests.post(URL, 
-            files=data,
-            params={},
-            verify=False,
-            timeout=10)
+    try:
+        resp = requests.post(URL, 
+                files=data,
+                params={},
+                verify=False,
+                timeout=3600)
+        # print (resp.status_code)
+        # print (resp.request.url)
+        # print (resp.request.body)
+        # print (resp.text)
+        jsonStr = json.loads(resp.text)
+        resultMap = jsonStr['data']
+        ret = 0
+        msg = "成功"
+        # 更新历史记录
+        UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                            resultMap, resultMap['max_sensitivity_type'],
+                            resultMap['violence_percent'], resultMap['porn_percent'])
+    except requests.Timeout:
+        pass
+    except requests.ConnectionError:
+        pass
 
-    print (resp.status_code)
-    print (resp.request.url)
-    print (resp.request.body)
-    print (resp.text)
-
-    ret = 0
-    msg = "成功"
-
-    # 更新历史记录
-    # UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-    #                     resultMap, resultMap['max_sensitivity_type'],
-    #                     resultMap['violence_percent'], resultMap['porn_percent'])
+    
 

@@ -133,7 +133,7 @@ class VideoFileUploadSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('video', 'video_url', 'system_id',
                   'channel_id', 'user_id', 'sync',
                   'orientation', 'data', 'ret', 'msg',
-                  'is_task')
+                  'is_task', 'serial_number')
 
     def clean_json(self, obj):
         return obj.ret, obj.msg, obj.data
@@ -310,6 +310,7 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
     inspection_result = serializers.JSONField(True)
     max_sensitivity_type = serializers.JSONField(True)
     max_sensitivity_level = serializers.JSONField(True)
+    max_sensitivity_percent = serializers.JSONField(True)
     violence_percent = serializers.JSONField(True)
     violence_sensitivity_level = serializers.JSONField(True)
     porn_percent = serializers.JSONField(True)
@@ -334,7 +335,7 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
         model = HistoryRecord
         fields = ('id', 'file_id', 'file_name', 'file_url',
                   'file_type', 'inspection_result', 'max_sensitivity_type',
-                  'max_sensitivity_level', 'violence_percent', 'violence_sensitivity_level',
+                  'max_sensitivity_level', 'max_sensitivity_percent','violence_percent', 'violence_sensitivity_level',
                   'porn_percent', 'porn_sensitivity_level', 'politics_percent',
                   'politics_sensitivity_level', 'public_percent', 'public_character_level',
                   'content', 'web_text', 'app_text', 'upload_time', 'process_status',
@@ -344,7 +345,7 @@ class HistoryRecordSerializer(serializers.HyperlinkedModelSerializer):
     def clean_json(self, obj):
         return obj.ret, obj.msg, obj.data, obj.file_id, obj.file_name, obj.file_url,
         obj.file_type, obj.inspection_result, obj.max_sensitivity_type,
-        obj.max_sensitivity_level, obj.violence_percent, obj.violence_sensitivity_level,
+        obj.max_sensitivity_level, max_sensitivity_percent,obj.violence_percent, obj.violence_sensitivity_level,
         obj.porn_percent, obj.porn_sensitivity_level, obj.politics_percent,
         obj.politics_sensitivity_level, obj.public_percent, obj.public_character_level,
         obj.content, obj.web_text, obj.app_text, obj.upload_time, obj.process_status,

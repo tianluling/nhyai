@@ -167,6 +167,7 @@ class VideoFileUpload(models.Model):
     msg = models.TextField(max_length=255, default='')
     data = models.TextField(max_length=2048, default='')
     is_task = models.CharField(_('is_task'), max_length=2, null=True, blank=True)
+    serial_number = models.IntegerField(_('serial_number'), null=True, blank=True)
 
 
 class AudioFileUpload(models.Model):
@@ -325,6 +326,8 @@ class HistoryRecord(models.Model):
         _('max_sensitivity_type'), max_length=32, null=True, blank=True)
     max_sensitivity_level = models.CharField(
         _('max_sensitivity_level'), max_length=4, null=True, blank=True)
+    max_sensitivity_percent = models.CharField(
+        _('max_sensitivity_percent'), max_length=16, null=True, blank=True)
     sensitivity_types = SortedManyToManyField(SensitivityType, blank=True)
     sensitivity_levels = SortedManyToManyField(SensitivityLevel, blank=True)
     violence_percent = models.CharField(
