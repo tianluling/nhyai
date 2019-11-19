@@ -166,6 +166,7 @@ class VideoFileUpload(models.Model):
     ret = models.IntegerField(_('ret'), null=True, blank=True)
     msg = models.TextField(max_length=255, default='')
     data = models.TextField(max_length=2048, default='')
+    is_task = models.CharField(_('is_task'), max_length=2, null=True, blank=True)
 
 
 class AudioFileUpload(models.Model):

@@ -8,7 +8,7 @@ from django_rq import job
 from .ienum import FILETYPE
 from django.conf import settings
 from .video import video
-
+import requests
 
 def get_two_float(f_str, n):
     f_str = str(f_str)      # f_str = '{}'.format(f_str) 也可以转换为字符串
@@ -138,13 +138,33 @@ def task_check_video(iserializer, serial_number):
     file_path = iserializer.video.path
     orientation = iserializer.orientation
 
-    resultMap = video().check_video_V2(file_path, orientation, serial_number)
+    # 多进程情况下不可用
+    # resultMap = video().check_video_V2(file_path, orientation, serial_number)
+
+    URL = settings.LOCAL_SERVER + '/api/v1/video/get_video_inspection/'
+    data = {
+        'video_url':(None, str(iserializer.video.path)),
+        'system_id': (None, str('99')),
+        'channel_id': (None, str('15')),
+        'sync': (None, str('1')),
+        'is_task': (None, str('1'))
+    }
+    resp = requests.post(URL, 
+            files=data,
+            params={},
+            verify=False,
+            timeout=10)
+
+    print (resp.status_code)
+    print (resp.request.url)
+    print (resp.request.body)
+    print (resp.text)
 
     ret = 0
     msg = "成功"
 
     # 更新历史记录
-    UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-                        resultMap, resultMap['max_sensitivity_type'],
-                        resultMap['violence_percent'], resultMap['porn_percent'])
+    # UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+    #                     resultMap, resultMap['max_sensitivity_type'],
+    #                     resultMap['violence_percent'], resultMap['porn_percent'])
 

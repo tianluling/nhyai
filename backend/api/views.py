@@ -604,11 +604,15 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
 
         # 增加网络URL文件上传
         if iserializer.video_url and not iserializer.video:
-            video_temp = NamedTemporaryFile(delete=True)
-            video_temp.write(urlopen(iserializer.video_url).read())
-            video_temp.flush()
-            iserializer.video.save(os.path.basename(
-                iserializer.video_url), File(video_temp))
+            if iserializer.is_task == '1':
+                iserializer.video.save(os.path.basename(
+                iserializer.video_url), File(iserializer.video_url))
+            else:
+                video_temp = NamedTemporaryFile(delete=True)
+                video_temp.write(urlopen(iserializer.video_url).read())
+                video_temp.flush()
+                iserializer.video.save(os.path.basename(
+                    iserializer.video_url), File(video_temp))
 
         file_path = iserializer.video.path
         orientation = iserializer.orientation

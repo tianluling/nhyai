@@ -132,7 +132,8 @@ class VideoFileUploadSerializer(serializers.HyperlinkedModelSerializer):
         model = VideoFileUpload
         fields = ('video', 'video_url', 'system_id',
                   'channel_id', 'user_id', 'sync',
-                  'orientation', 'data', 'ret', 'msg')
+                  'orientation', 'data', 'ret', 'msg',
+                  'is_task')
 
     def clean_json(self, obj):
         return obj.ret, obj.msg, obj.data
