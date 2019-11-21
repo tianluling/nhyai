@@ -267,6 +267,14 @@ RQ_QUEUES = {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ
     },
+    'android': {
+        'USE_REDIS_CACHE': 'default',
+        'ASYNC': IS_SUPPORT_RQ
+    },
+    'ios': {
+        'USE_REDIS_CACHE': 'default',
+        'ASYNC': IS_SUPPORT_RQ
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -277,5 +285,7 @@ RQ_SHOW_ADMIN_LINK = True
 LOCAL_SERVER = 'http://172.31.4.31:8000'
 
 ## 极光消息推送配置
-APP_KEY = u'145ae20dfa17aa0c5a1a90a7'
-MASTER_SECRET = u'aef06bda9671310fe0c28b89'
+# APP_KEY = u'145ae20dfa17aa0c5a1a90a7'
+# MASTER_SECRET = u'aef06bda9671310fe0c28b89'
+APP_KEY = u'518ac02ef206677bc8e8b0da'
+MASTER_SECRET = u'c5c5baf57bf15052624ae5a7'

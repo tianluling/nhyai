@@ -44,7 +44,7 @@ import docx
 from .filetype import FileType
 import platform
 import time
-from .tasks import task_check_video
+from .tasks import task_check_video_default, task_check_video_android, task_check_video_ios
 from .crons import run_django_rq_task
 if(platform.system() == "Windows"):
     import win32com.client as wc
@@ -687,6 +687,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         file_path = iserializer.video.path
         orientation = iserializer.orientation
         sync = iserializer.sync
+        system_id = iserializer.system_id
         serial_number = int(time.time())
 
         if sync or sync is None:
@@ -706,16 +707,16 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap = {}
             p, f = os.path.split(file_path)
             resultMap['video_url'] = settings.VIDEO_URL + f
-            resultMap['violence_sensitivity_level'] = ""
-            resultMap['porn_sensitivity_level'] = ""
+            resultMap['violence_sensitivity_level'] = 0
+            resultMap['porn_sensitivity_level'] = 0
             resultMap['video_evidence_information'] = []
             resultMap['violence_evidence_information'] = []
             resultMap['porn_evidence_information'] = []
             resultMap['interval'] = ""
-            resultMap['duration'] = ""
-            resultMap['fps'] = ""
-            resultMap['taketimes'] = ""
-            resultMap['max_sensitivity_type'] = ""
+            resultMap['duration'] = 0
+            resultMap['fps'] = 0
+            resultMap['taketimes'] = 0
+            resultMap['max_sensitivity_type'] = 0
             resultMap['max_sensitivity_level'] = None
             resultMap['max_sensitivity_percent'] = "0.00"
             resultMap['violence_percent'] = "0.00"
@@ -734,7 +735,12 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                                 resultMap['violence_percent'], resultMap['porn_percent'])
 
             # 上传成功，并创建识别任务
-            task_check_video.delay(iserializer, serial_number)
+            if system_id == 2:
+                task_check_video_android.delay(iserializer, serial_number)
+            elif system_id == 3:
+                task_check_video_ios.delay(iserializer, serial_number)
+            else:
+                task_check_video_default.delay(iserializer, serial_number)
 
             # 执行任务
             if settings.IS_SUPPORT_RQ:

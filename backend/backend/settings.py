@@ -267,6 +267,14 @@ RQ_QUEUES = {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ
     },
+    'android': {
+        'USE_REDIS_CACHE': 'default',
+        'ASYNC': IS_SUPPORT_RQ
+    },
+    'ios': {
+        'USE_REDIS_CACHE': 'default',
+        'ASYNC': IS_SUPPORT_RQ
+    },
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
