@@ -504,16 +504,17 @@ class video:
             while COUNT < totalFrameNumber:
                 imageName = img_names[COUNT]
                 imagePath = img_paths[COUNT]
+                imageFile = cv2.imread(imagePath)
                 try:
                     # 增加图片旋转矫正
                     if orientation:
                         # Flipped Horizontally 水平翻转
                         if orientation == 3:
-                            frame = self.rotate_bound(frame, 180.000)
+                            imageFile = self.rotate_bound(imageFile, 180.000)
                         elif orientation == 6:
-                            frame = self.rotate_bound(frame, -90.000)
+                            imageFile = self.rotate_bound(imageFile, -90.000)
                         elif orientation == 8:
-                            frame = self.rotate_bound(frame, 90.000)
+                            imageFile = self.rotate_bound(imageFile, 90.000)
 
                     if jsonResultInfos != False:
                         jsonResultInfo = jsonResultInfos[COUNT]
@@ -664,16 +665,17 @@ class video:
                 if (COUNT_SECOND % timeF == 0 or COUNT_SECOND == 1):  # 每隔timeF帧进行存储操作
                     imageName = img_names[COUNT]
                     imagePath = img_paths[COUNT]
+                    imageFile = cv2.imread(imagePath)
 
                     # 增加图片旋转矫正
                     if orientation:
                         # Flipped Horizontally 水平翻转
                         if orientation == 3:
-                            frame = self.rotate_bound(frame, 180.000)
+                            imageFile = self.rotate_bound(imageFile, 180.000)
                         elif orientation == 6:
-                            frame = self.rotate_bound(frame, -90.000)
+                            imageFile = self.rotate_bound(imageFile, -90.000)
                         elif orientation == 8:
-                            frame = self.rotate_bound(frame, 90.000)
+                            imageFile = self.rotate_bound(imageFile, 90.000)
 
                     if jsonResultInfos != False:
                         jsonResultInfo = jsonResultInfos[COUNT]
