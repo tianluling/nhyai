@@ -485,10 +485,16 @@ class video:
                 # 把每一帧图像保存成jpg格式（这一行可以根据需要选择保留）
                 imageName = str(COUNT) + '.jpg'
                 cv2.imwrite(temp_path+imageName, frame)
-                img_path = temp_path + '/' + imageName
-                img_names.append(imageName)
-                img_paths.append(img_path)
-                COUNT += 1
+                filename = temp_path + '/' + imageName
+                filesize = os.stat(filename).st_size
+                # 增加文件大小为0判断，如果大小为0，则忽略
+                if filesize == 0:
+                    totalFrameNumber = totalFrameNumber - 1
+                else:
+                    img_path = temp_path + '/' + imageName
+                    img_names.append(imageName)
+                    img_paths.append(img_path)
+                    COUNT += 1
 
             COUNT = 0
             jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)[
@@ -635,10 +641,17 @@ class video:
                     rval, frame = cap.read()
                     imageName = str(COUNT) + '.jpg'
                     cv2.imwrite(temp_path+imageName, frame)
-                    img_path = temp_path + '/' + imageName
-                    img_names.append(imageName)
-                    img_paths.append(img_path)
-                    COUNT += 1
+
+                    filename = temp_path + '/' + imageName
+                    filesize = os.stat(filename).st_size
+                    # 增加文件大小为0判断，如果大小为0，则忽略
+                    if filesize == 0:
+                        totalFrameNumber = totalFrameNumber - 1
+                    else:
+                        img_path = temp_path + '/' + imageName
+                        img_names.append(imageName)
+                        img_paths.append(img_path)
+                        COUNT += 1
                 COUNT_SECOND += 1
 
             COUNT_SECOND = 1

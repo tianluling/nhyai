@@ -12,7 +12,7 @@ app_key = settings.APP_KEY
 master_secret = settings.MASTER_SECRET
 ipush = mpush(app_key, master_secret)
 
-@job
+@job("default", timeout=3600)
 def task_check_video(iserializer, serial_number):
 
     video_id = iserializer.id

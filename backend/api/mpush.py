@@ -81,7 +81,7 @@ class mpush:
         ios = jpush.ios(alert=desc, sound="a.caf", extras=jsonStr, mutable_content=1)
         android = jpush.android(alert=title, priority=1, style=1, alert_type=1, title=title, big_text=desc, extras=jsonStr)
 
-        push.notification = jpush.notification(alert="Hello, JPush!", android=android, ios=ios)
+        push.notification = jpush.notification(alert="南海云AI平台识别成功通知", android=android, ios=ios)
 
         # pprint (push.payload)
         # result = push.send()
