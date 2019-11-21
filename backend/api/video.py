@@ -419,8 +419,8 @@ class video:
             resultMap['max_sensitivity_type'] = max_sensitivity_type
             resultMap['max_sensitivity_level'] = max_sensitivity_level
             resultMap['max_sensitivity_percent'] = max_sensitivity_percent
-            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1] * 100, 2)
-            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1] * 100, 2)
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
             resultMap['screenshot_url'] = settings.VIDEO_URL + \
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number

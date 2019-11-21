@@ -275,3 +275,7 @@ RQ_SHOW_ADMIN_LINK = True
 
 ## 本地服务地址
 LOCAL_SERVER = 'http://172.31.4.31:8000'
+
+## 极光消息推送配置
+APP_KEY = u'145ae20dfa17aa0c5a1a90a7'
+MASTER_SECRET = u'aef06bda9671310fe0c28b89'

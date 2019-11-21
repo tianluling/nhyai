@@ -110,7 +110,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             porn_sensitivity_level = "2"
 
     max_sensitivity_type = maxtype
-    max_sensitivity_percent = "0.00%"
+    max_sensitivity_percent = "0.00"
 
     content = ""
     web_text = ""
@@ -126,27 +126,27 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         max_sensitivity_percent = violence_percent
     elif maxtype == 'text' and file_type == FILETYPE.Text.value:
         max_sensitivity_level = None
-        max_sensitivity_percent = "0.00%"
+        max_sensitivity_percent = "0.00"
         content = result["text_content"]
         web_text = result["sensitive_info"]["web_text"]
         app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Content.value:
         max_sensitivity_level = None
-        max_sensitivity_percent = "0.00%"
+        max_sensitivity_percent = "0.00"
         content = serializer.text
         web_text = result["web_text"]
         app_text = result["app_text"]
     elif maxtype == 'ocr':
         max_sensitivity_level = None
-        max_sensitivity_percent = "0.00%"
+        max_sensitivity_percent = "0.00"
         content = result
     elif maxtype == 'audio':
         max_sensitivity_level = None
-        max_sensitivity_percent = "0.00%"
+        max_sensitivity_percent = "0.00"
         content = result['text']
     else:
         max_sensitivity_level = None
-        max_sensitivity_percent = "0.00%"
+        max_sensitivity_percent = "0.00"
 
     process_status = 2
     system_id = serializer.system_id
@@ -637,12 +637,23 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             iVideoFileUpload.msg = "成功"
             iVideoFileUpload.save()
 
+            max_sensitivity_percent = "0.00"
+            maxtype = resultMap['max_sensitivity_type']
+            if maxtype == 'violence':
+                max_sensitivity_percent = resultMap['violence_percent']
+            elif maxtype == 'porn':
+                max_sensitivity_percent = resultMap['porn_percent']
+            elif maxtype == 'violence_porn':
+                max_sensitivity_percent = resultMap['violence_percent']
+
             iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
             iHistoryRecord.inspection_result = resultMap
             iHistoryRecord.max_sensitivity_type = resultMap['max_sensitivity_type']
             iHistoryRecord.max_sensitivity_level = resultMap['max_sensitivity_level']
-            iHistoryRecord.max_sensitivity_percent = resultMap['max_sensitivity_percent']
+            iHistoryRecord.max_sensitivity_percent = max_sensitivity_percent
             iHistoryRecord.violence_percent = resultMap['violence_percent']
+            iHistoryRecord.violence_sensitivity_level = resultMap['violence_sensitivity_level']
+            iHistoryRecord.porn_percent = resultMap['porn_percent']
             iHistoryRecord.porn_sensitivity_level = resultMap['porn_sensitivity_level']
             iHistoryRecord.content = ""
             iHistoryRecord.web_text = ""

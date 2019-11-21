@@ -20,3 +20,4 @@ django-rq==2.1.0
 django-background-tasks==1.2.0
 pymysql==0.9.3
 mysqlclient==1.4.4
+jpush==3.3.7
