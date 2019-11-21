@@ -608,24 +608,75 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
     serializer_class = VideoFileUploadSerializer
     parser_classes = (MultiPartParser, FormParser,)
 
+    def list(self, request):
+        # 获取参数
+        requestData = request.query_params
+        object_id = requestData.get('id')
+        is_task = requestData.get('is_task')
+
+
+        # 根据条件过滤
+        conditions = {}
+        if object_id is not None:
+            conditions['id'] = object_id
+        
+        if is_task is not None and is_task == '1' and object_id:
+            iVideoFileUpload = VideoFileUpload.objects.get(id=object_id)
+            data = eval(iVideoFileUpload.data)
+            file_path = iVideoFileUpload.video.path
+            orientation = iVideoFileUpload.orientation
+            serial_number = data['serial_number']
+            resultMap = video().check_video_V2(file_path, orientation, serial_number)
+            
+            iVideoFileUpload.data = resultMap
+            iVideoFileUpload.serial_number = data['serial_number']
+            iVideoFileUpload.video_url = data['video_url']
+            iVideoFileUpload.is_task = 1
+            iVideoFileUpload.sync = 1
+            iVideoFileUpload.ret = 0
+            iVideoFileUpload.msg = "成功"
+            iVideoFileUpload.save()
+
+            iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
+            iHistoryRecord.inspection_result = resultMap
+            iHistoryRecord.max_sensitivity_type = resultMap['max_sensitivity_type']
+            iHistoryRecord.max_sensitivity_level = resultMap['max_sensitivity_level']
+            iHistoryRecord.max_sensitivity_percent = resultMap['max_sensitivity_percent']
+            iHistoryRecord.violence_percent = resultMap['violence_percent']
+            iHistoryRecord.porn_sensitivity_level = resultMap['porn_sensitivity_level']
+            iHistoryRecord.content = ""
+            iHistoryRecord.web_text = ""
+            iHistoryRecord.app_text = ""
+            iHistoryRecord.process_status = 2
+            iHistoryRecord.screenshot_url = resultMap["screenshot_url"]
+            iHistoryRecord.duration = resultMap["duration"]
+            iHistoryRecord.save()
+
+        queryset = VideoFileUpload.objects.filter(**conditions)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def perform_create(self, serializer):
         iserializer = serializer.save()
 
         # 增加网络URL文件上传
         if iserializer.video_url and not iserializer.video:
-                video_temp = NamedTemporaryFile(delete=True)
-                video_temp.write(urlopen(iserializer.video_url).read())
-                video_temp.flush()
-                iserializer.video.save(os.path.basename(
-                    iserializer.video_url), File(video_temp))
+            video_temp = NamedTemporaryFile(delete=True)
+            video_temp.write(urlopen(iserializer.video_url).read())
+            video_temp.flush()
+            iserializer.video.save(os.path.basename(
+                iserializer.video_url), File(video_temp))
 
         file_path = iserializer.video.path
         orientation = iserializer.orientation
         sync = iserializer.sync
-        if iserializer.is_task == '1':
-            serial_number = int(iserializer.serial_number)
-        else:  
-            serial_number = int(time.time())
+        serial_number = int(time.time())
 
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
@@ -635,10 +686,9 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                             msg=msg, video=iserializer.video)
 
             # 更新历史记录
-            if iserializer.is_task != '1':
-                UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-                                    resultMap, resultMap['max_sensitivity_type'],
-                                    resultMap['violence_percent'], resultMap['porn_percent'])
+            UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                resultMap, resultMap['max_sensitivity_type'],
+                resultMap['violence_percent'], resultMap['porn_percent'])
         else:
             ret = 0
             msg = "成功"

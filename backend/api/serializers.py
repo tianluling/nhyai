@@ -130,7 +130,7 @@ class VideoFileUploadSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = VideoFileUpload
-        fields = ('video', 'video_url', 'system_id',
+        fields = ('id', 'video', 'video_url', 'system_id',
                   'channel_id', 'user_id', 'sync',
                   'orientation', 'data', 'ret', 'msg',
                   'is_task', 'serial_number')
