@@ -689,6 +689,10 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         sync = iserializer.sync
         system_id = iserializer.system_id
         serial_number = int(time.time())
+        if iserializer.screenshot.name != None:
+            screenshot_file_path = iserializer.screenshot.path
+        else:
+            screenshot_file_path = ""
 
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
@@ -706,6 +710,11 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             msg = "成功"
             resultMap = {}
             p, f = os.path.split(file_path)
+            if screenshot_file_path != "":
+                sp,sf = os.path.split(screenshot_file_path)
+                resultMap['screenshot_url'] = settings.VIDEO_URL + sf
+            else:
+                resultMap['screenshot_url'] = ""
             resultMap['video_url'] = settings.VIDEO_URL + f
             resultMap['violence_sensitivity_level'] = 0
             resultMap['porn_sensitivity_level'] = 0
@@ -717,17 +726,17 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['fps'] = 0
             resultMap['taketimes'] = 0
             resultMap['max_sensitivity_type'] = 0
-            resultMap['max_sensitivity_level'] = None
+            resultMap['max_sensitivity_level'] = 0
             resultMap['max_sensitivity_percent'] = "0.00"
             resultMap['violence_percent'] = "0.00"
             resultMap['porn_percent'] = "0.00"
-            resultMap['screenshot_url'] = ""
+            
             resultMap['serial_number'] = serial_number
             resultMap['progress'] = "50%"
             resultMap['status'] = 3
 
             serializer.save(data=resultMap, ret=ret,
-                            msg=msg, video=iserializer.video)
+                            msg=msg, video=iserializer.video, screenshot=iserializer.screenshot)
 
             # 更新历史记录
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,

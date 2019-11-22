@@ -168,6 +168,8 @@ class VideoFileUpload(models.Model):
     data = models.TextField(max_length=2048, default='')
     is_task = models.CharField(_('is_task'), max_length=2, null=True, blank=True)
     serial_number = models.IntegerField(_('serial_number'), null=True, blank=True)
+    screenshot = models.FileField(upload_to=video_and_rename,
+                             max_length=255, null=True, blank=True)
 
 
 class AudioFileUpload(models.Model):
