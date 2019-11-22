@@ -20,7 +20,7 @@ def task_check_video_default(iserializer, serial_number):
     print (url)
     
     try:
-        resp = requests.get(url)#发送请求
+        resp = requests.get(url, timeout=1200)#发送请求
         jsonStr = json.loads(resp.text)
         print (jsonStr)
 
@@ -72,7 +72,7 @@ def task_check_video_android(iserializer, serial_number):
     print (url)
     
     try:
-        resp = requests.get(url)#发送请求
+        resp = requests.get(url, timeout=1800)#发送请求
         jsonStr = json.loads(resp.text)
         print (jsonStr)
 
@@ -124,7 +124,7 @@ def task_check_video_ios(iserializer, serial_number):
     print (url)
     
     try:
-        resp = requests.get(url)#发送请求
+        resp = requests.get(url, timeout=600)#发送请求
         jsonStr = json.loads(resp.text)
         print (jsonStr)
 
