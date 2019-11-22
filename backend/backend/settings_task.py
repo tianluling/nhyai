@@ -265,15 +265,18 @@ IS_SUPPORT_RQ = True
 RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
-        'ASYNC': IS_SUPPORT_RQ
+        'ASYNC': IS_SUPPORT_RQ,
+        'DEFAULT_TIMEOUT': 1200,
     },
     'android': {
         'USE_REDIS_CACHE': 'default',
-        'ASYNC': IS_SUPPORT_RQ
+        'ASYNC': IS_SUPPORT_RQ,
+        'DEFAULT_TIMEOUT': 1800,
     },
     'ios': {
         'USE_REDIS_CACHE': 'default',
-        'ASYNC': IS_SUPPORT_RQ
+        'ASYNC': IS_SUPPORT_RQ,
+        'DEFAULT_TIMEOUT': 600,
     },
 }
 

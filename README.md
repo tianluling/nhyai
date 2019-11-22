@@ -14,7 +14,7 @@ screen python backend/manage.py runserver 0.0.0.0:8000 --noreload
 screen python backend/manage_task.py process_tasks
 
 运行多任务:
-screen python backend/manage_task.py rqworker default android ios
+screen python backend/manage_task.py rqworker ios default android
 
 如遇到mysql安装错误，在ubuntu下执行如下命令：
 sudo apt-get install libmysqlclient-dev
