@@ -12,7 +12,7 @@ app_key = settings.APP_KEY
 master_secret = settings.MASTER_SECRET
 ipush = mpush(app_key, master_secret)
 
-@job("default")
+@job("default", timeout=1200)
 def task_check_video_default(iserializer, serial_number):
 
     video_id = iserializer.id
@@ -64,7 +64,7 @@ def task_check_video_default(iserializer, serial_number):
         pass
 
     
-@job("android")
+@job("android", timeout=1800)
 def task_check_video_android(iserializer, serial_number):
 
     video_id = iserializer.id
@@ -116,7 +116,7 @@ def task_check_video_android(iserializer, serial_number):
         pass
 
 
-@job("ios")
+@job("ios", timeout=600)
 def task_check_video_ios(iserializer, serial_number):
 
     video_id = iserializer.id

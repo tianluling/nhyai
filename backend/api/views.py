@@ -46,6 +46,7 @@ import platform
 import time
 from .tasks import task_check_video_default, task_check_video_android, task_check_video_ios
 from .crons import run_django_rq_task
+import numpy as np
 if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
@@ -157,7 +158,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     if file_type == FILETYPE.Video.value and result.get('serial_number') is not None:
         serial_number = result["serial_number"]
 
-    if file_type == FILETYPE.Video.value and result.get('status') is not None and result.get('status') == "3":
+    if file_type == FILETYPE.Video.value and result.get('status') is not None and result.get('status') == 3:
         process_status = 3
 
 
@@ -193,6 +194,28 @@ def RunShellWithReturnCode(command):
         error += err.decode("utf-8")
     return output, error
 
+
+# 图片旋转
+def rotate_bound(image, angle):
+    # 获取宽高
+    (h, w) = image.shape[:2]
+    (cX, cY) = (w // 2, h // 2)
+
+    # 提取旋转矩阵 sin cos
+    M = cv2.getRotationMatrix2D((cX, cY), -angle, 1.0)
+    cos = np.abs(M[0, 0])
+    sin = np.abs(M[0, 1])
+
+    # 计算图像的新边界尺寸
+    nW = int((h * sin) + (w * cos))
+    # nH = int((h * cos) + (w * sin))
+    nH = h
+
+    # 调整旋转矩阵
+    M[0, 2] += (nW / 2) - cX
+    M[1, 2] += (nH / 2) - cY
+
+    return cv2.warpAffine(image, M, (nW, nH), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -626,6 +649,10 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             file_path = iVideoFileUpload.video.path
             orientation = iVideoFileUpload.orientation
             serial_number = data['serial_number']
+            # 增加识别中状态
+            iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
+            iHistoryRecord.process_status = 1
+            iHistoryRecord.save()
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
             
             iVideoFileUpload.data = resultMap
@@ -646,7 +673,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             elif maxtype == 'violence_porn':
                 max_sensitivity_percent = resultMap['violence_percent']
 
-            iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
+            # iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
             iHistoryRecord.inspection_result = resultMap
             iHistoryRecord.max_sensitivity_type = resultMap['max_sensitivity_type']
             iHistoryRecord.max_sensitivity_level = resultMap['max_sensitivity_level']
@@ -691,6 +718,18 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         serial_number = int(time.time())
         if iserializer.screenshot.name != None:
             screenshot_file_path = iserializer.screenshot.path
+            screenshot_file = cv2.imread(screenshot_file_path)
+            # 增加图片旋转矫正
+            if orientation:
+                # Flipped Horizontally 水平翻转
+                if orientation == 3:
+                    screenshot_file = rotate_bound(screenshot_file, 180.000)
+                elif orientation == 6:
+                    screenshot_file = rotate_bound(screenshot_file, -90.000)
+                elif orientation == 8:
+                    screenshot_file = rotate_bound(screenshot_file, 90.000)
+                cv2.imwrite(screenshot_file_path, screenshot_file)
+            
         else:
             screenshot_file_path = ""
 
