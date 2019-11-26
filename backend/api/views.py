@@ -755,8 +755,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             else:
                 resultMap['screenshot_url'] = ""
             resultMap['video_url'] = settings.VIDEO_URL + f
-            resultMap['violence_sensitivity_level'] = 0
-            resultMap['porn_sensitivity_level'] = 0
+            resultMap['violence_sensitivity_level'] = -1
+            resultMap['porn_sensitivity_level'] = -1
             resultMap['video_evidence_information'] = []
             resultMap['violence_evidence_information'] = []
             resultMap['porn_evidence_information'] = []
@@ -764,8 +764,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['duration'] = 0
             resultMap['fps'] = 0
             resultMap['taketimes'] = 0
-            resultMap['max_sensitivity_type'] = 0
-            resultMap['max_sensitivity_level'] = 0
+            resultMap['max_sensitivity_type'] = -1
+            resultMap['max_sensitivity_level'] = -1
             resultMap['max_sensitivity_percent'] = "0.00"
             resultMap['violence_percent'] = "0.00"
             resultMap['porn_percent'] = "0.00"
