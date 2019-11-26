@@ -515,6 +515,7 @@ class video:
                             imageFile = self.rotate_bound(imageFile, -90.000)
                         elif orientation == 8:
                             imageFile = self.rotate_bound(imageFile, 90.000)
+                        cv2.imwrite(imagePath, imageFile)
 
                     if jsonResultInfos != False:
                         jsonResultInfo = jsonResultInfos[COUNT]
@@ -676,6 +677,7 @@ class video:
                             imageFile = self.rotate_bound(imageFile, -90.000)
                         elif orientation == 8:
                             imageFile = self.rotate_bound(imageFile, 90.000)
+                        cv2.imwrite(imagePath, imageFile)
 
                     if jsonResultInfos != False:
                         jsonResultInfo = jsonResultInfos[COUNT]

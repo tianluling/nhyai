@@ -720,15 +720,15 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             screenshot_file_path = iserializer.screenshot.path
             screenshot_file = cv2.imread(screenshot_file_path)
             # 增加图片旋转矫正
-            if orientation:
-                # Flipped Horizontally 水平翻转
-                if orientation == 3:
-                    screenshot_file = rotate_bound(screenshot_file, 180.000)
-                elif orientation == 6:
-                    screenshot_file = rotate_bound(screenshot_file, -90.000)
-                elif orientation == 8:
-                    screenshot_file = rotate_bound(screenshot_file, 90.000)
-                cv2.imwrite(screenshot_file_path, screenshot_file)
+            # if orientation:
+            #     # Flipped Horizontally 水平翻转
+            #     if orientation == 1:
+            #         screenshot_file = rotate_bound(screenshot_file, 90.000)
+            #     elif orientation == 3:
+            #         screenshot_file = rotate_bound(screenshot_file, -90.000)
+            #     elif orientation == 6:
+            #         screenshot_file = rotate_bound(screenshot_file, 180.000)
+            #     cv2.imwrite(screenshot_file_path, screenshot_file)
             
         else:
             screenshot_file_path = ""
