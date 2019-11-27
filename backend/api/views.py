@@ -89,7 +89,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     inspection_result = result
 
     violence_percent = "0"
-    violence_sensitivity_level = "0"
+    violence_sensitivity_level = "-1"
     if violence is not None:
         violence_percent = get_two_float(float(violence), 2)
         if (float(violence) < 0.5):
@@ -100,7 +100,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
             violence_sensitivity_level = "2"
 
     porn_percent = "0"
-    porn_sensitivity_level = "0"
+    porn_sensitivity_level = "-1"
     if porn is not None:
         porn_percent = get_two_float(float(porn), 2)
         if (float(porn) < 0.5):
@@ -755,8 +755,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             else:
                 resultMap['screenshot_url'] = ""
             resultMap['video_url'] = settings.VIDEO_URL + f
-            resultMap['violence_sensitivity_level'] = -1
-            resultMap['porn_sensitivity_level'] = -1
+            resultMap['violence_sensitivity_level'] = "-1"
+            resultMap['porn_sensitivity_level'] = "-1"
             resultMap['video_evidence_information'] = []
             resultMap['violence_evidence_information'] = []
             resultMap['porn_evidence_information'] = []
@@ -764,11 +764,11 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['duration'] = 0
             resultMap['fps'] = 0
             resultMap['taketimes'] = 0
-            resultMap['max_sensitivity_type'] = -1
-            resultMap['max_sensitivity_level'] = -1
+            resultMap['max_sensitivity_type'] = "-1"
+            resultMap['max_sensitivity_level'] = "-1"
             resultMap['max_sensitivity_percent'] = "0.00"
-            resultMap['violence_percent'] = "0.00"
-            resultMap['porn_percent'] = "0.00"
+            resultMap['violence_percent'] = None
+            resultMap['porn_percent'] = None
             
             resultMap['serial_number'] = serial_number
             resultMap['progress'] = "50%"
@@ -918,7 +918,7 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
         file_path = iserializer.image.path
         scores = settings.NSFW.caffe_preprocess_and_compute_api(file_path)
         resultMap = {}
-        porn_sensitivity_level = "0"
+        porn_sensitivity_level = "-1"
         if (float(scores[1]) < 0.5):
             porn_sensitivity_level = "0"
         if (float(scores[1]) >= 0.5 and float(scores[1]) <= 0.9):
@@ -930,7 +930,7 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
 
         check_result = settings.VIOLENCE.check_violence(file_path)
         violence = check_result['violence']
-        violence_sensitivity_level = "0"
+        violence_sensitivity_level = "-1"
         if (float(violence) < 0.5):
             violence_sensitivity_level = "0"
         if (float(violence) >= 0.5 and float(violence) <= 0.9):
