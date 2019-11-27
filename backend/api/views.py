@@ -1556,11 +1556,20 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             iHistoryRecord = HistoryRecord.objects.get(id=objecId)
             iHistoryRecord.inspection_result = eval(iHistoryRecord.inspection_result)
             serializer = self.get_serializer(iHistoryRecord, many=False)
-            dataMap = {}
-            dataMap['ret'] = 0
-            dataMap['msg'] = "成功"
-            dataMap['results'] = serializer.data
-            return Response(dataMap)
+            if system_id is not None and system_id=='2':
+                dataMap = {}
+                dataMap['ret'] = 0
+                dataMap['msg'] = "成功"
+                dataMap['results'] = serializer.data
+                dataMap['results']['video_evidence_information'] = serializer.data['inspection_result']['video_evidence_information']
+                dataMap['results']['inspection_result'] = {}
+                return Response(dataMap)
+            else:
+                dataMap = {}
+                dataMap['ret'] = 0
+                dataMap['msg'] = "成功"
+                dataMap['results'] = serializer.data
+                return Response(dataMap)
 
         if system_id is not None:
             conditions['system_id'] = system_id
@@ -1591,11 +1600,20 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
             iHistoryRecord.inspection_result = eval(iHistoryRecord.inspection_result)
             serializer = self.get_serializer(iHistoryRecord, many=False)
-            dataMap = {}
-            dataMap['ret'] = 0
-            dataMap['msg'] = "成功"
-            dataMap['results'] = serializer.data
-            return Response(dataMap)
+            if system_id is not None and system_id=='2':
+                dataMap = {}
+                dataMap['ret'] = 0
+                dataMap['msg'] = "成功"
+                dataMap['results'] = serializer.data
+                dataMap['results']['video_evidence_information'] = serializer.data['inspection_result']['video_evidence_information']
+                dataMap['results']['inspection_result'] = {}
+                return Response(dataMap)
+            else:
+                dataMap = {}
+                dataMap['ret'] = 0
+                dataMap['msg'] = "成功"
+                dataMap['results'] = serializer.data
+                return Response(dataMap)
 
         if group_type is not None:
             if int(group_type) == 0:
