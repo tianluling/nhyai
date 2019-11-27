@@ -767,8 +767,6 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['max_sensitivity_type'] = "-1"
             resultMap['max_sensitivity_level'] = "-1"
             resultMap['max_sensitivity_percent'] = "0.00"
-            resultMap['violence_percent'] = None
-            resultMap['porn_percent'] = None
             
             resultMap['serial_number'] = serial_number
             resultMap['progress'] = "50%"
@@ -780,7 +778,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             # 更新历史记录
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
                                 resultMap, resultMap['max_sensitivity_type'],
-                                resultMap['violence_percent'], resultMap['porn_percent'])
+                                None, None)
 
             # 上传成功，并创建识别任务
             if system_id == 2:
