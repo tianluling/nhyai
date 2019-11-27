@@ -1536,6 +1536,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
     def list(self, request):
         # 获取参数
         requestData = request.query_params
+        objecId = requestData.get('id')
         system_id = requestData.get('system_id')
         channel_id = requestData.get('channel_id')
         user_id = requestData.get('user_id')
@@ -1551,6 +1552,16 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
 
         # 根据条件过滤
         conditions = {}
+        if objecId is not None:
+            iHistoryRecord = HistoryRecord.objects.get(id=objecId)
+            iHistoryRecord.inspection_result = eval(iHistoryRecord.inspection_result)
+            serializer = self.get_serializer(iHistoryRecord, many=False)
+            dataMap = {}
+            dataMap['ret'] = 0
+            dataMap['msg'] = "成功"
+            dataMap['results'] = serializer.data
+            return Response(dataMap)
+
         if system_id is not None:
             conditions['system_id'] = system_id
 
@@ -1577,7 +1588,14 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             conditions['upload_time__lte'] = end_time_date
 
         if serial_number is not None:
-            conditions['serial_number'] = serial_number
+            iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
+            iHistoryRecord.inspection_result = eval(iHistoryRecord.inspection_result)
+            serializer = self.get_serializer(iHistoryRecord, many=False)
+            dataMap = {}
+            dataMap['ret'] = 0
+            dataMap['msg'] = "成功"
+            dataMap['results'] = serializer.data
+            return Response(dataMap)
 
         if group_type is not None:
             if int(group_type) == 0:
