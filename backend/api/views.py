@@ -1647,7 +1647,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                             result["upload_time"] = historydate
                             conditions["upload_time__date"] = datetime.date(historydate.year, historydate.month, historydate.day)
                             historylist = HistoryRecord.objects.filter(
-                                **conditions)
+                                **conditions).order_by('-upload_time')
                             serializer_group = self.get_serializer(
                                 historylist, many=True)
                             if len(serializer_group.data) > 0:
@@ -1663,7 +1663,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                         result["upload_time"] = historydate
                         conditions["upload_time__date"] = datetime.date(historydate.year, historydate.month, historydate.day)
                         historylist = HistoryRecord.objects.filter(
-                            **conditions)
+                            **conditions).order_by('-upload_time')
                         serializer_group = self.get_serializer(
                             historylist, many=True)
                         if len(serializer_group.data) > 0:
