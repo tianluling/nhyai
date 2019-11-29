@@ -8,7 +8,7 @@ python backend/manage.py makemigrations
 python backend/manage.py migrate
 
 后台运行：
-screen python backend/manage.py runserver 0.0.0.0:8000 --noreload
+screen python backend/manage.py runserver 0.0.0.0:8000 --noreload --insecure
 
 运行任务:
 screen python backend/manage_task.py process_tasks
