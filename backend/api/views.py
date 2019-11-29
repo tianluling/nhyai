@@ -1618,8 +1618,9 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                 channel_ids = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15]
                 conditions['channel_id__in'] = channel_ids
             elif int(group_type) == 1:
-                channel_ids = [2, 3]
-                conditions['channel_id__in'] = channel_ids
+                # channel_ids = [2, 3]
+                # conditions['channel_id__in'] = channel_ids
+                conditions['file_type'] = 1
             elif int(group_type) == 2:
                 channel_ids = [5, 6, 7, 8, 9, 10, 11, 12, 13]
                 conditions['channel_id__in'] = channel_ids
