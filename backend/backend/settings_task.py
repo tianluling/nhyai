@@ -266,17 +266,17 @@ RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 1200,
+        'DEFAULT_TIMEOUT': 7200,
     },
     'android': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 1800,
+        'DEFAULT_TIMEOUT': 3600,
     },
     'ios': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 600,
+        'DEFAULT_TIMEOUT': 3660,
     },
 }
 
