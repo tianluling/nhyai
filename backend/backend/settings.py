@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'api',
     'django_rq',
-    'background_task'
+    'background_task',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

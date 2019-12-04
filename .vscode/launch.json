@@ -53,6 +53,25 @@
             }
         },
         {
+            "name": "Python: RunProfileServer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/manage.py",
+            "console": "integratedTerminal",
+            "args": [
+                "runprofileserver",
+                "0.0.0.0:8000",
+                "--noreload",
+                "--insecure",
+                "--kcachegrind",
+                "--prof-path=/tmp/ai-profile-data",
+            ],
+            "django": true,
+            "env":{
+                "PYTHONENIOCODING": "GBK"
+            }
+        },
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",

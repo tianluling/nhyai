@@ -21,3 +21,4 @@ django-background-tasks==1.2.0
 pymysql==0.9.3
 mysqlclient==1.4.4
 jpush==3.3.7
+django-extensions==2.2.5

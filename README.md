@@ -10,8 +10,8 @@ python backend/manage.py migrate
 后台运行：
 screen python backend/manage.py runserver 0.0.0.0:8000 --noreload --insecure
 
-运行任务:
-screen python backend/manage_task.py process_tasks
+性能分析+后台运行:
+python backend/manage.py runprofileserver 0.0.0.0:8000 --noreload --insecure --kcachegrind --prof-path=/tmp/ai-profile-data
 
 运行多任务:
 screen python backend/manage_task.py rqworker android ios default
