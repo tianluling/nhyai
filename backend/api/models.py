@@ -366,3 +366,16 @@ class HistoryRecord(models.Model):
     duration = models.CharField(
         _('duration'), max_length=8, null=True, blank=True)
     serial_number = models.IntegerField(_('serial_number'), null=True, blank=True)
+
+class HistoryHashRecord(models.Model):
+    file_id = models.CharField(
+        _('file_id'), max_length=32, null=True, blank=True)
+    file_name = models.CharField(
+        _('file_name'), max_length=128, null=True, blank=True)
+    file_url = models.URLField(_('file_url'), null=True, blank=True)
+    file_type = models.IntegerField(_('file_type'), null=True, blank=True)
+    inspection_result = models.TextField(
+        _('inspection_result'), max_length=2048, null=True, blank=True)
+    upload_time = models.DateTimeField(auto_now=True, null=True, blank=True)
+    hash_value = models.CharField(
+        _('hash_value'), max_length=100, null=True, blank=True)    
