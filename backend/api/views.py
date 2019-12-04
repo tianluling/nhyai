@@ -186,11 +186,11 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         screenshot_url=screenshot_url, duration=duration, serial_number=serial_number
     )
 
-def UpdateHistoryHashRecord(serializer, filetype, result,hash_value):
-    file_id = serializer.id
-    file_type = filetype
-    file_name = serializer.video.name.split('/')[1]
-    file_url = settings.FILE_URL + serializer.video.url
+def UpdateHistoryHashRecord(file_id, file_name, file_url, file_type, result,hash_value):
+    file_id = file_id
+    file_type = file_type
+    file_name = file_name
+    file_url = file_url
     inspection_result = result
     #保存校验后的hash值记录
     HistoryHashRecord.objects.create(
@@ -679,7 +679,22 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             iHistoryRecord = HistoryRecord.objects.get(serial_number=serial_number)
             iHistoryRecord.process_status = 1
             iHistoryRecord.save()
-            resultMap = video().check_video_V2(file_path, orientation, serial_number)
+
+            #对视频文件进行hash，判断文件是否已经上传过
+            file_md5 = ''
+            with open(file_path, 'rb') as f:
+                file_md5 = get_file_md5(f)
+                historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
+                if historyHashRecord.exists():
+                    resultMap = json.loads(historyHashRecord[0].inspection_result.replace("'","\""))
+                else:
+                    resultMap = video().check_video_V2(file_path, orientation, serial_number)
+                    #保存hash值记录
+                    file_id = iHistoryRecord.file_id
+                    file_type = FILETYPE.Video.value
+                    file_name = iHistoryRecord.file_name
+                    file_url = iHistoryRecord.file_url
+                    UpdateHistoryHashRecord(file_id, file_name, file_url, file_type, resultMap,file_md5)
             
             iVideoFileUpload.data = resultMap
             iVideoFileUpload.serial_number = data['serial_number']
@@ -758,31 +773,35 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             
         else:
             screenshot_file_path = ""
-        #对视频文件进行hash，判断文件是否已经上传过
-        file_md5 = ''
-        with open(file_path, 'rb') as f:
-            file_md5 = get_file_md5(f)
-            historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
-            if historyHashRecord.exists():
-                ret = 0
-                msg = "成功"
-                serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
-                                msg=msg, video=iserializer.video)
-                return  Response(status=status.HTTP_201_CREATED)               
         
         if sync or sync is None:
-            resultMap = video().check_video_V2(file_path, orientation, serial_number)
-            ret = 0
-            msg = "成功"
-            serializer.save(data=resultMap, ret=ret,
-                            msg=msg, video=iserializer.video)
+            #对视频文件进行hash，判断文件是否已经上传过
+            file_md5 = ''
+            with open(file_path, 'rb') as f:
+                file_md5 = get_file_md5(f)
+                historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
+                if historyHashRecord.exists():
+                    ret = 0
+                    msg = "成功"
+                    serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
+                                    msg=msg, video=iserializer.video)
+                else:
+                    resultMap = video().check_video_V2(file_path, orientation, serial_number)
+                    ret = 0
+                    msg = "成功"
+                    serializer.save(data=resultMap, ret=ret,
+                                    msg=msg, video=iserializer.video)
+                    #保存hash值记录
+                    file_id = iserializer.id
+                    file_type = FILETYPE.Video.value
+                    file_name = iserializer.video.name.split('/')[1]
+                    file_url = settings.FILE_URL + iserializer.video.url
+                    UpdateHistoryHashRecord(file_id, file_name, file_url, file_type, resultMap,file_md5)
 
-            # 更新历史记录
-            UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
-                resultMap, resultMap['max_sensitivity_type'],
-                resultMap['violence_percent'], resultMap['porn_percent'])
-            #保存hash值记录
-            UpdateHistoryHashRecord(iserializer, FILETYPE.Video.value,resultMap,file_md5)    
+                # 更新历史记录
+                UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
+                    resultMap, resultMap['max_sensitivity_type'],
+                    resultMap['violence_percent'], resultMap['porn_percent'])
         else:
             ret = 0
             msg = "成功"
@@ -818,9 +837,6 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
                                 resultMap, resultMap['max_sensitivity_type'],
                                 None, None)
-            
-            #保存hash值记录
-            UpdateHistoryHashRecord(iserializer, FILETYPE.Video.value,resultMap,file_md5)    
             
             # 上传成功，并创建识别任务
             if system_id == 2:
