@@ -24,7 +24,7 @@ from violentsurveillance.image_terrorism import image_terrorism
 from violentsurveillance.vision_porn import vision_porn
 from django.conf import settings
 from .serializers import VideoFileUploadSerializer, OcrGeneralSerializer, OcrIDCardSerializer, AudioFileInspectionSerializer, ImageFileUploadSerializer, WordRecognitionInspectionSerializer, OcrDrivinglicenseSerializer, OcrVehiclelicenseSerializer, OcrBusinesslicenseSerializer, OcrBankcardSerializer, OcrHandWrittenSerializer, OcrVehicleplateSerializer, HistoryRecordSerializer, OcrBusinessCardSerializer
-from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord, OcrBusinessCard
+from .models import VideoFileUpload, AudioFileUpload, OcrGeneral, OcrIDCard, AudioFileInspection, ImageFileUpload, WordRecognitionInspection, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrHandWritten, OcrVehicleplate, HistoryRecord, OcrBusinessCard,HistoryHashRecord
 import os
 import shutil
 import uuid
@@ -50,7 +50,19 @@ import numpy as np
 if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
+import hashlib
 
+#对文件进行hash
+def get_file_md5(f):
+    m = hashlib.md5()
+    while True:
+        #如果不用二进制打开文件，则需要先编码
+        #data = f.read(1024).encode('utf-8')
+        data = f.read(1024)  #将文件分块读取
+        if not data:
+            break
+        m.update(data)
+    return m.hexdigest()
 
 def get_two_float(f_str, n):
     f_str = str(f_str)      # f_str = '{}'.format(f_str) 也可以转换为字符串
@@ -172,6 +184,20 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         web_text=web_text, app_text=app_text, process_status=process_status,
         system_id=system_id, channel_id=channel_id, user_id=user_id,
         screenshot_url=screenshot_url, duration=duration, serial_number=serial_number
+    )
+
+def UpdateHistoryHashRecord(serializer, filetype, result,hash_value):
+    file_id = serializer.id
+    file_type = filetype
+    file_name = serializer.video.name.split('/')[1]
+    file_url = settings.FILE_URL + serializer.video.url
+    inspection_result = result
+    #保存校验后的hash值记录
+    HistoryHashRecord.objects.create(
+        file_id=file_id, file_name=file_name,
+        file_url=file_url, file_type=file_type,
+        inspection_result=inspection_result,
+        hash_value=hash_value
     )
 
 
@@ -732,7 +758,18 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             
         else:
             screenshot_file_path = ""
-
+        #对视频文件进行hash，判断文件是否已经上传过
+        file_md5 = ''
+        with open(file_path, 'rb') as f:
+            file_md5 = get_file_md5(f)
+        historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
+        if historyHashRecord is not None:
+            ret = 0
+            msg = "成功"
+            serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
+                            msg=msg, video=iserializer.video)
+            return  Response(status=status.HTTP_201_CREATED)               
+        
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
             ret = 0
@@ -744,6 +781,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
                 resultMap, resultMap['max_sensitivity_type'],
                 resultMap['violence_percent'], resultMap['porn_percent'])
+            #保存hash值记录
+            UpdateHistoryHashRecord(iserializer, FILETYPE.Video.value,resultMap,file_md5)    
         else:
             ret = 0
             msg = "成功"
@@ -779,7 +818,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
                                 resultMap, resultMap['max_sensitivity_type'],
                                 None, None)
-
+            
             # 上传成功，并创建识别任务
             if system_id == 2:
                 task_check_video_android.delay(iserializer, serial_number)
