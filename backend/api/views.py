@@ -762,13 +762,13 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
         file_md5 = ''
         with open(file_path, 'rb') as f:
             file_md5 = get_file_md5(f)
-        historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
-        if historyHashRecord is not None:
-            ret = 0
-            msg = "成功"
-            serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
-                            msg=msg, video=iserializer.video)
-            return  Response(status=status.HTTP_201_CREATED)               
+            historyHashRecord = HistoryHashRecord.objects.filter(hash_value=file_md5)
+            if historyHashRecord.exists():
+                ret = 0
+                msg = "成功"
+                serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
+                                msg=msg, video=iserializer.video)
+                return  Response(status=status.HTTP_201_CREATED)               
         
         if sync or sync is None:
             resultMap = video().check_video_V2(file_path, orientation, serial_number)
@@ -818,6 +818,9 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             UpdateHistoryRecord(iserializer, FILETYPE.Video.value,
                                 resultMap, resultMap['max_sensitivity_type'],
                                 None, None)
+            
+            #保存hash值记录
+            UpdateHistoryHashRecord(iserializer, FILETYPE.Video.value,resultMap,file_md5)    
             
             # 上传成功，并创建识别任务
             if system_id == 2:
