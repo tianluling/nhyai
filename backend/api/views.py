@@ -1740,7 +1740,6 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             if system_id == '1' and objecId is None:
                 for queryone in queryset:
                     queryone.inspection_result = {}
-                    queryone.save()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
