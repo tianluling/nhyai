@@ -783,7 +783,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                 if historyHashRecord.exists():
                     ret = 0
                     msg = "成功"
-                    serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
+                    resultMap = json.loads(historyHashRecord[0].inspection_result.replace("'","\""))
+                    serializer.save(data=resultMap, ret=ret,
                                     msg=msg, video=iserializer.video)
                 else:
                     resultMap = video().check_video_V2(file_path, orientation, serial_number)
