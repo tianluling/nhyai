@@ -783,7 +783,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                 if historyHashRecord.exists():
                     ret = 0
                     msg = "成功"
-                    serializer.save(data=json.loads(historyHashRecord[0].inspection_result.replace("'","\"")), ret=ret,
+                    resultMap = json.loads(historyHashRecord[0].inspection_result.replace("'","\""))
+                    serializer.save(data=resultMap, ret=ret,
                                     msg=msg, video=iserializer.video)
                 else:
                     resultMap = video().check_video_V2(file_path, orientation, serial_number)
@@ -1735,6 +1736,11 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
                 return Response(dataMap)
         else:
             queryset = HistoryRecord.objects.filter(**conditions)
+            #如果是pc端口访问，去掉inspection_result字段
+            if system_id == '1' and objecId is None:
+                for queryone in queryset:
+                    queryone.inspection_result = {}
+                    queryone.save()
 
         page = self.paginate_queryset(queryset)
         if page is not None:
