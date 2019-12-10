@@ -647,7 +647,7 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
 
         # 更新历史记录
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            resultMap, 'porn', None, scores[1] * 100)
+                            resultMap, 'porn', None, scores[1])
 
         return Response(status=status.HTTP_201_CREATED)
 
