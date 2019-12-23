@@ -29,12 +29,12 @@
 							<div class="sample_item fl" v-for="(item,index) in sampleList">
 								<img :src="item.src" alt="">
 								<div class="sample_result_outer">
-									<p class="red_style_name" v-if="item.number>90">违规</p>
-									<p class="orange_style_name" v-else-if="item.number>50">疑似违规</p>
-									<p class="green_style_name" v-else>合规</p>
-									<p class="red_style_number" v-if="item.number>90">{{item.number}}%</p>
-									<p class="orange_style_number" v-else-if="item.number>50">{{item.number}}%</p>
-									<p class="green_style_number" v-else>{{item.number}}%</p>
+									<p class="red_style_name style_z_index" v-if="item.number>90">违规</p>
+									<p class="orange_style_name style_z_index" v-else-if="item.number>50">疑似违规</p>
+									<p class="green_style_name style_z_index" v-else>合规</p>
+									<p class="red_style_number style_z_index" v-if="item.number>90">{{item.number}}%</p>
+									<p class="orange_style_number style_z_index" v-else-if="item.number>50">{{item.number}}%</p>
+									<p class="green_style_number style_z_index" v-else>{{item.number}}%</p>
 								</div>
 							</div>
 							<!--<img src="../assets/image/force/force_sample.png" alt="">-->
@@ -113,17 +113,17 @@
 					<div class="yellow_result_outer clearfix" >
 						<div class="fl" v-for="item in resultList">
 							<img :src="item.image" alt="">
-							<div class="result_outer" v-if="item.number>80">
-								<p class="red_style_name">违规</p>
-								<p class="red_style_number">{{item.number}}%</p>
+							<div class="result_outer " v-if="item.number>80">
+								<p class="red_style_name ">违规</p>
+								<p class="red_style_number ">{{item.number}}%</p>
 							</div>
-							<div class="result_outer" v-else-if="item.number>50">
-								<p class="orange_style_name">疑似违规</p>
-								<p class="orange_style_number">{{item.number}}%</p>
+							<div class="result_outer " v-else-if="item.number>50">
+								<p class="orange_style_name ">疑似违规</p>
+								<p class="orange_style_number ">{{item.number}}%</p>
 							</div>
-							<div class="result_outer" v-else>
-								<p class="green_style_name">合规</p>
-								<p class="green_style_number">{{item.number}}%</p>
+							<div class="result_outer " v-else>
+								<p class="green_style_name ">合规</p>
+								<p class="green_style_number ">{{item.number}}%</p>
 							</div>
 						</div>
 					</div>
@@ -540,16 +540,17 @@
 	.top_nav_image_outer a img{width: 100%;}
 	.top_nav_image_outer .sample_item{width: 260px;margin-bottom: 35px;margin-right: 40px;}
 	.top_nav_image_outer .sample_item:nth-of-type(3n){margin-right: 0}
-	.top_nav_image_outer .sample_item img{width: 260px;height: 200px;}
-	.sample_result_outer{margin: -20px auto 0;display: flex;color: #000000;height: 28px;line-height: 28px;width: 60%;}
+	.top_nav_image_outer .sample_item img{width: 260px;height: 200px;z-index: 999}
+	.sample_result_outer{margin: -20px auto 0;display: flex;color: #000000;height: 28px;line-height: 28px;width: 60%;z-index: 1000}
 	.sample_result_outer p:nth-of-type(1){font-size: 14px;flex: 5;}
 	.sample_result_outer p:nth-of-type(2){font-size: 14px;flex: 4;text-align: center;background-color:white}
 	.green_style_name{background-color: #54cd62;border: 1px solid #54cd62;color: #fff}
-	.green_style_number{border: 1px solid #54cd62;color: #54cd62}
+	.green_style_number{border: 1px solid #54cd62;color: #54cd62;z-index: 1000;}
 	.orange_style_name{background-color: #ffac09;border: 1px solid #ffac09;color: #fff}
 	.orange_style_number{border: 1px solid #ffac09;color: #ffac09}
 	.red_style_name{background-color: #ff524a;border: 1px solid #ff524a;color: #fff}
 	.red_style_number{border: 1px solid #ff524a;color: #ff524a}
+    .style_z_index{z-index: 1000;}
 
 
 	.suggest_outer{margin: 40px 0 20px;}

@@ -29,12 +29,12 @@
 							<div class="sample_item fl" v-for="(item,index) in sampleList">
 								<img :src="item.src" alt="">
 								<div class="sample_result_outer">
-									<p class="red_style_name" v-if="item.number>90">违规</p>
-									<p class="orange_style_name" v-else-if="item.number>50">疑似违规</p>
-									<p class="green_style_name" v-else>合规</p>
-									<p class="red_style_number" v-if="item.number>90">{{item.number}}%</p>
-									<p class="orange_style_number" v-else-if="item.number>50">{{item.number}}%</p>
-									<p class="green_style_number" v-else>{{item.number}}%</p>
+									<p class="red_style_name style_z_index" v-if="item.number>90">违规</p>
+									<p class="orange_style_name style_z_index" v-else-if="item.number>50">疑似违规</p>
+									<p class="green_style_name style_z_index" v-else>合规</p>
+									<p class="red_style_number style_z_index" v-if="item.number>90">{{item.number}}%</p>
+									<p class="orange_style_number style_z_index" v-else-if="item.number>50">{{item.number}}%</p>
+									<p class="green_style_number style_z_index" v-else>{{item.number}}%</p>
 								</div>
 							</div>
 							<!--<img src="../assets/image/force/force_sample.png" alt="">-->
@@ -571,6 +571,7 @@
 	.result_outer .orange_style_number{border: 1px solid #ffac09;color: #ffac09}
 	.result_outer .red_style_name{background-color: #ff524a;border: 1px solid #ff524a;color: #fff}
 	.result_outer .red_style_number{border: 1px solid #ff524a;color: #ff524a}
+	.style_z_index{z-index: 1000;}
 	.yellow_result_suggest{text-align: center;font-size: 15px;color: #999999;margin-top: 10px;}
 	.yellow_result_suggest span{color: #ff4949;}
 	.current_width_style{width: 1000px;margin: 0 auto;}

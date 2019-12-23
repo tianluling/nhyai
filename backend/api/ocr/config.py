@@ -1,4 +1,5 @@
 import os
+from django.conf import settings
 ########################文字检测########################
 ##文字检测引擎 
 pwd = os.getcwd()
@@ -19,7 +20,7 @@ yoloData    = os.path.join(pwd,"backend","api","ocr","models","text.data")
 ########################文字检测########################
 
 ## GPU选择及启动GPU序号
-GPU = True##OCR 是否启用GPU
+GPU = settings.IS_GPU##OCR 是否启用GPU
 GPUID=0##调用GPU序号
 
 ## nms选择,支持cython,gpu,python

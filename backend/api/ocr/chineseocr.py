@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.getcwd(),"backend","api","ocr"))
 # print(sys.path)
 from ocrmodel import model
 from apphelper.image import union_rbox,adjust_box_to_origin
-from application import idcard,drivinglicense,vehiclelicense,bankcard,vehicleplate
+from application import idcard,drivinglicense,vehiclelicense,businesslicense,bankcard,vehicleplate,businesscard
 
 
 class OCR:
@@ -86,6 +86,12 @@ class OCR:
                 res = vehiclelicense.vehiclelicense(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+
+            elif billModel=='营业执照':
+
+                res = businesslicense.businesslicense(result)
+                res = res.res
+                res =[ {'text':res[key],'name':key,'box':{}} for key in res]
         
             elif billModel=='银行卡':
                 res = bankcard.bankcard(result)
@@ -108,6 +114,11 @@ class OCR:
 
             elif billModel=='车牌':
                 res = vehicleplate.vehicleplate(result)
+                res = res.res
+                res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+            
+            elif billModel=='名片':
+                res = businesscard.businesscard(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
             

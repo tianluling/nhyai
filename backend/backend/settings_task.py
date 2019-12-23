@@ -45,8 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'api',
     'django_rq',
-    'background_task',
-    'django_extensions',
+    'background_task'
 ]
 
 MIDDLEWARE = [
@@ -187,7 +186,7 @@ CORS_ORIGIN_REGEX_WHITELIST = (
 DF = pd.read_csv(os.path.join(os.getcwd(),"backend","api","sensitives","sensitiveWords.csv"),encoding='gbk')
 
 #是否支持GPU
-IS_GPU = True
+IS_GPU = False
 
 #视屏检测图片存放路径
 TEMP_PATH = 'capture_out_images/'
@@ -201,11 +200,11 @@ NSFW = nsfw()
 VIOLENCE = violence(IS_GPU)
 
 #暴恐级别比例
-VIOLENCESCORE_MIN = 50
-VIOLENCESCORE_MAX = 80
+VIOLENCESCORE_MIN = 0.5
+VIOLENCESCORE_MAX = 0.8
 #色情级别比例
-PORNSCORE_MIN = 50
-PORNSCORE_MAX = 80
+PORNSCORE_MIN = 0.5
+PORNSCORE_MAX = 0.8
 
 #文件服务地址
 FILE_URL = 'http://172.31.4.31:8000'
@@ -267,17 +266,17 @@ RQ_QUEUES = {
     'default': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 1200,
+        'DEFAULT_TIMEOUT': 7200,
     },
     'android': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 1800,
+        'DEFAULT_TIMEOUT': 3600,
     },
     'ios': {
         'USE_REDIS_CACHE': 'default',
         'ASYNC': IS_SUPPORT_RQ,
-        'DEFAULT_TIMEOUT': 600,
+        'DEFAULT_TIMEOUT': 3660,
     },
 }
 
@@ -289,5 +288,7 @@ RQ_SHOW_ADMIN_LINK = True
 LOCAL_SERVER = 'http://172.31.4.31:8000'
 
 ## 极光消息推送配置
-APP_KEY = u'145ae20dfa17aa0c5a1a90a7'
-MASTER_SECRET = u'aef06bda9671310fe0c28b89'
+# APP_KEY = u'145ae20dfa17aa0c5a1a90a7'
+# MASTER_SECRET = u'aef06bda9671310fe0c28b89'
+APP_KEY = u'518ac02ef206677bc8e8b0da'
+MASTER_SECRET = u'c5c5baf57bf15052624ae5a7'

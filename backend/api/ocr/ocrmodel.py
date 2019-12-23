@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from config import opencvFlag,GPU,IMGSIZE,ocrFlag
-if not GPU:
+if not settings.IS_GPU:
     import os
     os.environ["CUDA_VISIBLE_DEVICES"]=''##不启用GPU
     
