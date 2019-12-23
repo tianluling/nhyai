@@ -21,34 +21,30 @@ export default {
         return newFile;
     },
 
-    getFile:(file,success,error)=>{
+    getFile:(file,callback)=>{
+        let isChange = false;
+        var newFile;
         fileUtil.getOrientation(file).then((orient) => {
             if (orient && orient === 6) {
+                isChange = true;
                 const reader = new FileReader();
                 reader.onload = ($event) => {
                     let img = new Image();
                     img.src = $event.target.result;
                     img.onload = () => {
                         const data = fileUtil.rotateImage(img, img.width, img.height);
-                        const newFile = fileUtil.dataURLtoFile(data, file.name);
+                        newFile = fileUtil.dataURLtoFile(data, file.name);
                         newFile.url = URL.createObjectURL(newFile);
                         console.log(newFile);
-                        if(file.size>20971520){
-                            error(file)
-                        }else {
-                            success(newFile)
-                        }
+                        callback(newFile)
                     }
                 };
                 reader.readAsDataURL(file);
             } else {
-                if(file.size>20971520){
-                    error(file);
-                }else {
-                    success(file);
-                }
+                callback(file)
             }
         });
+
     },
 
     dataURLtoFile: (dataurl, filename) => {

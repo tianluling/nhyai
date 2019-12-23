@@ -64,4 +64,5 @@
 .red_style{
   background-color: red!important;
   color: red;
+  z-index: 101;
 }

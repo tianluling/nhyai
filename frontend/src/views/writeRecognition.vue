@@ -214,6 +214,8 @@
 				this.isCheck = 2;
                 var formData = new FormData();
                 formData.append('text', this.recWord);
+                formData.append('channel_id', 4);
+                formData.append('system_id', 1);
                 $.ajax({
                     url: this.api+"/api/v1/text/get_text_recognition/",
                     type: "post",

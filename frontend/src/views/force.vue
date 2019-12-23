@@ -422,6 +422,8 @@
 //                this.loading = this.$loading(this.options);
                 var formData = new FormData();
                 formData.append('image', file);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 2);
                 $.ajax({
                     url: this.api+"/api/v1/image/get_violence_identify/",
                     type: "post",

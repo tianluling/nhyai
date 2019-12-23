@@ -401,6 +401,8 @@
                 this.isLoading= true;
                 var formData = new FormData();
                 formData.append('image', file);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 3);
                 $.ajax({
                     url: this.api+"/api/v1/image/get_vision_porn/",
                     type: "post",

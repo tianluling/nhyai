@@ -4,16 +4,15 @@
 		<div class="clearfix">
 			<div class="show_voice_outer fl">
 				<div class="outer_voice">
-					<p class="voice_title">语音审查</p>
 					<div class="voice_player_outer clearfix">
-						<img src="../../assets/image/voice_mark.png" class="fl icon_music" id="music_icon">
+						<img src="../assets/image/voice_mark.png" class="fl icon_music" id="music_icon">
 						<div class="audio_wrapper_outer">
 							<div class="audio-wrapper">
-								<audio id="audio">
-									<source :src="recordSrc" type="audio/wav">
+								<audio id="audio" ref="audio">
+									<source :src="url" type="audio/wav">
 								</audio>
 								<div class="audio-left">
-									<img id="audioPlayer" src="../../assets/image/audio/play.png">
+									<img id="audioPlayer" src="../assets/image/audio/play.png" >
 								</div>
 								<div class="audio-right">
 									<div class="progress-bar-bg" id="progressBarBg">
@@ -28,43 +27,6 @@
 								</div>
 							</div>
 						</div>
-
-					</div>
-					<div class="voice_result_outer">
-						<div class="show_voice_word">
-							<!--<span class="fl"> 1:05 - 1:06</span>-->
-							<!--<span class="fl ell"> 好，现在<span class="red_color">违禁词</span>到室当中呢，<span class="red_color">违禁词</span>了三十位</span>-->
-						</div>
-					</div>
-				</div>
-				<p class="suggest"><span class="red_color">*</span> 提示: 敏感系数<50%为合规，50%～80%为疑似违规，>80%为违规<span v-show="imageIsBig" style="color: red;margin-left: 10px;display: inline-block;">！该图片大小超过1M</span></p>
-			</div>
-			<div class="show_json_outer fl">
-				<p class="result_title">审查结果</p>
-				<div>
-					<div class="result_outer">
-						<p>色情文字检测</p>
-						<p class="green_style_name" v-if="isUploading">识别中...</p>
-						<p class="red_style_name" v-else-if="isSex">违规</p>
-						<p class="green_style_name" v-else>合规</p>
-					</div>
-					<div class="result_outer">
-						<p>涉政文字检测 </p>
-						<p class="green_style_name" v-if="isUploading">识别中...</p>
-						<p class="red_style_name" v-else-if="isPolitics">违规</p>
-						<p class="green_style_name" v-else>合规</p>
-					</div>
-					<div class="result_outer">
-						<p>违禁品检测</p>
-						<p class="green_style_name" v-if="isUploading">识别中...</p>
-						<p class="red_style_name" v-else-if="isForce">违规</p>
-						<p class="green_style_name" v-else>合规</p>
-					</div>
-					<div class="result_outer">
-						<p>民谣类检测</p>
-						<p class="green_style_name" v-if="isUploading">识别中...</p>
-						<p class="red_style_name" v-else-if="isSong">违规</p>
-						<p class="green_style_name" v-else>合规</p>
 					</div>
 				</div>
 			</div>
@@ -75,41 +37,54 @@
 
 <script>
     export default {
-	    props:['stopAudio'],
-	    data(){
+        props: {
+            theUrl: {
+                type: String,
+            }
+        },
+        data(){
             return{
                 imageIsBig:false,
-				recordSrc:"",
-				resultType:[],
+                recordUrl:"",
+                resultType:[],
                 audioName:'',
-				isNone:true,
+                isNone:true,
                 isUploading:false,
                 isSex:false,
                 isForce:false,
                 isSong:false,
-                isPolitics:false
-
-			}
+                isPolitics:false,
+                url: this.theUrl,
+            }
         },
-		mounted(){
+        mounted(){
             this.initAudioEvent();
-		},
-		watch:{
+        },
+        watch:{
             stopAudio:(newVal)=>{
                 if(newVal){
-                    const audio = document.getElementsByTagName('audio')[0];
+                    const audio = document.getElementById('audio');
                     const audioPlayer = document.getElementById('audioPlayer');
                     const musicIcon = document.getElementById('music_icon');
                     console.log(newVal);
                     audio.pause();
-                    audioPlayer.src =require( '../../assets/image/audio/play.png');
-                    musicIcon.src =require( '../../assets/image/voice_mark.png');
-				}
-			}
-		},
-		methods:{
+                    audioPlayer.src =require( '../assets/image/audio/play.png');
+                    musicIcon.src =require( '../assets/image/voice_mark.png');
+                }
+            },
+            theUrl:{
+                handler(newValue, oldValue) {
+                    //刷新audio的配置，不让它受上一条影响
+                    //把新拿到的值更新到url上
+                    this.url =newValue;
+                },
+                deep: true
+            }
+        },
+        methods:{
             initAudioEvent(){
-                var audio = document.getElementsByTagName('audio')[0];
+                this.url = this.theUrl;
+                var audio = this.$refs.audio;
                 var audioPlayer = document.getElementById('audioPlayer');
                 var musicIcon = document.getElementById('music_icon');
                 // 监听音频播放时间并更新进度条
@@ -121,21 +96,22 @@
                 audio.addEventListener('ended', ()=> {
                     this.audioEnded();
                 }, false);
-
                 // 点击播放/暂停图片时，控制音乐的播放与暂停
                 audioPlayer.addEventListener('click', ()=> {
                     // 改变播放/暂停图片
                     if (audio.paused) {
+                        console.log('播放');
                         // 开始播放当前点击的音频
                         this.timeout1 = setTimeout(()=>{
                             audio.play()
-                        },300)
-                        audioPlayer.src =require('../../assets/image/audio/pause.png') ;
-                        musicIcon.src = require('../../assets/image/audio/icon-music.gif');
+                        },300);
+                        audioPlayer.src =require('../assets/image/audio/pause.png') ;
+                        musicIcon.src = require('../assets/image/audio/icon-music.gif');
                     } else {
+                        console.log('暂停');
                         audio.pause();
-                        audioPlayer.src =require( '../../assets/image/audio/play.png');
-                        musicIcon.src = require('../../assets/image/voice_mark.png');
+                        audioPlayer.src =require( '../assets/image/audio/play.png');
+                        musicIcon.src = require('../assets/image/voice_mark.png');
                     }
                 }, false);
 
@@ -155,6 +131,24 @@
                 // 拖动进度点调节进度
                 this.dragProgressDotEvent(audio);
             },
+            audioContral(){
+                var audio = document.getElementById('audio');
+                var audioPlayer = document.getElementById('audioPlayer');
+                var musicIcon = document.getElementById('music_icon');
+                if (audio.paused) {
+                    console.log('播放');
+                    // 开始播放当前点击的音频
+					this.$refs.audio.play()
+                    audioPlayer.src =require('../assets/image/audio/pause.png') ;
+                    musicIcon.src = require('../assets/image/audio/icon-music.gif');
+                } else {
+                    console.log('暂停');
+                    this.$refs.audio.pause();
+                    audioPlayer.src =require( '../assets/image/audio/play.png');
+                    musicIcon.src = require('../assets/image/voice_mark.png');
+                }
+                this.dragProgressDotEvent(audio)
+			},
 
             /**
              * 鼠标拖动进度点时可以调节进度
@@ -230,17 +224,17 @@
                 }
             },
 
-			/**
-			 * 停止播放
-			 * */
-			pauseAudio(){
+            /**
+             * 停止播放
+             * */
+            pauseAudio(){
                 var audio = document.getElementsByTagName('audio')[0];
                 var audioPlayer = document.getElementById('audioPlayer');
                 var musicIcon = document.getElementById('music_icon');
                 audio.stop();
-                audioPlayer.src =require( '../../assets/image/audio/play.png');
-                musicIcon.src =require( '../../assets/image/voice_mark.png');
-			},
+                audioPlayer.src =require( '../assets/image/audio/play.png');
+                musicIcon.src =require( '../assets/image/voice_mark.png');
+            },
 
             /**
              * 更新进度条与当前播放时间
@@ -261,8 +255,8 @@
                 document.getElementById('progressBar').style.width = 0;
                 document.getElementById('progressDot').style.left = 0;
                 document.getElementById('audioCurTime').innerText = this.transTime(0);
-                document.getElementById('audioPlayer').src =require( '../../assets/image/audio/play.png');
-                document.getElementById('music_icon').src =require( '../../assets/image/voice_mark.png');
+                document.getElementById('audioPlayer').src =require( '../assets/image/audio/play.png');
+                document.getElementById('music_icon').src =require( '../assets/image/voice_mark.png');
             },
 
             /**
@@ -301,86 +295,12 @@
 
                 return time;
             },
-            submitAudio(e,file,url){
-                this.isUploading = true;
-                this.isSex = false;
-                this.isPolitics = false;
-                this.isSong = false;
-                this.isForce = false;
-                if(file){
-                    this.recordSrc = URL.createObjectURL(file);
-                    this.audioName = file.name;
-				}else {
-                    this.recordSrc = url;
-                    this.audioName = url;
-                }
-
-                document.getElementsByClassName('show_voice_word')[0].innerHTML='';
-                console.log(file);
-
-                var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_voice")});
-                console.log("音频提交中。。。")
-                var formData = new FormData();
-                if(file){
-                    formData.append('speech', file);
-                    formData.append('system_id', 1);
-				}else {
-                    formData.append('speech_url', url);
-                    formData.append('system_id', 1);
-				}
-                formData.append('channel_id', 14);
-                $.ajax({
-                    url: this.api+"/api/v1/audio/get_chinese_speech_inspection/",
-                    type: "post",
-                    timeout : 600000,
-                    data: formData,
-//                    headers: {'Authorization': 'Token mytoken'},
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    success:(response)=>{
-                        console.log(response);
-                        this.isUploading = false;
-                        var audio = document.getElementById('audio').load();
-                        window.setTimeout(()=>{
-                            var audio = document.getElementById('audio');
-							document.getElementsByClassName('audio-length-total')[0].innerText = this.transTime(audio.duration);
-							document.getElementsByClassName('show_voice_word')[0].innerHTML= response.data.speech_contents.web_text;
-                            loading.close();
-						},100);
-//                        this.updateProgress(audio);
-                        if(response.data.speech_contents.final_list.length!=0){
-                            response.data.speech_contents.final_list.forEach(item=>{
-                                if(item.indexOf('色情')!=-1){
-                                    this.isSex = true;
-                                }else if(item.indexOf('政治')!=-1){
-                                    this.isPolitics = true;
-                                }else if(item.indexOf('民谣')!=-1){
-                                    this.isSong = true;
-                                }else if(item.indexOf('违禁品')!=-1){
-                                    this.isForce = true;
-                                }
-                            });
-                        }
-                        this.$parent.changeUploadState(false);
-                    },
-                    error:err=>{
-                        loading.close();
-                        console.log(err);
-                        this.$parent.changeUploadState(false);
-                        this.$message.error('上传失败,重新上传！');
-                    }
-                });
-                if(e){
-                    e.preventDefault();
-				}
-            }
-		}
-	}
+        }
+    }
 </script>
 
 <style scoped>
-	@import "../../assets/css/audio.css";
+	@import "../assets/css/audio.css";
 	/*音频样式begin*/
 	.audioCheck{width: 1200px;margin: 0 auto;}
 	.show_voice_outer{min-height: 440px;width: 800px;}
@@ -394,20 +314,7 @@
 	.show_voice_word span{display: inline-block;text-align: left;}
 	.show_voice_word span:nth-of-type(2){margin-left: 20px;flex: 1;}
 
-	.show_json_outer{width:400px;height: 430px;z-index: 99;background-color: white;position: relative;left: -20px;top: 35px;box-shadow:5px 0 20px #c5cff1;overflow-y: auto;}
-	.show_json_outer .result_title{font-size: 24px;color: #000000;text-align: center;height: 100px;padding-top: 30px;}
-	.show_json_outer .result_title:before{content: "";background: url("../../assets/image/result_top_image.png") no-repeat center center;height: 23px;display: block;margin-bottom: 10px;}
 	.suggest{color: #b2b2b2;font-size: 14px;min-height: 30px;margin:8px 0;}
-	.result_outer{margin: 20px auto;display: flex;color: #000000;height: 28px;line-height: 28px;width: 240px;}
-	.result_outer p:nth-of-type(1){font-size: 16px;width: 120px;}
-	.result_outer p:nth-of-type(2){font-size: 16px;width: 120px;text-align: center}
-	.result_outer p:nth-of-type(3){font-size: 16px;flex: 4;text-align: center}
-	.result_outer .green_style_name{background-color: #54cd62;border: 1px solid #54cd62;color: #fff;text-align: center;}
-	.result_outer .green_style_number{border: 1px solid #54cd62;color: #54cd62}
-	.result_outer .orange_style_name{background-color: #ffac09;border: 1px solid #ffac09;color: #fff}
-	.result_outer .orange_style_number{border: 1px solid #ffac09;color: #ffac09}
-	.result_outer .red_style_name{background-color: #ff524a;border: 1px solid #ff524a;color: #fff}
-	.result_outer .red_style_number{border: 1px solid #ff524a;color: #ff524a}
 	.orange_color{color: #ffac09;}
 	.red_color{color: #ff524a;}
 </style>

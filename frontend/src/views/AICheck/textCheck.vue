@@ -75,8 +75,7 @@
 
 		},
 		methods:{
-
-            submitText(e,file){
+            submitText(e,file,url){
                 console.log(file);
                 document.getElementsByClassName('show_text_word')[0].innerHTML='';
                 this.isUploadText = true;
@@ -88,7 +87,14 @@
                 var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_text")});
                 console.log("文本提交中。。。")
                 var formData = new FormData();
-                formData.append('text', file);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 4);
+                if(file){
+                    formData.append('text', file);
+				}else {
+                    formData.append('text_url', url);
+                }
+
                 $.ajax({
                     url: this.api+"/api/v1/text/get_text_recognition_inspection/",
                     type: "post",
@@ -101,13 +107,13 @@
                         console.log(response);
                         window.setTimeout(()=>{
                             console.log(document.getElementsByClassName('show_text_word')[0]);
-                            document.getElementsByClassName('show_text_word')[0].innerHTML= response.data.web_text;
+                            document.getElementsByClassName('show_text_word')[0].innerHTML= response.data.sensitive_info.web_text;
                             loading.close();
                             this.isUploadText = false;
                             this.$parent.changeUploadState(false);
                         },1000);
-                        if(response.data.final_list.length!=0){
-                            response.data.final_list.forEach(item=>{
+                        if(response.data.sensitive_info.final_list.length!=0){
+                            response.data.sensitive_info.final_list.forEach(item=>{
                                 if(item.indexOf('色情')!=-1){
 									this.isSex = true;
 								}else if(item.indexOf('政治')!=-1){

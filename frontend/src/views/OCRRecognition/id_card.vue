@@ -43,51 +43,6 @@
 		</el-row>
 	</div>
 
-	<!--<template>
-		<div class="bg-login">
-			<div class="middle-box">
-				<div class="login-title text-center">
-					<h1>用户登录</h1>
-				</div>
-				<div class="login-from">
-					<a-form layout="vertical" :form="form" @submit="handleSubmit">
-						<a-form-item
-							:validate-status="userNameError() ? 'error' : ''"
-							:help="userNameError() || ''"
-						>
-							<a-input
-								v-decorator="['userName',{rules: [{ required: true, message: '请输入您的用户名!' }]}]"
-								placeholder="用户名：Username"
-							>
-								<a-icon slot="prefix" type="user" style="color:rgba(0,0,0,.5)" />
-							</a-input>
-						</a-form-item>
-						<a-form-item
-							:validate-status="passwordError() ? 'error' : ''"
-							:help="passwordError() || ''"
-						>
-							<a-input
-								v-decorator="['password',{rules: [{ required: true, message: '请输入您的密码!' }]}]"
-								type="password"
-								placeholder="密码：Password"
-							>
-								<a-icon slot="prefix" type="lock" style="color:rgba(0,0,0,.5)" />
-							</a-input>
-						</a-form-item>
-						<a-form-item>
-							<a-button
-								type="primary"
-								html-type="submit"
-								:disabled="hasErrors(form.getFieldsError())"
-								block="large"
-							>登录</a-button>
-						</a-form-item>
-					</a-form>
-				</div>
-			</div>
-			<span class="tech-box"></span>
-		</div>
-	</template>-->
 
 </template>
 
@@ -137,6 +92,8 @@
                 var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
                 var formData = new FormData();
                 formData.append('image', $('#datafile')[0].files[0]);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 5);
                 $.ajax({
                     url: this.api+"/api/v1/ocr/get_idcard_ocr/",
                     type: "post",

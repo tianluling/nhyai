@@ -51,13 +51,13 @@
 						<ul class="clearfix">
 							<li ><router-link to="/wordRecognition/idCard" >身份证识别</router-link></li>
 							<li ><router-link to="/wordRecognition/commonUse" >通用识别</router-link></li>
-							<!--<li ><router-link to="/wordRecognition/runningLicence" >行驶证识别</router-link></li>
+							<li ><router-link to="/wordRecognition/runningLicence" >行驶证识别</router-link></li>
 							<li ><router-link to="/wordRecognition/drivingLicence" >驾驶证识别</router-link></li>
 							<li ><router-link to="/wordRecognition/businessLicence" >营业执照识别</router-link></li>
 							<li ><router-link to="/wordRecognition/bankCard" >银行卡识别</router-link></li>
 							<li ><router-link to="/wordRecognition/handwriten" >手写体识别</router-link></li>
 							<li ><router-link to="/wordRecognition/carNumber" >车牌识别</router-link></li>
-							<li ><router-link to="/wordRecognition/visitingCard" >名片识别</router-link></li>-->
+							<li ><router-link to="/wordRecognition/visitingCard" >名片识别</router-link></li>
 						</ul>
 					</div>
 				</el-col>

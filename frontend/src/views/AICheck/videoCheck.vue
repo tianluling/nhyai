@@ -10,6 +10,7 @@
 						您的浏览器不支持视频
 					</video>
 				</div>
+
 				<el-progress  :text-inside="true" :percentage="percentage" :stroke-width="3"></el-progress>
 			</div>
 			<div class="video_result_outer fl">
@@ -116,17 +117,21 @@
 		    onChangeFile(e){
                 this.$parent.changeImage(e);
 			},
-            submitVideo(e,file){
+            submitVideo(e,file,videoUrl){
                 this.isLoading = true;
                 this.sexInfo = 200;
                 this.forceInfo = 200;
                 this.imageUrl=[];
                 this.sexImageUrl= [];
                 this.forceImageUrl= [];
-                var url = URL.createObjectURL(file);
+                var url;
+                if(file){
+                    url = URL.createObjectURL(file);
+				}else {
+                    url = videoUrl;
+				}
                 console.log(url);
                 this.videoUrl={url:url} ;
-                console.log(file);
                 this.percentage= 0;
                 var timer = window.setInterval(()=>{
                     this.percentage += 5;
@@ -137,7 +142,12 @@
                 var loading = this.$loading({fullscreen:false,target:document.querySelector(".show_video")});
                 console.log("视频提交中。。。")
                 var formData = new FormData();
-                formData.append('video', file);
+                formData.append('system_id', 1);
+                if(file){
+                    formData.append('video', file);
+				}else {
+                    formData.append('video_url', url);
+				}
                 $.ajax({
                     url: this.api+"/api/v1/video/get_video_inspection/",
                     timeout:3600000,
@@ -148,6 +158,7 @@
                     contentType: false,
                     processData: false,
                     success:(response)=>{
+                        this.videoUrl={url:response.data.video_url} ;
                         this.percentage = 100;
                         window.clearInterval(timer);
                         loading.close();
@@ -157,7 +168,7 @@
                         this.imageUrl= [];
                         this.markerInfo= [];
 //                        this.uploadInfo(response);
-//                        this.videoUrl={url:response.data.video_url} ;
+                        console.log('this.videoUrl',this.videoUrl);
 //                        this.videoUrl={url:response.data.video};
 //						this.video_url= response.data.video_url;
                         this.sexImageUrl = response.data.porn_evidence_information;
@@ -241,13 +252,17 @@
                         this.percentage = 0;
                         this.sexInfo = 201;
                         this.forceInfo = 201;
+                        this.videoUrl={url:url} ;
                         window.clearInterval(timer);
                         this.isLoading = false;
                         this.showMessage('上传失败,重新上传！');
                         this.$parent.changeUploadState(false);
 					}
                 });
-                e.preventDefault();
+                if(e){
+                    e.preventDefault();
+				}
+
             },
             showMessage(msg){
                 this.$message.error({

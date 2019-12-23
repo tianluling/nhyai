@@ -8,15 +8,18 @@
 						<img class="show_add_image" :src="dialogImageUrl">
 					</div>
 					<div class="upload_outer">
-						<div class="local_upload">
+						<div class="local_upload" v-if="!isLoading">
 							<!--<p>本地上传</p>-->
 							<input id="datafile" name="datafile" type="file" class="inputfile" @change="changeImage($event)">
 							<label for="datafile">本地上传</label>
 						</div>
-						<div class="show_input_outer">
+						<div class="local_upload" v-else>
+							<p class="is_check">正在检测</p>
+						</div>
+						<!--<div class="show_input_outer">
 							<input type="text" class="init_url_style" placeholder="请输入网络图片URL">
 							<p class="check_style">检测</p>
-						</div>
+						</div>-->
 					</div>
 					<p class="top_suggest">提示：图片大小不超过1M，请保证需要识别部分为图片主体部分</p>
 				</div>
@@ -24,13 +27,18 @@
 			<el-col :xs={span:24} :sm={span:11} :md="10" :lg="9" :xl="8">
 				<div class="show_json_outer">
 					<span class="original_style">识别结果</span>
-					<div id="show_json" v-show="showJson.name">
-						<p>姓名：{{showJson.name}}</p>
-						<p>性别：{{showJson.sex}}</p>
-						<p>民族：{{showJson.nation}}</p>
-						<p>出生：{{showJson.birthday}}</p>
+					<div id="show_json" v-show="showJson.license_type">
+						<p>证件类型：{{showJson.license_type}}</p>
+						<p>号牌号码：{{showJson.plate_no}}</p>
+						<p>车辆类型：{{showJson.vehicle_type}}</p>
+						<p>所有人：{{showJson.owner}}</p>
 						<p>住址：{{showJson.address}}</p>
-						<p>公民身份证号：{{showJson.idNumber}}</p>
+						<p>使用性质：{{showJson.use_character}}</p>
+						<p>品牌型号：{{showJson.model}}</p>
+						<p>车辆识别代号：{{showJson.vin}}</p>
+						<p>发动机号码：{{showJson.engine_no}}</p>
+						<p>注册日期：{{showJson.register_date}}</p>
+						<p>发证日期：{{showJson.issue_date}}</p>
 					</div>
 				</div>
 			</el-col>
@@ -45,13 +53,14 @@
             return {
                 dialogImageUrl: require("../../assets/image/running_sample.jpg"),
                 dialogVisible: false,
-                jsonDemo:'{"name":"艾米","sex":"女","nation":"汉","birthday":"1986年4月23日","address":"上海徐汇区田林路397号腾云大厦6F","idNumber":"310104198604230289"}',
+                jsonDemo:'{"license_type":"中华人民共和国机动车行驶证","plate_no":"沪AA1234","vehicle_type":"小型轿车","owner":"李明","address":"上海徐汇区田林路397号腾云大厦6F","use_character":"非营运","model":"大众汽车牌SVW71612RS","vin":"ABCDEFGH123456789","engine_no":"8B54321","register_date":"2011-10-18","issue_date":"2011-10-18"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",
                 isForce:false,
                 imageRight:false,
                 imageIsBig:false,
+				isLoading:false,
                 activeName: 'first',
                 showJson :{},
                 options:{background:"rgba(0, 0, 0, 0.3)",fullscreen:false,target:document.querySelector(".outer_add")}
@@ -60,22 +69,28 @@
         },
         mounted:function () {
             var that = this;
+            this.isLoading = true;
             var jdata = JSON.stringify(JSON.parse(this.jsonDemo), null, 4);
             var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
             this.intervalid1 = setTimeout(() => {
                 this.showJson = JSON.parse(this.jsonDemo);
                 clearInterval(this.intervalid1);
+                this.isLoading = false;
                 loading.close();
             }, 2000);
         },
         methods: {
             uploadImage(e){
-                this.loading = this.$loading(this.options);
+                let loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
+                this.isLoading = true;
                 this.imageRight = false;
-                var formData = new FormData($(this));
-                formData.append('datafile', $('#datafile')[0].files[0]);
+                this.showJson = {}
+                var formData = new FormData();
+                formData.append('image', $('#datafile')[0].files[0]);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 6);
                 $.ajax({
-                    url: "http://172.31.11.171:8000/api/uploads/",
+                    url: this.api+"/api/v1/ocr/get_driving_permit_ocr/",
                     type: "post",
                     data: formData,
 //                    headers: {'Authorization': 'Token mytoken'},
@@ -83,22 +98,17 @@
                     contentType: false,
                     processData: false,
                     success:(response)=>{
-                        this.$loading().close();
+                        loading.close();
+                        this.isLoading = false;
 //                        this.uploadInfo(response);
-                        console.log(this)
-                        var result = response.result;
-                        console.log( result.data.tag_list[1].probability,"hhhhhhhhhhhh") ;
-                        var jdata = JSON.stringify(result, null, 4);
-                        $("#show_json").html("<pre>"+jdata+"</pre>");//这时数据展示正确
-                        var forcePercent = result.data.tag_list[1].probability.toString();
-                        forcePercent = forcePercent.substring(0,forcePercent.indexOf(".")+5)*100;
-                        console.log(forcePercent);
-                        this.showPercent =`概率：${forcePercent}%`;
-
-                        if(forcePercent>80){
-                            this.isForce = true;
-                        }
+                        console.log(response.data);
+                        this.showJson = response.data;
                     },
+                    error:(error)=>{
+                        this.$message.error('上传失败，请重新上传！');
+                        loading.close();
+                        this.isLoading= false;
+                    }
                 });
                 e.preventDefault();
             },
@@ -112,6 +122,7 @@
                 reader.onload = function() {
                     that.dialogImageUrl = this.result;
                 };
+                this.uploadImage(e);
             },
         }
     }
@@ -119,10 +130,10 @@
 
 <style scoped>
 	.show_json_outer{height: 350px;overflow-y:scroll;border: 1px solid #e2ecfc;}
-	.show_add_image{height: 100%;margin: 0 auto;display: block;}
 	.original_style{position: absolute;font-size: 14px;color: #316dff;height: 30px;line-height: 30px;background-color: #e3ecfb;display: inline-block;padding: 0 35px 0 25px;-webkit-clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%);}
 	.image_outer{margin-right: 10px;}
-	.outer_add{height:350px;position: relative;overflow: hidden;border: 1px solid #e2ecfc;}
+	.show_add_image{max-height: 100%;max-width: 100%;vertical-align: middle;}
+	.outer_add{height:350px;overflow: hidden;border: 1px solid #e2ecfc;vertical-align: middle;text-align: center;line-height: 350px;}
 	.upload_outer{display: flex;margin-top: 20px;}
 	.top_suggest{color: #999999;font-size: 14px;line-height: 40px;height: 30px;}
 	.init_url_style{flex: 1;height: 43px;line-height: 43px;border: 1px solid #E2ECFC;font-size: 15px;padding-left: 10px;background-color: #fafcfe;}
@@ -131,9 +142,10 @@
 	.check_style{display:inline-block;height: 41px;line-height: 41px;font-size: 16px;color: #316dff;border: 2px solid #316dff;width: 100px;text-align: center;cursor:pointer;background-color: #fafcfe;}
 	.check_style:hover{background-color: #316DFF;color: white;}
 	.local_upload{height: 45px;line-height: 45px;font-size: 16px;}
-	.local_upload:after{content: "或";margin: 0 15px;}
+	.is_check{display:inline-block;height: 43px;line-height: 43px;font-size: 16px;background-color: #f5f5f5;color:#666666;border: 1px solid #dddddd;padding: 0 30px;text-align: center;}
+	/*.local_upload:after{content: "或";margin: 0 15px;}*/
 	.inputfile{z-index: -11111;width: 0px;height:1px;opacity: 0;position: absolute;}
-	.local_upload label{display:inline-block;height: 43px;line-height: 43px;font-size: 16px;background-color: #316DFF;color:white;border: 1px solid #316DFF;padding: 0 15px;text-align: center;cursor: pointer;}
+	.local_upload label{display:inline-block;height: 43px;line-height: 43px;font-size: 16px;background-color: #316DFF;color:white;border: 1px solid #316DFF;padding: 0 30px;text-align: center;cursor: pointer;}
 	.local_upload label:hover{background-color: #6087F7;color: white;}
 	.show_input_outer{display: flex;flex: 1;}
 	#show_json{margin: 50px auto;padding: 10px 30px;}

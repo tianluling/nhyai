@@ -253,6 +253,8 @@
                 this.isCheck = 2;
                 var formData = new FormData();
                 formData.append('speech', wav);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 14);
 
                 $.ajax({
                     url: this.api+"/api/v1/audio/get_chinese_speech/",

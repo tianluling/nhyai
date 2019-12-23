@@ -3,6 +3,9 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import moment from 'moment'
+
+
 
 import App from './App'
 import router from './store/router'
@@ -23,7 +26,8 @@ Vue.prototype.$axios=axios;
 Vue.use(ElementUI);
 Vue.use(common);
 Vue.use(fileUtil);
-Vue.use(AudioRecorder)
+Vue.use(AudioRecorder);
+Vue.use(moment);
 
 Vue.config.productionTip = false
 

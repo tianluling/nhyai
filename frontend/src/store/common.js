@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import moment from 'moment'
 
 export default {
 	install(Vue, options) {
@@ -8,9 +9,9 @@ export default {
         // Vue.prototype.api = "http://220.174.232.142:9016";	//测试环境
 
 		// Vue.prototype.api = "http://www.ischoolhn.com";	//试运行环境
-		// Vue.prototype.api = "http://172.31.4.33:8000";	//卫俊
+		Vue.prototype.api = "http://172.31.4.31:8000";	//卫俊
 		// Vue.prototype.api = "http://172.31.20.59:8000";	//卫俊
-		Vue.prototype.api = "https://ai.hn-ssc.com";	//卫俊
+		// Vue.prototype.api = "https://ai.hn-ssc.com";	//卫俊
 
 		//Vue.prototype.api = "http://www.hn-ssc.com";	//正式环境
         // Vue.prototype.api = "";	//打包环境
@@ -28,6 +29,30 @@ export default {
 }
 
 //过滤器
+Vue.filter('momentDate', function(time, dateType) {
+    // 返回处理后的值
+    if(time){
+        time = time.replace('T'," ");
+    }else {
+        return;
+    }
+    var date = new Date(time);
+    if(dateType == null) {
+        return moment(date).format('YYYY-MM-DD HH:mm:ss')
+    } else {
+        return moment(date).format(dateType);
+    }
+});
+//过滤器
+Vue.filter('noCheck', function(name) {
+    // 返回处理后的值
+    if(name){
+    	return name;
+	}else {
+        return '未识别';
+	}
+});
+//过滤器
 Vue.filter('formatDate', function(time, dateType) {
 	// 返回处理后的值
     if(time){
@@ -41,7 +66,6 @@ Vue.filter('formatDate', function(time, dateType) {
 	} else {
 		return formatDate(date, dateType);
 	}
-
 });
 
 

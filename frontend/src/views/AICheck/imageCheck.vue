@@ -89,63 +89,61 @@
 			}
 		},
 		methods:{
-	      submitImage(e,file,url){
-	          console.log(file);
+            httpImage(formData) {
+                let loading = this.$loading({fullscreen:false,target:document.querySelector(".show_result_outer")});
+                $.ajax({
+                    url: this.api + "/api/v1/image/get_image_inspection/",
+                    type: "post",
+                    data: formData,
+//                    headers: {'Authorization': 'Token mytoken'},
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: (response) => {
+                        loading.close();
+                        console.log(response);
+//                      this.dialogImageUrl = response.image;
+                        this.sexLevel = response.data.porn_percent;
+                        this.forceLevel = response.data.violence_percent;
+                        if (this.sexLevel > 50 | this.forceLevel > 50) {
+                            this.isForce = true;
+                        } else {
+                            this.isForce = false;
+                        }
+                        this.$parent.changeUploadState(false);
+                    },
+                    error: err => {
+                        loading.close();
+                        console.log(err)
+                        this.$parent.changeUploadState(false);
+                    }
+                });
+            },
+			submitImage(e, file, url){
+	          console.log('submitImage',file);
 	          this.sexLevel=200;
 	          this.forceLevel=200;
-              var loading;
-              fileUtil.getOrientation(file).then((orient) => {
-                  if(orient && orient === 6) {
-                      const reader = new FileReader();
-                      reader.onload = ($event)=> {
-                          let img = new Image();
-                          img.src = $event.target.result;
-                          img.onload = ()=> {
-                              const data = fileUtil.rotateImage(img, img.width, img.height);
-                              const newFile = fileUtil.dataURLtoFile(data, file.name);
-                              console.log(newFile);
-                              this.dialogImageUrl= fileUtil.getObjectURL(newFile);
-                              loading = this.$loading({fullscreen:false,target:document.querySelector(".show_result_outer")});
-                          }
-                      };
-                      reader.readAsDataURL(file);
-                  } else {
-                      this.dialogImageUrl= fileUtil.getObjectURL(file);
-                      loading = this.$loading({fullscreen:false,target:document.querySelector(".show_result_outer")});
-                  }
-                  console.log("图片提交中。。。");
+              if(file){
+                  let File ;
+                  fileUtil.getFile(file,(newFile)=>{
+                      File = newFile;
+                      this.dialogImageUrl= fileUtil.getObjectURL(newFile);
+                      var formData = new FormData();
+                      formData.append('image', newFile);
+                      formData.append('system_id', 1);
+                      this.httpImage(formData);
+				  });
+			  }else {
+                  this.dialogImageUrl= url;
                   var formData = new FormData();
-                  formData.append('image', file);
-                  $.ajax({
-                      url: this.api+"/api/v1/image/get_image_inspection/",
-                      type: "post",
-                      data: formData,
-//                    headers: {'Authorization': 'Token mytoken'},
-                      cache: false,
-                      contentType: false,
-                      processData: false,
-                      success:(response)=>{
-                          loading.close();
-                          console.log(response);
-//                      this.dialogImageUrl = response.image;
-                          this.sexLevel = response.data.porn_percent;
-                          this.forceLevel = response.data.violence_percent;
-                          if(this.sexLevel>50|this.forceLevel>50){
-                              this.isForce = true;
-                          }else {
-                              this.isForce = false;
-                          }
-                          this.$parent.changeUploadState(false);
-                      },
-                      error:err=>{
-                          loading.close();
-                          console.log(err)
-                          this.$parent.changeUploadState(false);
-                      }
-                  });
-              });
+                  formData.append('image_url', url);
+                  formData.append('system_id', 1);
+                  this.httpImage(formData);
+			  }
+			  if(e){
+                  e.preventDefault();
+			  }
 
-              e.preventDefault();
 		  }
 		}
 	}

@@ -83,6 +83,8 @@
                 var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
                 var formData = new FormData();
                 formData.append('image', $('#datafile')[0].files[0]);
+                formData.append('system_id', 1);
+                formData.append('channel_id', 8);
                 document.getElementById('show_common_json').innerHTML="";
                 $.ajax({
                     url: this.api+"/api/v1/ocr/get_general_ocr/",
