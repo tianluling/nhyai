@@ -77,6 +77,13 @@ namespace cv
                                             InputArray prevPts, InputOutputArray nextPts,
                                             OutputArray status, OutputArray err,
                                             Size winSize = Size(21,21), int maxLevel = 3, int iterations = 30);
+        
+        CV_EXPORTS_W int cpuFindSimilaritiesBetweenImages( cv::Mat &original, cv::Mat &image_to_compare, float ratio=0.75 );
+
+        CV_EXPORTS_W int gpuFindSimilaritiesBetweenImages( cv::Mat &original, cv::Mat &image_to_compare, float ratio=0.75 );
+        
+        CV_EXPORTS_W void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::String> check_img_list, float ratio=0.75 );
+
     }
 }
 #endif /* __OPENCV_PYTHONCUDA_HPP__ */

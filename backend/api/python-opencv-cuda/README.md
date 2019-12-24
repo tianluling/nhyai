@@ -20,41 +20,46 @@
 2. cmake (I used anaconda3 with environment named as: tensorflow_p36 (with python 3.6))
 ```
 cmake \
--DCMAKE_BUILD_TYPE=RELEASE \
--DWITH_CUDA=ON \
--DCMAKE_INSTALL_PREFIX="/home/$USER/anaconda3/envs/tensorflow_p36" \
--DOPENCV_EXTRA_MODULES_PATH="../../opencv_contrib-3.4.2/modules" \
--DINSTALL_PYTHON_EXAMPLES=OFF \
--DINSTALL_C_EXAMPLES=OFF \
--DBUILD_SHARED_LIBS=OFF \
--DBUILD_DOCS=OFF \
--DBUILD_TESTS=OFF \
--DBUILD_EXAMPLES=OFF \
--DBUILD_PERF_TESTS=OFF \
--DBUILD_opencv_dnn=OFF \
--DTINYDNN_USE_NNPACK=OFF \
--DTINYDNN_USE_TBB=ON \
--DTINYDNN_USE_OMP=ON \
--DENABLE_FAST_MATH=ON \
--DWITH_OPENMP=ON \
--DWITH_TBB=ON \
--DWITH_JPEG=OFF \
--DWITH_IPP=OFF \
--DMKL_WITH_TBB=ON \
--DMKL_WITH_OPENMP=ON \
--DBUILD_opencv_python2=OFF \
--DPYTHON_EXECUTABLE="/home/$USER/anaconda3/envs/tensorflow_p36/bin/python" \
--DPYTHON_LIBRARY="/home/$USER/anaconda3/envs/tensorflow_p36/lib/python3.6" \
--DPYTHON3_LIBRARY="/home/$USER/anaconda3/envs/tensorflow_p36/lib/python3.6" \
--DPYTHON3_EXECUTABLE="/home/$USER/anaconda3/envs/tensorflow_p36/bin/python" \
--DPYTHON3_INCLUDE_DIR="/home/$USER/anaconda3/envs/tensorflow_p36/include/python3.6m" \
--DPYTHON3_INCLUDE_DIR2="/home/$USER/anaconda3/envs/tensorflow_p36/include" \
--DPYTHON3_NUMPY_INCLUDE_DIRS="/home/$USER/anaconda3/envs/tensorflow_p36/lib/python3.6/site-packages/numpy/core/include" \
--DPYTHON3_INCLUDE_PATH="/home/$USER/anaconda3/envs/tensorflow_p36/include/python3.6m" \
--DPYTHON3_LIBRARIES="/home/$USER/anaconda3/envs/tensorflow_p36/lib/libpython3.6m.so" \
+-D CMAKE_BUILD_TYPE=RELEASE \
+-D WITH_CUDA=ON \
+-D CMAKE_INSTALL_PREFIX="/usr/local" \
+-D OPENCV_EXTRA_MODULES_PATH="/home/nhydev/github/opencv_contrib/modules" \
+-D INSTALL_PYTHON_EXAMPLES=ON \
+-D INSTALL_C_EXAMPLES=ON \
+-D BUILD_SHARED_LIBS=ON \
+-D BUILD_DOCS=OFF \
+-D BUILD_TESTS=OFF \
+-D BUILD_EXAMPLES=ON \
+-D BUILD_PERF_TESTS=OFF \
+-D BUILD_opencv_dnn=ON \
+-D TINYDNN_USE_NNPACK=ON \
+-D TINYDNN_USE_TBB=ON \
+-D TINYDNN_USE_OMP=ON \
+-D ENABLE_FAST_MATH=ON \
+-D WITH_OPENMP=ON \
+-D WITH_TBB=ON \
+-D WITH_IPP=OFF \
+-D MKL_WITH_TBB=ON \
+-D MKL_WITH_OPENMP=ON \
+-D OPENCV_ENABLE_NONFREE=ON \
+-D BUILD_opencv_python2=OFF \
+-D OPENCV_GENERATE_PKGCONFIG=YES \
+-D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.1 \
+-D DCMAKE_LIBRARY_PATH=${CUDA_TOOLKIT_ROOT_DIR}/lib64/stubs \
+-D CUDA_ARCH_BIN="6.0 6.1 7.0 7.5" \
+-D CUDA_ARCH_PTX="" \
+-D PYTHON_EXECUTABLE="/home/nhydev/anaconda3/envs/py35/bin/python" \
+-D PYTHON_LIBRARY="/home/nhydev/anaconda3/envs/py35/lib/python3.7" \
+-D PYTHON3_LIBRARY="/home/nhydev/anaconda3/envs/py35/lib/python3.7" \
+-D PYTHON3_EXECUTABLE="/home/nhydev/anaconda3/envs/py35/bin/python" \
+-D PYTHON3_INCLUDE_DIR="/home/nhydev/anaconda3/envs/py35/include/python3.7m" \
+-D PYTHON3_INCLUDE_DIR2="/home/nhydev/anaconda3/envs/py35/include" \
+-D PYTHON3_NUMPY_INCLUDE_DIRS="/home/nhydev/anaconda3/envs/py35/lib/python3.7/site-packages/numpy/core/include" \
+-D PYTHON3_INCLUDE_PATH="/home/nhydev/anaconda3/envs/py35/include/python3.7m" \
+-D PYTHON3_LIBRARIES="/home/nhydev/anaconda3/envs/py35/lib/libpython3.7m.so" \
 ..
 ```
-2. ``` make ```
+2. ``` make -j$(nproc)```
 3. ``` sudo make install ```
 4. ``` sudo ldconfig ```
 
@@ -64,6 +69,12 @@ cmake \
 ``` 
 python cpu-opt_flow.py
 python gpu-opt_flow.py 
+
+import cv2
+print(cv2.getBuildInformation())
+cv2.pythoncuda.readDirectory
+cv2.pythoncuda.gpuFindSimilaritiesBetweenImages
+cv2.pythoncuda.cpuFindSimilaritiesBetweenImages
 ```
 
 ### Output at my end:
