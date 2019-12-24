@@ -37,10 +37,10 @@ class OCR:
                         }
                 } for i,x in enumerate(result)]
         res = adjust_box_to_origin(img,angle, res)##修正box
-        textList = []
+        textStrings = ''
         for each in res:
-            textList.append(each["text"])
-        return textList
+            textStrings += each["text"] + ' '
+        return textStrings
 
     def getWordRecognition(self, img_file, bill_model):
         billModel = bill_model
