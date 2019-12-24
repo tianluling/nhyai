@@ -125,7 +125,7 @@ class OCR:
         
         timeTake = time.time()-timeTake
         
-        return {'res':res,'timeTake':round(timeTake,4)}
+        return {'res':res,'timeTake':round(timeTake,4), 'text':result}
 
 if __name__ == '__main__':
     ocrTest = OCR()

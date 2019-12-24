@@ -104,22 +104,22 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     violence_sensitivity_level = "-1"
     if violence is not None:
         violence_percent = get_two_float(float(violence), 2)
-        if (float(violence) < 0.5):
+        if (float(violence) < settings.VIOLENCESCORE_MIN):
             violence_sensitivity_level = "0"
-        if (float(violence) >= 0.5 and float(violence) <= 0.9):
+        if (float(violence) >= settings.VIOLENCESCORE_MIN and float(violence) <= settings.VIOLENCESCORE_MAX):
             violence_sensitivity_level = "1"
-        if (float(violence) > 0.9):
+        if (float(violence) > settings.VIOLENCESCORE_MAX):
             violence_sensitivity_level = "2"
 
     porn_percent = "0"
     porn_sensitivity_level = "-1"
     if porn is not None:
         porn_percent = get_two_float(float(porn), 2)
-        if (float(porn) < 0.5):
+        if (float(porn) < settings.PORNSCORE_MIN):
             porn_sensitivity_level = "0"
-        if (float(porn) >= 0.5 and float(porn) <= 0.9):
+        if (float(porn) >= settings.PORNSCORE_MIN and float(porn) <= settings.PORNSCORE_MAX):
             porn_sensitivity_level = "1"
-        if (float(porn) > 0.9):
+        if (float(porn) > settings.PORNSCORE_MAX):
             porn_sensitivity_level = "2"
 
     max_sensitivity_type = maxtype
@@ -152,7 +152,8 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     elif maxtype == 'ocr':
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
-        content = result
+        content = result['content']
+        web_text = result['text']
     elif maxtype == 'audio':
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
@@ -511,13 +512,16 @@ class OcrGeneralViewSet(viewsets.ModelViewSet):
         dataArr = []
         for each in arr:
             dataArr.append(each["text"])
-        # result = check_result
+        result = {
+            'content': dataArr,
+            'text': check_result['text']
+        }
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
 
         # 更新历史记
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataArr, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -579,8 +583,12 @@ class OcrIDCardViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -613,7 +621,7 @@ class FileImageTerrorismUploadViewSet(viewsets.ModelViewSet):
 
         # 更新历史记录
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            resultMap, 'violence', violence, None)
+                            resultMap, 'violence', resultMap['violence'], None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -647,7 +655,7 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
 
         # 更新历史记录
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            resultMap, 'porn', None, scores[1])
+                            resultMap, 'porn', None, resultMap['normal_hot_porn'])
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1109,8 +1117,12 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1202,8 +1214,12 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1285,8 +1301,12 @@ class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1347,8 +1367,12 @@ class OcrBankcardViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1392,8 +1416,12 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataArr, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1443,8 +1471,12 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1526,8 +1558,12 @@ class OcrBusinessCardViewSet(viewsets.ModelViewSet):
                         image=iserializer.image)
 
         # 更新历史记
+        result = {
+            'content': dataMap,
+            'text': check_result['text']
+        }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            dataMap, 'ocr', None, None)
+                            result, 'ocr', None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -1735,7 +1771,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             else:
                 return Response(dataMap)
         else:
-            queryset = HistoryRecord.objects.filter(**conditions)
+            queryset = HistoryRecord.objects.filter(**conditions).order_by('-upload_time')
             #如果是pc端口访问，去掉inspection_result字段
             if system_id == '1' and objecId is None:
                 for queryone in queryset:
