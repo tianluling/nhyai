@@ -24,10 +24,29 @@ class OCR:
     def __init__(self):
         self = self
 
+    def getTextList(self, img, angle, result):
+        result = union_rbox(result,0.2)
+        res = [{'text':x['text'],
+                'name':str(i),
+                'box':{'cx':x['cx'],
+                        'cy':x['cy'],
+                        'w':x['w'],
+                        'h':x['h'],
+                        'angle':x['degree']
+
+                        }
+                } for i,x in enumerate(result)]
+        res = adjust_box_to_origin(img,angle, res)##修正box
+        textList = []
+        for each in res:
+            textList.append(each["text"])
+        return textList
+
     def getWordRecognition(self, img_file, bill_model):
         billModel = bill_model
         textAngle = True ##文字检测
         textLine = False ##只进行单行识别
+        text = ''
         
         img = cv2.imread(img_file)##GBR
         H,W = img.shape[:2]
@@ -56,6 +75,7 @@ class OCR:
 
 
             if billModel=='' or billModel=='通用OCR' :
+                text = self.getTextList(img,angle, result)
                 result = union_rbox(result,0.2)
                 res = [{'text':x['text'],
                         'name':str(i),
@@ -74,29 +94,34 @@ class OCR:
                 res = idcard.idcard(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
             
             elif billModel=='驾驶证':
 
                 res = drivinglicense.drivinglicense(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
 
             elif billModel=='行驶证':
 
                 res = vehiclelicense.vehiclelicense(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
 
             elif billModel=='营业执照':
 
                 res = businesslicense.businesslicense(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
         
             elif billModel=='银行卡':
                 res = bankcard.bankcard(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
 
             elif billModel=='手写体':
                 result = union_rbox(result,0.2)
@@ -111,21 +136,24 @@ class OCR:
                               }
                        } for i,x in enumerate(result)]
                 res = adjust_box_to_origin(img,angle, res)##修正box
+                text = self.getTextList(img,angle, result)
 
             elif billModel=='车牌':
                 res = vehicleplate.vehicleplate(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
             
             elif billModel=='名片':
                 res = businesscard.businesscard(result)
                 res = res.res
                 res =[ {'text':res[key],'name':key,'box':{}} for key in res]
+                text = self.getTextList(img,angle, result)
             
         
         timeTake = time.time()-timeTake
-        
-        return {'res':res,'timeTake':round(timeTake,4), 'text':result}
+            
+        return {'res':res,'timeTake':round(timeTake,4), 'text':text}
 
 if __name__ == '__main__':
     ocrTest = OCR()

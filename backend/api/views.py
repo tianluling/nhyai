@@ -154,6 +154,7 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
         max_sensitivity_percent = "0.00"
         content = result['content']
         web_text = result['text']
+        inspection_result = result['content']
     elif maxtype == 'audio':
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
