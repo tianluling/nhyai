@@ -985,11 +985,12 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
         scores = settings.NSFW.caffe_preprocess_and_compute_api(file_path)
         resultMap = {}
         porn_sensitivity_level = "-1"
-        if (float(scores[1]) < 0.5):
+        porn_pencent = float(scores[1]) * 100
+        if (porn_pencent < settings.PORNSCORE_MIN):
             porn_sensitivity_level = "0"
-        if (float(scores[1]) >= 0.5 and float(scores[1]) <= 0.9):
+        if (porn_pencent >= settings.PORNSCORE_MIN and porn_pencent <= settings.PORNSCORE_MAX):
             porn_sensitivity_level = "1"
-        if (float(scores[1]) > 0.9):
+        if (porn_pencent > settings.PORNSCORE_MAX):
             porn_sensitivity_level = "2"
         resultMap['porn_sensitivity_level'] = porn_sensitivity_level
         resultMap['porn_percent'] = get_two_float(float(scores[1]) * 100, 2)
@@ -997,11 +998,12 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
         check_result = settings.VIOLENCE.check_violence(file_path)
         violence = check_result['violence']
         violence_sensitivity_level = "-1"
-        if (float(violence) < 0.5):
+        violence_pencent = float(violence) * 100
+        if (violence_pencent < settings.VIOLENCESCORE_MIN):
             violence_sensitivity_level = "0"
-        if (float(violence) >= 0.5 and float(violence) <= 0.9):
+        if (violence_pencent >= settings.VIOLENCESCORE_MIN and violence_pencent <= settings.VIOLENCESCORE_MAX):
             violence_sensitivity_level = "1"
-        if (float(violence) > 0.9):
+        if (violence_pencent > settings.VIOLENCESCORE_MAX):
             violence_sensitivity_level = "2"
         resultMap['violence_sensitivity_level'] = violence_sensitivity_level
         resultMap['violence_percent'] = get_two_float(float(violence) * 100, 2)
@@ -1023,7 +1025,7 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
             max_sensitivity_type = 'violence_porn'
 
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
-                            resultMap, max_sensitivity_type, violence, scores[1])
+                            resultMap, max_sensitivity_type, resultMap['violence_percent'], resultMap['porn_percent'])
 
         return Response(status=status.HTTP_201_CREATED)
 
