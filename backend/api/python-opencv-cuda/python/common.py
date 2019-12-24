@@ -80,3 +80,15 @@ def findOpticalFlow(inputVideo, outputVideo, useCuda = False, printFrames = Fals
         print('total time in optical flow GPU processing: {:0.4f} sec, for: {} frames. FPS: {:0.2f}'.format(totaltime, count, speed))
     else:
         print('total time in optical flow CPU processing: {:0.4f} sec, for: {} frames. FPS: {:0.2f}'.format(totaltime, count, speed))
+
+def cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio):
+    good_matcher_cpu = cv2.pythoncuda.cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio)
+    return good_matcher_cpu
+
+def gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio):
+    good_matcher_gpu = cv2.pythoncuda.gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio)
+    return good_matcher_gpu
+
+def readDirectory(directory_name, useCuda, ratio):
+    check_img_list = cv2.pythoncuda.readDirectory(directory_name, useCuda, None, ratio)
+    return check_img_list
