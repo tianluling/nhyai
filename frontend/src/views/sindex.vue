@@ -687,7 +687,7 @@
                     params =  'system_id=1'+`&page=${pager}`
 				}else if(start|end|name) {
                     start =start?'&begin_time='+getDate(start)+' 00:00:01':'';
-                    end =end?'&end_time='+getDate(end)+' 00:00:01':'';
+                    end =end?'&end_time='+getDate(end)+' 23:59:59':'';
                     name =name?'&file_name='+name:'';
                     params =  'system_id=1'+start+end+name
 				}else {
