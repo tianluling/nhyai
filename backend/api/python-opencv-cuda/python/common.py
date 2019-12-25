@@ -90,5 +90,5 @@ def gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio):
     return good_matcher_gpu
 
 def readDirectory(directory_name, useCuda, ratio):
-    check_img_list = cv2.pythoncuda.readDirectory(directory_name, useCuda, None, ratio)
+    check_img_list = cv2.pythoncuda.readDirectory(directory_name, useCuda, ratio)
     return check_img_list

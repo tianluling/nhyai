@@ -82,7 +82,7 @@ namespace cv
 
         CV_EXPORTS_W int gpuFindSimilaritiesBetweenImages( cv::Mat &original, cv::Mat &image_to_compare, float ratio=0.75 );
         
-        CV_EXPORTS_W void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::String> check_img_list, float ratio=0.75 );
+        CV_EXPORTS_W std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, float ratio=0.75 );
 
     }
 }

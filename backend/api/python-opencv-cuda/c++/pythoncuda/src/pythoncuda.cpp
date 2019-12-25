@@ -229,7 +229,7 @@ namespace cv
             return goodMatches.size();
         }
 
-        CV_EXPORTS_W void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::String> check_img_list, float ratio=0.75 )
+        CV_EXPORTS_W std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, float ratio=0.75 )
         {
             auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -240,7 +240,7 @@ namespace cv
             std::vector<cv::Mat> images;
             cv::glob(path,fn,false);
             size_t count = fn.size();
-            // std::vector<cv::String> check_img_list;
+            std::vector<cv::String> check_img_list;
 
             if (count == 0) {
                 std::cout << "File " << directory_name << " not exits" << std::endl;
@@ -309,6 +309,8 @@ namespace cv
             }else {
                 std::cout << "images length must be more then one!" << std::endl;
             }
+
+            return check_img_list;
         }
 
     }

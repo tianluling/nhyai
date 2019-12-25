@@ -130,7 +130,7 @@ int gpuFindSimilaritiesBetweenImages(Mat &original, Mat &image_to_compare, float
     return goodMatches.size();
 }
 
-void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::String> & check_img_list, float ratio=0.75) {
+std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, float ratio=0.75) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     cv::String path(directory_name); //select only jpg
@@ -140,6 +140,7 @@ void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::Stri
     std::vector<cv::Mat> images;
     cv::glob(path,fn,false);
     size_t count = fn.size();
+    std::vector<cv::String> check_img_list;
 
     if (count == 0) {
         std::cout << "File " << directory_name << " not exits" << std::endl;
@@ -208,6 +209,8 @@ void readDirectory(cv::String directory_name, bool useCuda, std::vector<cv::Stri
     }else {
         std::cout << "images length must be more then one!" << std::endl;
     }
+
+    return check_img_list;
 }
 
 int main()
@@ -229,7 +232,7 @@ int main()
     int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
     cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
 
-    readDirectory(path, useCuda, check_img_list, ratio);
+    check_img_list = readDirectory(path, useCuda, ratio);
     for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
          cout << check_img_list[j] << endl;
     }
