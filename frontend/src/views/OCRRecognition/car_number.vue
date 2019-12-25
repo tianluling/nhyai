@@ -22,7 +22,7 @@
 							<p class="check_style">检测</p>
 						</div>-->
 					</div>
-					<p class="top_suggest">提示：图片大小不超过1M，请保证需要识别部分为图片主体部分</p>
+					<p class="top_suggest">提示：图片大小不超过20M，请保证需要识别部分为图片主体部分</p>
 				</div>
 			</el-col>
 			<el-col :xs={span:24} :sm={span:11} :md="10" :lg="9" :xl="8">
@@ -44,10 +44,9 @@
             return {
                 dialogImageUrl: require("../../assets/image/car_number_sample.jpg"),
                 dialogVisible: false,
-                jsonDemo:'{"name":"艾米","sex":"女","nation":"汉","birthday":"1986年4月23日","address":"上海徐汇区田林路397号腾云大厦6F","idNumber":"310104198604230289"}',
+                jsonDemo:'{"plate_no":"京N0L9U8"}',
                 buttonWord:"开始检测",
                 imageName:"",
-                showPercent:"概率：1.75%",
                 isForce:false,
                 imageRight:false,
                 imageIsBig:false,
@@ -59,12 +58,13 @@
             };
         },
         mounted:function () {
-            var that = this;
+            console.log('不可能啊 ',this.showJson);
             this.isCheck = true;
             var jdata = JSON.stringify(JSON.parse(this.jsonDemo), null, 4);
             var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
             this.intervalid1 = setTimeout(() => {
                 this.showJson = JSON.parse(this.jsonDemo);
+                console.log('不可能啊 ',this.showJson);
                 clearInterval(this.intervalid1);
                 this.isCheck = false;
                 loading.close();
@@ -114,11 +114,10 @@
                     that.dialogImageUrl = this.result;
                 };
                 let size=file.size;//文件的大小，判断图片的大小
-                if(size>1048576*2){
-                    console.log("图片太大了")
+                if(size>1048576*20){
+                    this.$message.error('请上传小于20M的图片！');
                 }else {
                     this.imageRight = true;
-                    console.log('开始上传')
                     this.uploadImage(e);
                 }
             },
