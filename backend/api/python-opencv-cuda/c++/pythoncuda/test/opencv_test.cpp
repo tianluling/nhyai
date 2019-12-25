@@ -36,8 +36,9 @@ int cpuFindSimilaritiesBetweenImages(Mat &original, Mat &image_to_compare, float
     }
 
     //提取特征点方法
-    double min_hessian = 400;
-    cv::Ptr<cv::xfeatures2d::SURF> surf = cv::xfeatures2d::SURF::create(min_hessian);
+    // double min_hessian = 400;
+    // cv::Ptr<cv::xfeatures2d::SURF> surf = cv::xfeatures2d::SURF::create(min_hessian);
+    cv::Ptr< cv::ORB > orb = cv::ORB::create(1500);
     
     //特征点
     std::vector<cv::KeyPoint> kp_1, kp_2;
@@ -45,18 +46,20 @@ int cpuFindSimilaritiesBetweenImages(Mat &original, Mat &image_to_compare, float
     //特征点匹配
     cv::Mat desc_1, desc_2;
     //提取特征点并计算特征描述子
-    surf->detectAndCompute(original_gray, cv::Mat(), kp_1, desc_1);
-    surf->detectAndCompute(image_to_compare_gray, cv::Mat(), kp_2, desc_2);
+    orb->detectAndCompute(original_gray, cv::Mat(), kp_1, desc_1);
+    orb->detectAndCompute(image_to_compare_gray, cv::Mat(), kp_2, desc_2);
 
     std::vector<std::vector<cv::DMatch>> matches;
 
-    cv::Ptr<cv::FlannBasedMatcher> matcher = cv::FlannBasedMatcher::create();
+    // cv::Ptr<cv::FlannBasedMatcher> matcher = cv::FlannBasedMatcher::create();
+    cv::Ptr< cv::DescriptorMatcher > matcher = cv::BFMatcher::create();
     matcher->knnMatch(desc_1, desc_2, matches, 2);
 
     std::vector<cv::DMatch> goodMatches;
     for (unsigned int i = 0; i < matches.size(); ++i) {
-        if (matches[i][0].distance < matches[i][1].distance * ratio)
+        if (matches[i][0].distance < matches[i][1].distance * ratio){
             goodMatches.push_back(matches[i][0]);
+        }
     }
 
     auto stop_time = std::chrono::high_resolution_clock::now();
@@ -174,7 +177,7 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
                 // cout << i <<" , good_matcher with gpu:" << good_matcher  << endl;
                 // cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
             }else {
-                good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+                good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio  + 0.01);
                 // cout << i <<" , good_matcher with cpu:" << good_matcher  << endl;
                 // cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
             }
@@ -226,7 +229,7 @@ int main()
     float ratio=0.75;
     std::vector<string> check_img_list;
 
-    int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
     cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
 
     int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
