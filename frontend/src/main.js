@@ -13,6 +13,7 @@ import common from './store/common'
 import fileUtil from './store/fileUtil'
 import axios from 'axios'
 import { post, fetch, patch, put } from './store/https'
+import {showMessageShort} from './store/common'
 import AudioRecorder from 'vue-audio-recorder'
 import "babel-polyfill"
 
@@ -22,6 +23,7 @@ Vue.prototype.$fetch = fetch;
 Vue.prototype.$patch = patch;
 Vue.prototype.$put = put;
 Vue.prototype.$axios = axios;
+Vue.prototype.$showMessageShort = showMessageShort;
 
 Vue.use(ElementUI);
 Vue.use(common);

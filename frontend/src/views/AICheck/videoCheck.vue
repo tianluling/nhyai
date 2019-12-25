@@ -265,6 +265,7 @@
 
             },
             showMessage(msg){
+                this.$message.closeAll();
                 this.$message.error({
                     showClose: true,
                     message: msg,

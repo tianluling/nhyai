@@ -67,9 +67,23 @@ Vue.filter('formatDate', function(time, dateType) {
 		return formatDate(date, dateType);
 	}
 });
-
-
-
+export function getDate(msg,dateType) {
+    var date = new Date(msg);
+    if(dateType == null) {
+        return formatDate(date, 'yyyy-MM-dd');
+    } else {
+        return formatDate(date, dateType);
+    }
+};
+export function showMessageShort(msg) {
+    this.$message.closeAll();
+    this.$message.error({
+        showClose: true,
+        message: msg,
+        type: 'error',
+        duration:1500
+    });
+};
 
 export function formatDate(date, fmt) {//2018-03-21 18:08:48
 	if(/(y+)/.test(fmt)) {
@@ -94,6 +108,18 @@ export function formatDate(date, fmt) {//2018-03-21 18:08:48
 function padLeftZero(str) {
 	return('00' + str).substr(str.length);
 };
+export function addDate() {
+    let nowDate = new Date();
+    let date = {
+        year: nowDate.getFullYear(),
+        month: nowDate.getMonth() + 1,
+        date: nowDate.getDate(),
+    }
+    date.month = date.month>9?date.month:0+date.month;
+    date.date = date.date>9?date.date:0+date.date;
+    console.log(date);
+    return date.year + '-' + date.month + '-' + date.date;
+}
 export function scrollBy(offsetTop){
     // window.scrollBy(0,offsetTop);
     $('html,body').animate({ scrollTop: offsetTop}, 200)

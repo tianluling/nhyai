@@ -132,7 +132,13 @@
                 reader.onload = function() {
                     that.dialogImageUrl = this.result;
                 };
-                this.uploadImage(e);
+                let size=file.size;//文件的大小，判断图片的大小
+                if(size>1048576*20){
+                    this.$message.error('请上传小于20M的图片！');
+                }else {
+                    this.imageRight = true;
+                    this.uploadImage(e);
+                }
             },
         }
     }

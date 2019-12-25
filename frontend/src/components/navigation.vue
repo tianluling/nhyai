@@ -25,7 +25,7 @@
 							<router-link to=""><span>文本检测</span></router-link>
 							<ul class="header_nav_two">
 								<li v-for="(item,index) in OCRList">
-									<router-link @click.native="headerNavLeave" :to="item.link">{{item.title}}</router-link>
+									<router-link @click.native="headerNavLeaveOcr" :to="item.link">{{item.title}}</router-link>
 								</li>
 							</ul>
 						</li>
@@ -45,6 +45,7 @@
 <script>
 	export default {
 	    name:"navigation",
+        props:['isWord'],
 		data(){
 	        return{
                 activeIndex: '1',
@@ -78,7 +79,14 @@
             headerNavLeave:function(){
                 $(".header_nav_two").hide();
                 $(event.currentTarget).children(".header_nav_two").hide();
-                console.log("离开了")
+            },
+			headerNavLeaveOcr(){
+                $(".header_nav_two").hide();
+                $(event.currentTarget).children(".header_nav_two").hide();
+                if(this.isWord){
+                    this.$parent.toPractice();
+				}
+
             },
 		}
 	}

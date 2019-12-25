@@ -21,7 +21,7 @@
 							<p class="check_style_hidden" @click="urlCheck">检测</p>
 						</div>-->
 					</div>
-					<p class="top_suggest">提示：图片大小不超过1M，请保证需要识别部分为图片主体部分</p>
+					<p class="top_suggest">提示：图片大小不超过20M，请保证需要识别部分为图片主体部分</p>
 				</div>
 			</el-col>
 			<el-col :xs={span:24} :sm={span:11} :md="10" :lg="9" :xl="8">
@@ -127,7 +127,13 @@
                 reader.onload = function() {
                     that.dialogImageUrl = this.result;
                 };
-                this.uploadImage(e);
+                let size=file.size;//文件的大小，判断图片的大小
+                if(size>1048576*20){
+                    this.$message.error('请上传小于20M的图片！');
+                }else {
+                    this.imageRight = true;
+                    this.uploadImage(e);
+                }
             },
         }
     }

@@ -66,16 +66,20 @@
 					<el-date-picker
 						v-model="beginDate"
 						type="date"
-						placeholder="起始日期">
+						placeholder="起始日期"
+						:picker-options="pickerOptionsStart"
+						@change="changeEnd">
 					</el-date-picker>
 					<span>-</span>
 					<el-date-picker
 						v-model="endDate"
 						type="date"
-						placeholder="截止日期">
+						placeholder="截止日期"
+						:picker-options="pickerOptionsEnd"
+						@change="changeStart">
 					</el-date-picker>
-					<input type="text" class="search_input">
-					<span class="search_btn">查询</span>
+					<input type="text" class="search_input" v-model="searchContent">
+					<span class="search_btn" @click="searchHistory">查询</span>
 				</div>
 				<table border="0" width="100%">
 					<tr class="show_history_title">
@@ -88,7 +92,9 @@
 						<th>预览</th>
 					</tr>
 					<tr class="show_history_con" v-for="(item ,index) in historyInfo">
-						<td class="ell">{{item.file_name}}</td>
+
+						<td v-if="item.file_type==5" class="ell">手动输入，无文件名</td>
+						<td v-else class="ell">{{item.file_name}}</td>
 						<td class="green_color" v-if="item.max_sensitivity_level==0">合规</td>
 						<td class="orange_color" v-else-if="item.max_sensitivity_level==1">疑似违规</td>
 						<td class="red_color" v-else-if="item.max_sensitivity_level==2">违规</td>
@@ -100,19 +106,23 @@
 						<td class="ell" v-else-if="item.max_sensitivity_type=='ocr'">OCR识别</td>
 						<td class="ell" v-else-if="item.max_sensitivity_type=='audio'">语音识别</td>
 						<td class="ell" v-else-if="item.max_sensitivity_type=='-1'">未识别</td>
-						<td >{{item.max_sensitivity_percent}}%</td>
-						<td class="ell" v-if="item.app_text">{{item.app_text}}</td>
+						<td v-if="item.max_sensitivity_type !='ocr'">{{item.max_sensitivity_percent}}%</td>
+						<td class="green_color" v-else>/</td>
+						<td class="ell" v-if="item.app_text">{{item.content}}</td>
+						<td class="ell" v-else-if="item.web_text">{{item.web_text}}</td>
 						<td class="ell" v-else-if="item.channel_id ==5">详情请预览</td>
 						<td class="ell" v-else-if="item.channel_id ==8">详情请预览</td>
 						<td class="ell" v-else>无</td>
 						<td class="ell">{{item.upload_time|momentDate}}</td>
 						<td  @click="preLook(item)">预览</td>
 					</tr>
+					<tr v-show="!historyInfo.length" class="show_history_center">暂时没有记录哦~</tr>
 
 				</table>
 				<div class="show_pagination">
 					<el-pagination
 						background
+						:current-page="currentPager"
 						:prev-text="prevText"
 						:next-text="nextText"
 						:page-size="10"
@@ -151,26 +161,27 @@
 						<table width="100%" cellspacing="0" cellpadding="0">
 							<tr class="pre_item">
 								<td class="pre_item_common">文件名称</td>
-								<td>{{preLookInfo.file_name}}</td>
+								<td v-if="preLookInfo.file_type==5" class="ell">手动输入，无文件名</td>
+								<td v-else>{{preLookInfo.file_name}}</td>
 							</tr>
 							<tr class="pre_item">
 								<td class="pre_item_common">上传时间</td>
 								<td>{{preLookInfo.upload_time|momentDate}}</td>
 							</tr>
-							<tr class="pre_item">
+							<tr class="pre_item" v-show="preLookInfo.max_sensitivity_type!='ocr'">
 								<td class="pre_result_item">审查结果</td>
-								<td>
+								<td v-if="preLookInfo.channel_id !=4">
 									<div class="clearfix">
 										<div class="result_outer result_outer_notop fl">
-											<p>暴恐识别</p>
+											<p v-show="preLookInfo.violence_sensitivity_level !=-1">暴恐识别</p>
 											<p class="green_style_name" v-if="preLookInfo.violence_sensitivity_level==0">合规</p>
 											<p class="orange_style_name" v-else-if="preLookInfo.violence_sensitivity_level==1">疑似违规</p>
-											<p class="green_style_name" v-else-if="preLookInfo.violence_sensitivity_level==-1">未检测</p>
-											<p class="red_style_name" v-else>违规</p>
+											<!--<p class="green_style_name" v-else-if="preLookInfo.violence_sensitivity_level==-1">未检测</p>-->
+											<p class="red_style_name" v-else-if="preLookInfo.violence_sensitivity_level==2">违规</p>
 											<p class="green_style_number" v-if="preLookInfo.violence_sensitivity_level==0">{{preLookInfo.violence_percent}}%</p>
 											<p class="orange_style_number" v-else-if="preLookInfo.violence_sensitivity_level==1">{{preLookInfo.violence_percent}}%</p>
-											<p class="green_style_number" v-else-if="preLookInfo.violence_sensitivity_level==-1">/</p>
-											<p class="red_style_number" v-else>{{preLookInfo.violence_percent}}%</p>
+											<!--<p class="green_style_number" v-else-if="preLookInfo.violence_sensitivity_level==-1">/</p>-->
+											<p class="red_style_number" v-else-if="preLookInfo.violence_sensitivity_level==2">{{preLookInfo.violence_percent}}%</p>
 										</div>
 										<!--<div class="result_outer result_outer_notop left_50 fl">
 											<p>政治敏感识别</p>
@@ -183,12 +194,12 @@
 											<p class="ell">色情识别</p>
 											<p class="green_style_name" v-if="preLookInfo.porn_sensitivity_level==0">合规</p>
 											<p class="orange_style_name" v-else-if="preLookInfo.porn_sensitivity_level==1">疑似违规</p>
-											<p class="green_style_name" v-else-if="preLookInfo.porn_sensitivity_level==-1">未检测</p>
-											<p class="red_style_name" v-else>违规</p>
+											<!--<p class="green_style_name" v-else-if="preLookInfo.porn_sensitivity_level==-1">未检测</p>-->
+											<p class="red_style_name" v-else-if="preLookInfo.porn_sensitivity_level==2">违规</p>
 											<p class="green_style_number" v-if="preLookInfo.porn_sensitivity_level==0">{{preLookInfo.porn_percent}}%</p>
 											<p class="orange_style_number" v-else-if="preLookInfo.porn_sensitivity_level==1">{{preLookInfo.porn_percent}}%</p>
-											<p class="green_style_number" v-else-if="preLookInfo.porn_sensitivity_level==-1">/</p>
-											<p class="red_style_number" v-else>{{preLookInfo.porn_percent}}%</p>
+											<!--<p class="green_style_number" v-else-if="preLookInfo.porn_sensitivity_level==-1">/</p>-->
+											<p class="red_style_number" v-else-if="preLookInfo.porn_sensitivity_level==2">{{preLookInfo.porn_percent}}%</p>
 										</div>
 										<!--<div class="result_outer left_50 fl" >
 											<p>公众人物识别</p>
@@ -204,12 +215,31 @@
 										</div>
 									</div>-->
 								</td>
+								<td v-else-if="preLookInfo.file_type ==4">
+									<div class="clearfix" v-if="videoUrl.sensitive_info">
+										<div class="result_outer text_result_outer fl" v-for="item in videoUrl.sensitive_info.final_list">
+											<p>{{item}}</p>
+											<p class="red_style_name" >违规</p>
+											<!--<p class="red_style_number">{{item}}</p>-->
+										</div>
+									</div>
+								</td>
+								<td v-else-if="preLookInfo.file_type ==5">
+									<div class="clearfix" v-if="videoUrl">
+										<div class="result_outer text_result_outer fl" v-for="item in videoUrl.final_list">
+											<p>{{item}}</p>
+											<p class="red_style_name" >违规</p>
+											<!--<p class="red_style_number">{{item}}</p>-->
+										</div>
+									</div>
+								</td>
 							</tr>
 							<tr class="pre_item">
 								<td class="pre_word_item">文本识别</td>
-								<td v-if="preLookInfo.web_text" id="web_text">{{preLookInfo.web_text}}</td>
-								<td v-else-if="preLookInfo.channel_id==5">姓名：{{videoUrl.name}}、<br/>性别：{{videoUrl.sex}}、<br/>
-									民族：{{videoUrl.nation}}、<br/>出生：{{videoUrl.birthday}}、<br/>地址：{{videoUrl.address}}、<br/>公民身份号码：{{videoUrl.id}}</td>
+								<!--<td v-if="preLookInfo.web_text" id="web_text">{{preLookInfo.web_text}}</td>-->
+								<td v-if="preLookInfo.channel_id==4" id="web_text"></td>
+								<td v-else-if="preLookInfo.channel_id==5">姓名：{{videoUrl.name|noCheck}}<br/>性别：{{videoUrl.sex|noCheck}}<br/>
+									民族：{{videoUrl.nation|noCheck}}<br/>出生：{{videoUrl.birth|formatDate('yyyy年MM月dd日')}}<br/>地址：{{videoUrl.address|noCheck}}<br/>公民身份号码：{{videoUrl.id|noCheck}}</td>
 								<td v-else-if="preLookInfo.channel_id==8"><span v-for="item in videoUrl" >{{item}}<br/></span></td>
 								<td v-else-if="preLookInfo.channel_id==6">
 									<span>{{runningTitle.license_type}}：{{videoUrl.license_type}}<br/></span>
@@ -331,7 +361,7 @@
 	import audioSample from '../components/audioSample.vue'
 	import audioExample from '../components/audio.vue'
     import { Message } from 'element-ui';
-    import {scrollBy} from '../store/common'
+    import {scrollBy,getDate} from '../store/common'
     export default {
         data() {
             return {
@@ -346,6 +376,7 @@
                 options:{background:"rgba(0, 0, 0, 0.3)"},
 				beginDate:'',
 				endDate:'',
+				currentPager:1,
                 prevText:'上一页',
                 nextText:'下一页',
 				checkType:1,
@@ -369,8 +400,26 @@
                 markerInfo:[],
                 player:null,
                 fileSort:2,
-				firstVideo:true
-
+				firstVideo:true,
+                pickerOptions: {
+                    disabledDate(time) {
+                        return time.getTime() > Date.now();
+                    }
+                },
+                pickerOptionsStart: {
+                    /*disabledDate(time) {
+                        return time.getTime() < new Date(new Date().toLocaleDateString()).getTime();
+                    }*/
+                    disabledDate(time) {
+                        return time.getTime() > Date.now();
+                    }
+                },
+                pickerOptionsEnd: {
+                    disabledDate(time) {
+                        return time.getTime() > Date.now();
+                    }
+				},
+                searchContent:''
             };
         },
 		components:{
@@ -387,14 +436,43 @@
 		watch:{
 
 		},
+        activated(){
+            this.getHistory(1);
+		},
 		mounted:function () {
             this.getHistory();
+            console.log(this.currentDate)
         },
         methods: {
             showInputValue(){
                 console.log(document.getElementById('contentUrl').value);
                 this.$message.error('该功能尚未开通！')
 			},
+            changeStart() {
+                this.pickerOptionsStart = Object.assign({}, this.pickerOptionsStart, {
+                    // 可通过箭头函数的方式访问到this
+                    disabledDate: (time) => {
+                        //这样写有bug
+                        //   return  this.outTime < time.getTime() < new Date(new Date().toLocaleDateString()).getTime()
+                        var times = '';
+                        //百度没搜到试了好久才试出来
+                        times = this.endDate < time.getTime()||time.getTime() > Date.now();
+                        //打印了几百条
+                        // console.log("times时间",times);
+                        return times
+                    }
+                })
+
+            },
+            //开始时间 控制结束时间
+            changeEnd() {
+
+                this.pickerOptionsEnd = Object.assign({}, this.pickerOptionsEnd, {
+                    disabledDate: (time) => {
+                        return time.getTime() < this.beginDate ||time.getTime() > Date.now();
+                    }
+                })
+            },
             urlCheck(){
                 if(this.fileUrl ==''){
                     this.$message.error('请输入要检测的文件地址')
@@ -428,8 +506,15 @@
                     this.submitTextCallback(null,null,this.fileUrl);
                     this.isUploading = true;
 				}else {
-                    this.$message.error('您选择的文件格式错误！');
+                    this.$showMessageShort('您选择的文件格式错误！');
 				}
+			},
+            searchHistory(){
+                if(!this.beginDate&&!this.endDate&&!this.searchContent){
+                    this.$showMessageShort('请选择/输入要查询的条件！');
+                    return;
+				}
+                this.getHistory(null,this.beginDate,this.endDate,this.searchContent);
 			},
 			submitImageCallback(e,file,url){
                 this.$refs.imageCheck.submitImage(e,file,url);
@@ -457,7 +542,7 @@
                     console.log(fileType);
                     if(fileType.substr(0, 5) === "image"){
                         if(file.size>20971520){
-                            this.$message.error('请选择小于20M的图片！');
+                            this.$showMessageShort('请选择小于20M的图片！');
                             return;
                         }
                         that.checkType = 1;
@@ -467,11 +552,11 @@
                         this.isUploading = true;
                     }else if(fileType.substr(0, 5) === "audio"){
                         if(fileType.indexOf("wav") ==-1){
-                            this.$message.error('请选择wav格式的视频！');
+                            this.$showMessageShort('请选择wav格式的视频！');
                             return;
                         }
                         if(file.size>20971520){
-                            this.$message.error('请选择小于20M的音频文件！');
+                            this.$showMessageShort('请选择小于20M的音频文件！');
                             return;
                         }
                         that.checkType = 3;
@@ -482,11 +567,11 @@
 					}else if(fileType.substr(0, 5) === "video"){
 
                         if(fileType.indexOf("mp4") ==-1){
-                            this.$message.error('请选择mp4格式的视频！');
+                            this.$showMessageShort('请选择mp4格式的视频！');
                             return;
 						}
-                        if(file.size>20971520){
-                            this.$message.error('请选择小于20M的视频！');
+                        if(file.size>20971520*20){
+                            this.$showMessageShort('请选择小于20M的视频！');
                             return;
                         }
                         that.checkType = 2;
@@ -496,8 +581,8 @@
                         this.isUploading = true;
                         this.toPractice();
 					}else if(fileType.substr(0, 4) === "text"){
-                        if(file.size>10485760){
-                            this.$message.error('请选择小于10M的文件！');
+                        if(file.size>10485760*10){
+                            this.$showMessageShort('请选择小于10M的文件！');
                             return;
                         }
                         that.checkType = 4;
@@ -506,7 +591,7 @@
                         this.submitTextCallback(e,file);
                         this.isUploading = true;
                     }else{
-                        this.$message.error('您选择的文件格式错误！');
+                        this.$showMessageShort('您选择的文件格式错误！');
 					}
                     document.getElementById("datafile").value=null;
 
@@ -580,16 +665,31 @@
                             }
 
                         }
+                        if(this.preLookInfo.file_type ==4){
+                            document.getElementById('web_text').innerHTML = this.preLookInfo.web_text;
+						}
+                        if(this.preLookInfo.file_type ==5){
+                            document.getElementById('web_text').innerHTML = this.preLookInfo.web_text;
+                        }
+
                     },
                     error:err=>{
                         console.log(err);
                     }
                 });
             },
-			getHistory(pager){
+			getHistory(pager,start,end,name){
+                console.log(start);
+                console.log(end);
+                console.log(name);
                 let params;
 				if(pager){
                     params =  'system_id=1'+`&page=${pager}`
+				}else if(start|end|name) {
+                    start =start?'&begin_time='+getDate(start)+' 00:00:01':'';
+                    end =end?'&end_time='+getDate(end)+' 23:59:59':'';
+                    name =name?'&file_name='+name:'';
+                    params =  'system_id=1'+start+end+name
 				}else {
                     params =  'system_id=1'
 				}
@@ -607,6 +707,7 @@
                         console.log(response);
                         this.count = response.count;
                         this.historyInfo = response.results;
+                        this.currentPager = pager?pager:1;
                     },
                     error:err=>{
                         console.log(err);
@@ -730,7 +831,9 @@
 	.show_history_title th:nth-of-type(3){flex: 2.5;}
 	.show_history_title th:nth-of-type(6){flex: 2;}
 	.show_history_title th:nth-of-type(5){flex: 2.5;}
+
 	.show_history_con{height: 50px;line-height: 50px;color: #333333;font-size: 14px;background-color: #fff;width: 1200px;display: flex;border: 1px solid #e3e8f3;border-top: none;}
+	.show_history_center{height: 50px;line-height: 50px;color: #333333;font-size: 14px;background-color: #fff;width: 1200px;border: 1px solid #e3e8f3;border-top: none;text-align: center}
 	.show_history_con td{flex: 0.8;padding-left: 10px;text-align: center;}
 	.show_history_con td:last-child{flex: 0.5;text-align: center;color: #85afff;cursor: pointer;}
 	.show_history_con td:first-child{padding-left: 10px;flex: 3;text-align: left;}
@@ -760,6 +863,7 @@
 	.pre_result_item{height: 175px;line-height: 175px;}
 	.pre_word_item {height: 150px;line-height: 150px;}
 	.result_outer{margin: 25px 20px 0 0;display: flex;color: #000000;height: 25px;line-height: 25px;width: 35%;}
+	.text_result_outer{margin: 25px 20px 25px 20px;width: 25%;}
 	.result_outer_notop{margin-top: 0;}
 	.result_outer div:first-child{margin-top: 0;}
 	.result_outer p:nth-of-type(1){font-size: 14px;margin:0 15px 0 0;}
