@@ -1735,7 +1735,7 @@ class HistoryRecordViewSet(viewsets.ModelViewSet):
             conditions['user_id'] = user_id
 
         if file_name is not None:
-            conditions['file_name'] = file_name
+            conditions['file_name__contains'] = file_name
 
         if file_type is not None:
             conditions['file_type'] = file_type
