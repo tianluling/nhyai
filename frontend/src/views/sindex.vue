@@ -99,14 +99,25 @@
 						<td class="orange_color" v-else-if="item.max_sensitivity_level==1">疑似违规</td>
 						<td class="red_color" v-else-if="item.max_sensitivity_level==2">违规</td>
 						<td class="green_color" v-else>/</td>
-						<td class="ell" v-if="item.max_sensitivity_type=='violence'">暴恐识别</td>
-						<td class="ell" v-else-if="item.max_sensitivity_type=='porn'">色情识别</td>
-						<td class="ell" v-else-if="item.max_sensitivity_type=='violence_porn'">暴恐识别、色情识别</td>
+						<td class="ell" v-if="item.max_sensitivity_type=='violence'">暴恐</td>
+						<td class="ell" v-else-if="item.max_sensitivity_type=='porn'">涉黄</td>
+						<td class="ell" v-else-if="item.max_sensitivity_type=='violence_porn'">涉黄、暴恐</td>
 						<td class="ell" v-else-if="item.max_sensitivity_type=='text'">文本识别</td>
-						<td class="ell" v-else-if="item.max_sensitivity_type=='ocr'">OCR识别</td>
+						<!--<td class="ell" v-else-if="item.max_sensitivity_type=='ocr'">OCR识别</td>-->
+						<td class="ell" v-else-if="item.channel_id=='5'">身份证识别</td>
+						<td class="ell" v-else-if="item.channel_id=='6'">行驶证识别</td>
+						<td class="ell" v-else-if="item.channel_id=='7'">驾驶证识别</td>
+						<td class="ell" v-else-if="item.channel_id=='8'">通用识别</td>
+						<td class="ell" v-else-if="item.channel_id=='9'">营业执照识别</td>
+						<td class="ell" v-else-if="item.channel_id=='10'">银行卡识别</td>
+						<td class="ell" v-else-if="item.channel_id=='11'">手写体识别</td>
+						<td class="ell" v-else-if="item.channel_id=='12'">车牌识别</td>
+						<td class="ell" v-else-if="item.channel_id=='13'">名片识别</td>
 						<td class="ell" v-else-if="item.max_sensitivity_type=='audio'">语音识别</td>
+						<td class="ell" v-else-if="item.file_type=='5'">敏感字识别</td>
 						<td class="ell" v-else-if="item.max_sensitivity_type=='-1'">未识别</td>
 						<td v-if="item.max_sensitivity_type !='ocr'">{{item.max_sensitivity_percent}}%</td>
+						<td class="green_color" v-else-if="item.channel_id=='4'">/</td>
 						<td class="green_color" v-else>/</td>
 						<td class="ell" v-if="item.app_text">{{item.content}}</td>
 						<td class="ell" v-else-if="item.web_text">{{item.web_text}}</td>
@@ -170,8 +181,8 @@
 							</tr>
 							<tr class="pre_item" v-show="preLookInfo.max_sensitivity_type!='ocr'">
 								<td class="pre_result_item">审查结果</td>
-								<td v-if="preLookInfo.channel_id !=4">
-									<div class="clearfix" v-show="preLookInfo.violence_sensitivity_level !=-1">
+								<td v-if="preLookInfo.channel_id !=4" class="type_outer">
+									<div class="clearfix" v-if="preLookInfo.violence_sensitivity_level !=-1">
 										<div class="result_outer result_outer_notop fl">
 											<p >暴恐识别</p>
 											<p class="green_style_name" v-if="preLookInfo.violence_sensitivity_level==0">合规</p>
@@ -189,7 +200,7 @@
 											<p class="green_style_number">12.56%</p>
 										</div>-->
 									</div>
-									<div class="clearfix" v-show="preLookInfo.porn_sensitivity_level !=-1">
+									<div class="clearfix" v-if="preLookInfo.porn_sensitivity_level !=-1">
 										<div class="result_outer fl">
 											<p class="ell">色情识别</p>
 											<p class="green_style_name" v-if="preLookInfo.porn_sensitivity_level==0">合规</p>
@@ -237,7 +248,10 @@
 							<tr class="pre_item">
 								<td class="pre_word_item">文本识别</td>
 								<!--<td v-if="preLookInfo.web_text" id="web_text">{{preLookInfo.web_text}}</td>-->
-								<td v-if="preLookInfo.channel_id==4" id="web_text"></td>
+								<td v-if="preLookInfo.channel_id==1">{{videoUrl.text|noCheck}}</td>
+								<td v-else-if="preLookInfo.channel_id==2">{{videoUrl.text|noCheck}}</td>
+								<td v-else-if="preLookInfo.channel_id==3">{{videoUrl.text|noCheck}}</td>
+								<td v-else-if="preLookInfo.channel_id==4" id="web_text"></td>
 								<td v-else-if="preLookInfo.channel_id==5">姓名：{{videoUrl.name|noCheck}}<br/>性别：{{videoUrl.sex|noCheck}}<br/>
 									民族：{{videoUrl.nation|noCheck}}<br/>出生：{{videoUrl.birth|formatDate('yyyy年MM月dd日')}}<br/>地址：{{videoUrl.address|noCheck}}<br/>公民身份号码：{{videoUrl.id|noCheck}}</td>
 								<td v-else-if="preLookInfo.channel_id==8"><span v-for="item in videoUrl" >{{item}}<br/></span></td>
@@ -862,10 +876,11 @@
 	.pre_item_common{height: 46px;line-height: 46px;}
 	.pre_result_item{height: 175px;line-height: 175px;}
 	.pre_word_item {height: 150px;line-height: 150px;}
-	.result_outer{margin: 25px 20px 0 0;display: flex;color: #000000;height: 25px;line-height: 25px;width: 35%;}
+	.result_outer{display: flex;color: #000000;height: 25px;line-height: 25px;width: 35%;}
 	.text_result_outer{margin: 25px 20px 25px 20px;width: 25%;}
 	.result_outer_notop{margin-top: 0;}
-	.result_outer div:first-child{margin-top: 0;}
+	.result_outer div:first-child{margin-top: 10px;}
+	.type_outer>div:nth-of-type(2){margin-top: 20px;}
 	.result_outer p:nth-of-type(1){font-size: 14px;margin:0 15px 0 0;}
 	.result_outer p:nth-of-type(2){font-size: 14px;flex: 3;text-align: center;line-height: 23px;height: 23px;}
 	.result_outer p:nth-of-type(3){font-size: 14px;flex: 4;text-align: center}
@@ -876,6 +891,7 @@
 	.result_outer .red_style_name{background-color: #ff524a;border: 1px solid #ff524a;color: #fff}
 	.result_outer .red_style_number{border: 1px solid #ff524a;color: #ff524a}
 	.left_50{margin-left: 50px;}
+	#web_text{max-height: 800px;overflow-y: scroll;}
 
 
 	.show_pagination{text-align: center;margin-top: 30px;}

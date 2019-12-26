@@ -131,6 +131,7 @@
                       var formData = new FormData();
                       formData.append('image', newFile);
                       formData.append('system_id', 1);
+                      formData.append('channel_id', 1);
                       this.httpImage(formData);
 				  });
 			  }else {
