@@ -183,15 +183,15 @@ class sensitiveClass:
         
         resultMap["sensitive_hit_flag"] = sensitive_hit_flag
         resultMap["sensitive_size"] = sensitive_size
-        resultMap["web_text"] = "<div>"+web_text+"</div>"
+        if len(web_text) == 0:
+            resultMap["web_text"] = ""
+        else:
+            resultMap["web_text"] = "<div>"+web_text+"</div>"
         resultMap["app_text"] = app_text
         resultMap["takingTimes"] = endTime - startTime
         return resultMap
 
 if __name__ == '__main__':
     df = pd.read_csv(os.path.join(os.getcwd(),"backend","api","sensitives","sensitiveWords.csv"),encoding='gbk')
-    #sensitiveClass().check_sensitiveWords_test(df, "十八摸 11111")
-    sensitiveClass().check_sensitiveWords_test(df, " 十八摸  我是台独分子   台独分子  独分子 台独 十八摸 台独共党")
     #sensitiveClass().check_sensitiveWords_test(df, "  heheh ")
-    #sensitiveClass().check_sensitiveWords_test(df, "你 不是 跟 我 讲的 笑话 吗 欲死欲仙 十八摸")
     

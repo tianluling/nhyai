@@ -348,12 +348,12 @@ class HistoryRecord(models.Model):
         _('public_percent'), max_length=16, null=True, blank=True)
     public_character_level = models.CharField(
         _('public_character_level'), max_length=4, null=True, blank=True)
-    content = models.CharField(
-        _('content'), max_length=1530, null=True, blank=True)
-    web_text = models.CharField(
-        _('web_text'), max_length=3060, null=True, blank=True)
-    app_text = models.CharField(
-        _('app_text'), max_length=3060, null=True, blank=True)
+    content = models.TextField(
+        _('content'), max_length=2048, null=True, blank=True)
+    web_text = models.TextField(
+        _('web_text'), max_length=2048, null=True, blank=True)
+    app_text = models.TextField(
+        _('app_text'), max_length=2048, null=True, blank=True)
     upload_time = models.DateTimeField(auto_now=True, null=True, blank=True)
     process_status = models.IntegerField(
         _('process_status'), null=True, blank=True)

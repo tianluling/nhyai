@@ -131,12 +131,21 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     if maxtype == 'violence':
         max_sensitivity_level = violence_sensitivity_level
         max_sensitivity_percent = violence_percent
+        content = result["text_content"]
+        web_text = result["sensitive_info"]["web_text"]
+        app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'porn':
         max_sensitivity_level = porn_sensitivity_level
         max_sensitivity_percent = porn_percent
+        content = result["text_content"]
+        web_text = result["sensitive_info"]["web_text"]
+        app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'violence_porn':
         max_sensitivity_level = violence_sensitivity_level
         max_sensitivity_percent = violence_percent
+        content = result["text_content"]
+        web_text = result["sensitive_info"]["web_text"]
+        app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Text.value:
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
@@ -374,8 +383,8 @@ class WordRecognitionViewSet(viewsets.ModelViewSet):
         serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
 
         # 更新历史记录
-        UpdateHistoryRecord(iserializer, FILETYPE.Content.value,
-                            data, max_sensitivity_type, None, None)
+        # UpdateHistoryRecord(iserializer, FILETYPE.Content.value,
+        #                     data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -479,8 +488,8 @@ class WordRecognitionInspectionViewSet(viewsets.ModelViewSet):
         serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
 
         # 更新历史记
-        UpdateHistoryRecord(iserializer, FILETYPE.Text.value,
-                            data, max_sensitivity_type, None, None)
+        # UpdateHistoryRecord(iserializer, FILETYPE.Text.value,
+        #                     data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -614,9 +623,26 @@ class FileImageTerrorismUploadViewSet(viewsets.ModelViewSet):
 
         file_path = iserializer.image.path
         check_result = settings.VIOLENCE.check_violence(file_path)
+
+        #增加文本识别
+        bill_model = "通用OCR"
+        ocr_result = OCR().getWordRecognition(file_path, bill_model)
+        arr = ocr_result['res']
+        dataArr = []
+        for each in arr:
+            dataArr.append(each["text"])
+
+        sensitive_list = sensitiveClass().check_sensitiveWords(ocr_result['text'])
+
         violence = check_result['violence']
         resultMap = {}
         resultMap['violence'] = get_two_float(float(violence) * 100, 2)
+        resultMap['content'] = dataArr
+        resultMap["text_content"] = ocr_result['text']
+        resultMap['text'] = ocr_result['text']
+        resultMap['sensitive_info'] = sensitive_list
+        resultMap['web_text'] = sensitive_list['web_text']
+
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
 
@@ -648,8 +674,24 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
         file_path = iserializer.image.path
         # check_result = vision_porn(file_path)
         scores = settings.NSFW.caffe_preprocess_and_compute_api(file_path)
+
+        #增加文本识别
+        bill_model = "通用OCR"
+        ocr_result = OCR().getWordRecognition(file_path, bill_model)
+        arr = ocr_result['res']
+        dataArr = []
+        for each in arr:
+            dataArr.append(each["text"])
+
+        sensitive_list = sensitiveClass().check_sensitiveWords(ocr_result['text'])
+
         resultMap = {}
         resultMap['normal_hot_porn'] = get_two_float(float(scores[1]) * 100, 2)
+        resultMap['content'] = dataArr
+        resultMap["text_content"] = ocr_result['text']
+        resultMap['text'] = ocr_result['text']
+        resultMap['sensitive_info'] = sensitive_list
+        resultMap['web_text'] = sensitive_list['web_text']
         # print (check_result)
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
@@ -1012,6 +1054,22 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
         resultMap['politics_percent'] = ""
         resultMap['public_character_level'] = ""
         resultMap['public_percent'] = ""
+
+         #增加文本识别
+        bill_model = "通用OCR"
+        ocr_result = OCR().getWordRecognition(file_path, bill_model)
+        arr = ocr_result['res']
+        dataArr = []
+        for each in arr:
+            dataArr.append(each["text"])
+
+        sensitive_list = sensitiveClass().check_sensitiveWords(ocr_result['text'])
+
+        resultMap['content'] = dataArr
+        resultMap["text_content"] = ocr_result['text']
+        resultMap['text'] = ocr_result['text']
+        resultMap['sensitive_info'] = sensitive_list
+        resultMap['web_text'] = sensitive_list['web_text']
 
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
