@@ -528,7 +528,7 @@
                     this.$showMessageShort('请选择/输入要查询的条件！');
                     return;
 				}
-                this.getHistory(null,this.beginDate,this.endDate,this.searchContent);
+                this.getHistory('',this.beginDate,this.endDate,this.searchContent);
 			},
 			submitImageCallback(e,file,url){
                 this.$refs.imageCheck.submitImage(e,file,url);
@@ -693,17 +693,16 @@
                 });
             },
 			getHistory(pager,start,end,name){
-                console.log(start);
-                console.log(end);
-                console.log(name);
                 let params;
 				if(pager){
+				    console.log(pager+'pager true')
                     params =  'system_id=1'+`&page=${pager}`
-				}else if(start|end|name) {
+				}else if(start|end|name!='') {
                     start =start?'&begin_time='+getDate(start)+' 00:00:01':'';
                     end =end?'&end_time='+getDate(end)+' 23:59:59':'';
                     name =name?'&file_name='+name:'';
-                    params =  'system_id=1'+start+end+name
+                    params ='system_id=1'+start+end+name;
+                    console.log(params)
 				}else {
                     params =  'system_id=1'
 				}
