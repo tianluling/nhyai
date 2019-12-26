@@ -183,7 +183,10 @@ class sensitiveClass:
         
         resultMap["sensitive_hit_flag"] = sensitive_hit_flag
         resultMap["sensitive_size"] = sensitive_size
-        resultMap["web_text"] = "<div>"+web_text+"</div>"
+        if len(web_text) == 0:
+            resultMap["web_text"] = ""
+        else:
+            resultMap["web_text"] = "<div>"+web_text+"</div>"
         resultMap["app_text"] = app_text
         resultMap["takingTimes"] = endTime - startTime
         return resultMap
