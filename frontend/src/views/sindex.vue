@@ -171,9 +171,9 @@
 							<tr class="pre_item" v-show="preLookInfo.max_sensitivity_type!='ocr'">
 								<td class="pre_result_item">审查结果</td>
 								<td v-if="preLookInfo.channel_id !=4">
-									<div class="clearfix">
+									<div class="clearfix" v-show="preLookInfo.violence_sensitivity_level !=-1">
 										<div class="result_outer result_outer_notop fl">
-											<p v-show="preLookInfo.violence_sensitivity_level !=-1">暴恐识别</p>
+											<p >暴恐识别</p>
 											<p class="green_style_name" v-if="preLookInfo.violence_sensitivity_level==0">合规</p>
 											<p class="orange_style_name" v-else-if="preLookInfo.violence_sensitivity_level==1">疑似违规</p>
 											<!--<p class="green_style_name" v-else-if="preLookInfo.violence_sensitivity_level==-1">未检测</p>-->
@@ -189,7 +189,7 @@
 											<p class="green_style_number">12.56%</p>
 										</div>-->
 									</div>
-									<div class="clearfix">
+									<div class="clearfix" v-show="preLookInfo.porn_sensitivity_level !=-1">
 										<div class="result_outer fl">
 											<p class="ell">色情识别</p>
 											<p class="green_style_name" v-if="preLookInfo.porn_sensitivity_level==0">合规</p>
