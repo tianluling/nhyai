@@ -193,8 +193,5 @@ class sensitiveClass:
 
 if __name__ == '__main__':
     df = pd.read_csv(os.path.join(os.getcwd(),"backend","api","sensitives","sensitiveWords.csv"),encoding='gbk')
-    #sensitiveClass().check_sensitiveWords_test(df, "十八摸 11111")
-    sensitiveClass().check_sensitiveWords_test(df, " 十八摸  我是台独分子   台独分子  独分子 台独 十八摸 台独共党")
     #sensitiveClass().check_sensitiveWords_test(df, "  heheh ")
-    #sensitiveClass().check_sensitiveWords_test(df, "你 不是 跟 我 讲的 笑话 吗 欲死欲仙 十八摸")
     
