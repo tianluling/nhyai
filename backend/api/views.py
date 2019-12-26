@@ -383,8 +383,8 @@ class WordRecognitionViewSet(viewsets.ModelViewSet):
         serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
 
         # 更新历史记录
-        UpdateHistoryRecord(iserializer, FILETYPE.Content.value,
-                            data, max_sensitivity_type, None, None)
+        # UpdateHistoryRecord(iserializer, FILETYPE.Content.value,
+        #                     data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -488,8 +488,8 @@ class WordRecognitionInspectionViewSet(viewsets.ModelViewSet):
         serializer.save(ret=ret, msg=msg, data=data, text=iserializer.text)
 
         # 更新历史记
-        UpdateHistoryRecord(iserializer, FILETYPE.Text.value,
-                            data, max_sensitivity_type, None, None)
+        # UpdateHistoryRecord(iserializer, FILETYPE.Text.value,
+        #                     data, max_sensitivity_type, None, None)
 
         return Response(status=status.HTTP_201_CREATED)
 
