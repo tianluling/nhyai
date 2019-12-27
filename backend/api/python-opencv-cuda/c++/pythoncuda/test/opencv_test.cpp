@@ -8,7 +8,8 @@
 #include <opencv2/cudafeatures2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <iostream>
-#include <chrono> 
+#include <chrono>
+#include <opencv2/pythoncuda.hpp>
 
 using namespace std;
 using namespace cv;
@@ -229,13 +230,25 @@ int main()
     float ratio=0.75;
     std::vector<string> check_img_list;
 
-    int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+    // int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+    // cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
+
+    // int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    // cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
+
+    // check_img_list = readDirectory(path, useCuda, ratio);
+    // for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
+    //      cout << check_img_list[j] << endl;
+    // }
+
+    // test pythoncuda.hpp
+    int good_matcher_cpu =  cv::pythoncuda::cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
     cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
 
-    int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    int good_matcher_gpu = cv::pythoncuda::gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
     cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
 
-    check_img_list = readDirectory(path, useCuda, ratio);
+    check_img_list = cv::pythoncuda::readDirectory(path, useCuda, ratio);
     for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
          cout << check_img_list[j] << endl;
     }
