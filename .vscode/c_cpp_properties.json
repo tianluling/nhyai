@@ -5,12 +5,14 @@
             "includePath": [
                 "/usr/local/include",
                 "/usr/local/include/opencv4",
+                "/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/c++/pythoncuda/include",
                 "${workspaceFolder}/**"
             ],
             "browse": {
                 "path": [
                     "${workspaceFolder}",
                     "/usr/local/include/opencv4",
+                    "/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/c++/pythoncuda/include",
                     "/usr/local/include"
                 ]
             },
