@@ -26,7 +26,7 @@ from decimal import getcontext
 from moviepy.editor import VideoFileClip
 import subprocess
 import math
-
+from api.common import gpuopencv
 
 class video:
     def __init__(self):
@@ -484,18 +484,21 @@ class video:
                 ret, frame = cap.read()
                 # 把每一帧图像保存成jpg格式（这一行可以根据需要选择保留）
                 imageName = str(COUNT) + '.jpg'
-                cv2.imwrite(temp_path+imageName, frame)
-                filename = temp_path + '/' + imageName
-                filesize = os.stat(filename).st_size
-                # 增加文件大小为0判断，如果大小为0，则忽略
-                if filesize == 0:
-                    totalFrameNumber = totalFrameNumber - 1
+                if ret is True:
+                    cv2.imwrite(temp_path+imageName, frame)
+                    filename = temp_path + '/' + imageName
+                    filesize = os.stat(filename).st_size
+                    # 增加文件大小为0判断，如果大小为0，则忽略
+                    if filesize == 0:
+                        totalFrameNumber = totalFrameNumber - 1
+                    else:
+                        img_path = temp_path + '/' + imageName
+                        img_names.append(imageName)
+                        img_paths.append(img_path)
+                        COUNT += 1
                 else:
-                    img_path = temp_path + '/' + imageName
-                    img_names.append(imageName)
-                    img_paths.append(img_path)
-                    COUNT += 1
-
+                    break        
+            totalFrameNumber = COUNT
             COUNT = 0
             jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)[
                 "result"]
@@ -789,6 +792,395 @@ class video:
                 settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
             resultMap['serial_number'] = serial_number
         return resultMap
+
+    #过滤掉相似图片,使用gpu加速
+    def check_video_imgs_similarity_filter(self, file_path, orientation, serial_number):
+        t = time.time()
+        startTime = int(round(t * 1000))
+        
+        # 转换视频
+        if file_path.endswith('.avi'):
+            fileNameMp4 = file_path.replace('.avi', '')
+            convertReulst = self.convert_avi_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+        elif file_path.endswith('.mov'):
+            fileNameMp4 = file_path.replace('.mov', '')
+            convertReulst = self.convert_mov_to_mp4(file_path, fileNameMp4)
+            if convertReulst:
+                file_path = fileNameMp4 + '.mp4'
+
+        # 读取视频
+        totalCount = 0
+        pornTotalCount = 0
+        cap = cv2.VideoCapture(file_path)
+
+        clip = VideoFileClip(file_path)
+        # 获取FPS(每秒传输帧数(Frames Per Second))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        # 获取总帧数
+        totalFrameNumber = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        print("fps=", fps)
+        print("totalFrameNumber=", totalFrameNumber)
+        # 当前读取到第几帧
+        p, f = os.path.split(file_path)
+        uuidStr = str(uuid.uuid1())
+        temp_path = settings.SAVE_PATH+uuidStr+"/"
+        os.makedirs(temp_path)  # 重新创建文件夹
+        contentList = []
+        violenceList = []
+        pornList = []
+        violenceScoreArr = [0.00]*int(totalFrameNumber)
+        pornScoreArr = [0.00]*int(totalFrameNumber)
+        FPS_FLAG = settings.FPS_FLAG  # 为True时，按帧读取；False时，按秒读取
+        # 暴恐级别比例
+        VIOLENCESCORE_MIN = settings.VIOLENCESCORE_MIN
+        VIOLENCESCORE_MAX = settings.VIOLENCESCORE_MAX
+        # 色情级别比例
+        PORNSCORE_MIN = settings.PORNSCORE_MIN
+        PORNSCORE_MAX = settings.PORNSCORE_MAX
+        # 识别计数
+        COUNT = 0
+        img_paths = []
+        img_names = []
+        jsonResultInfos = []
+
+        if FPS_FLAG:
+            # 针对暴恐增加批量识别功能
+            while COUNT < totalFrameNumber:
+                # 一帧一帧图像读取
+                ret, frame = cap.read()
+                # 把每一帧图像保存成jpg格式（这一行可以根据需要选择保留）
+                imageName = str(COUNT) + '.jpg'
+                if ret is True:
+                    cv2.imwrite(temp_path+imageName, frame)
+                    filename = temp_path + '/' + imageName
+                    filesize = os.stat(filename).st_size
+                    # 增加文件大小为0判断，如果大小为0，则忽略
+                    if filesize == 0:
+                        totalFrameNumber = totalFrameNumber - 1
+                    else:
+                        img_path = temp_path + '/' + imageName
+                        img_names.append(imageName)
+                        img_paths.append(img_path)
+                        COUNT += 1
+                else:
+                    break        
+            totalFrameNumber = COUNT
+            COUNT = 0
+            #过滤相似度图片begin
+            imgList = gpuopencv.readDirectory(temp_path,True,0.8,90)
+            filterList = list()
+            filterCountList = list()
+            for value in imgList:
+                filterList.append(temp_path + '/'+value)
+                filterCountList.append(int(value.split(".")[0]))
+
+            jsonResultInfos = settings.VIOLENCE.check_violences(filterList)[
+                "result"]
+            #过滤相似度图片end
+
+            # 若小于总帧数则读一帧图像
+            filterCount = 0
+            while COUNT < totalFrameNumber:
+                imageName = img_names[COUNT]
+                imagePath = img_paths[COUNT]
+                imageFile = cv2.imread(imagePath)
+                try:
+                    # 增加图片旋转矫正
+                    if orientation:
+                        # Flipped Horizontally 水平翻转
+                        if orientation == 3:
+                            imageFile = self.rotate_bound(imageFile, 180.000)
+                        elif orientation == 6:
+                            imageFile = self.rotate_bound(imageFile, -90.000)
+                        elif orientation == 8:
+                            imageFile = self.rotate_bound(imageFile, 90.000)
+                        cv2.imwrite(imagePath, imageFile)
+
+                    if COUNT<filterCountList[filterCount] or (COUNT>=filterCountList[filterCount] and filterCount == len(filterCountList)-1):
+                        violenceScoreArr[COUNT] = violenceScoreArr[filterCountList[filterCount-1]]
+                    else:
+                        if jsonResultInfos != False:
+                            jsonResultInfo = jsonResultInfos[filterCountList[filterCount]]
+                            violencePercent = jsonResultInfo.get('violence')
+                        else:
+                            violencePercent = 0
+                            violenceScore = float(violencePercent)
+                            violenceScoreArr[COUNT] = violenceScore
+                    
+                    if COUNT<filterCountList[filterCount] or (COUNT>=filterCountList[filterCount] and filterCount == len(filterCountList)-1):
+                        pornScoreArr[COUNT] = pornScoreArr[filterCountList[filterCount-1]]
+                    else:                       
+                        pornPercent = settings.NSFW.caffe_preprocess_and_compute_api(
+                            imagePath)
+                        # pornScore = "%.2f" % float(pornPercent[1])
+                        pornScore = math.floor(float(pornPercent[1])*10000)/100
+                        # pornScore = float(pornScore)
+                        pornScoreArr[COUNT] = pornScore
+                        if filterCount<(len(filterCountList)-1):
+                            filterCount = filterCount+1
+
+                    contentMap = {}
+                    infoMap = {}
+                    violenceMap = {}
+                    pornMap = {}
+                    if (violenceScore >= settings.VIOLENCESCORE_MIN or pornScore >= settings.PORNSCORE_MIN):
+                        infoMap['violence_sensitivity_level'] = self.get_two_float(
+                            violenceScore * 100, 2)
+                        infoMap['porn_sensitivity_level'] = self.get_two_float(
+                            float(pornPercent[1]) * 100, 2)
+                        infoMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        infoMap['sensitivity_time'] = self.get_two_float(
+                            (COUNT+1) / fps, 2)
+                        infoMap['current_fps'] = COUNT
+                        contentList.append(infoMap)
+
+                    if (violenceScore >= settings.VIOLENCESCORE_MIN):
+                        violenceMap['violence_sensitivity_level'] = self.get_two_float(
+                            violenceScore * 100, 2)
+                        violenceMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        violenceMap['sensitivity_time'] = self.get_two_float(
+                            (COUNT+1) / fps, 2)
+                        violenceMap['current_fps'] = COUNT
+                        violenceList.append(violenceMap)
+
+                    if (pornScore >= settings.PORNSCORE_MIN):
+                        pornMap['porn_sensitivity_level'] = self.get_two_float(
+                            pornPercent[1] * 100, 2)
+                        pornMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        pornMap['sensitivity_time'] = self.get_two_float(
+                            (COUNT+1) / fps, 2)
+                        pornMap['current_fps'] = COUNT
+                        pornList.append(pornMap)
+                    if COUNT == 338:
+                        print(COUNT)
+                    COUNT = COUNT + 1
+                    cv2.waitKey(33)
+                except:
+                    COUNT = COUNT + 1
+                    continue
+            cap.release()
+            pornScoreArr = sorted(pornScoreArr)
+            violenceScoreArr = sorted(violenceScoreArr)
+            violence_sensitivity_level = 0
+            if (violenceScoreArr[-1] < VIOLENCESCORE_MIN):
+                violence_sensitivity_level = 0
+            elif (violenceScoreArr[-1] >= VIOLENCESCORE_MIN and violenceScoreArr[-1] <= VIOLENCESCORE_MAX):
+                violence_sensitivity_level = 1
+            elif (violenceScoreArr[-1] > VIOLENCESCORE_MAX):
+                violence_sensitivity_level = 2
+
+            porn_sensitivity_level = 0
+            if (pornScoreArr[-1] < PORNSCORE_MIN):
+                porn_sensitivity_level = 0
+            elif (pornScoreArr[-1] >= PORNSCORE_MIN and pornScoreArr[-1] <= PORNSCORE_MAX):
+                porn_sensitivity_level = 1
+            elif (pornScoreArr[-1] > PORNSCORE_MAX):
+                porn_sensitivity_level = 2
+            resultMap = {}
+
+            # 增加最大敏感类型
+            if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
+                max_sensitivity_type = 'violence'
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
+            elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
+                max_sensitivity_type = 'porn'
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
+            else:
+                max_sensitivity_type = 'violence_porn'
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
+
+            resultMap['video_url'] = settings.VIDEO_URL + f
+            resultMap['violence_sensitivity_level'] = violence_sensitivity_level
+            resultMap['porn_sensitivity_level'] = porn_sensitivity_level
+            resultMap['video_evidence_information'] = contentList
+            resultMap['violence_evidence_information'] = violenceList
+            resultMap['porn_evidence_information'] = pornList
+            resultMap['interval'] = self.get_two_float(float(self.get_two_float(
+                (COUNT+1) / fps, 2)) - float(self.get_two_float((COUNT) / fps, 2)), 3)
+            resultMap['duration'] = int(clip.duration)
+            resultMap['fps'] = fps
+            t = time.time()
+            endTime = int(round(t * 1000))
+            print(endTime - startTime)
+            resultMap['taketimes'] = endTime - startTime
+            resultMap['max_sensitivity_type'] = max_sensitivity_type
+            resultMap['max_sensitivity_level'] = max_sensitivity_level
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
+            resultMap['screenshot_url'] = settings.VIDEO_URL + \
+                settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
+
+        else:
+            COUNT_SECOND = 1
+
+            if cap.isOpened():  # 判断是否正常打开
+                rval, frame = cap.read()
+            else:
+                rval = False
+            timeF = fps  # 视频帧计数间隔频率
+
+            # 针对暴恐增加批量识别功能
+            while COUNT < totalFrameNumber:
+                if (COUNT_SECOND % timeF == 0 or COUNT_SECOND == 1):  # 每隔timeF帧进行存储操作
+                    rval, frame = cap.read()
+                    imageName = str(COUNT) + '.jpg'
+                    cv2.imwrite(temp_path+imageName, frame)
+
+                    filename = temp_path + '/' + imageName
+                    filesize = os.stat(filename).st_size
+                    # 增加文件大小为0判断，如果大小为0，则忽略
+                    if filesize == 0:
+                        totalFrameNumber = totalFrameNumber - 1
+                    else:
+                        img_path = temp_path + '/' + imageName
+                        img_names.append(imageName)
+                        img_paths.append(img_path)
+                        COUNT += 1
+                COUNT_SECOND += 1
+
+            COUNT_SECOND = 1
+            COUNT = 0
+            jsonResultInfos = settings.VIOLENCE.check_violences(img_paths)[
+                "result"]
+
+            while rval:  # 循环读取视频帧
+                #pic_path = temp_path + '/'
+                if (COUNT_SECOND % timeF == 0 or COUNT_SECOND == 1):  # 每隔timeF帧进行存储操作
+                    imageName = img_names[COUNT]
+                    imagePath = img_paths[COUNT]
+                    imageFile = cv2.imread(imagePath)
+
+                    # 增加图片旋转矫正
+                    if orientation:
+                        # Flipped Horizontally 水平翻转
+                        if orientation == 3:
+                            imageFile = self.rotate_bound(imageFile, 180.000)
+                        elif orientation == 6:
+                            imageFile = self.rotate_bound(imageFile, -90.000)
+                        elif orientation == 8:
+                            imageFile = self.rotate_bound(imageFile, 90.000)
+                        cv2.imwrite(imagePath, imageFile)
+
+                    if jsonResultInfos != False:
+                        jsonResultInfo = jsonResultInfos[COUNT]
+                        violencePercent = jsonResultInfo.get('violence')
+                    else:
+                        violencePercent = 0
+                    violenceScore = float(violencePercent)
+                    violenceScoreArr[COUNT] = violenceScore
+
+                    pornPercent = settings.NSFW.caffe_preprocess_and_compute_api(
+                        imagePath)
+                    pornScore = "%.2f" % float(pornPercent[1])
+                    pornScore = float(pornScore)
+                    pornScoreArr[COUNT] = pornScore
+                    infoMap = {}
+                    violenceMap = {}
+                    pornMap = {}
+                    if (violenceScore >= settings.VIOLENCESCORE_MIN or pornScore >= settings.PORNSCORE_MIN):
+                        infoMap['violence_sensitivity_level'] = self.get_two_float(
+                            violenceScore * 100, 2)
+                        infoMap['porn_sensitivity_level'] = self.get_two_float(
+                            float(pornPercent[1]) * 100, 2)
+                        infoMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        infoMap['sensitivity_time'] = self.get_two_float(
+                            COUNT, 2)
+                        infoMap['current_fps'] = c+1
+                        contentList.append(infoMap)
+
+                    if (violenceScore >= settings.VIOLENCESCORE_MIN):
+                        violenceMap['violence_sensitivity_level'] = self.get_two_float(
+                            violenceScore * 100, 2)
+                        violenceMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        violenceMap['sensitivity_time'] = self.get_two_float(
+                            COUNT, 2)
+                        violenceMap['current_fps'] = c+1
+                        violenceList.append(violenceMap)
+
+                    if (pornScore >= settings.PORNSCORE_MIN):
+                        pornMap['porn_sensitivity_level'] = self.get_two_float(
+                            pornPercent[1] * 100, 2)
+                        pornMap['image_url'] = settings.VIDEO_URL + \
+                            settings.TEMP_PATH + uuidStr + '/' + imageName
+                        pornMap['sensitivity_time'] = self.get_two_float(
+                            COUNT, 2)
+                        pornMap['current_fps'] = c+1
+                        pornList.append(pornMap)
+
+                    COUNT = COUNT + 1
+                COUNT_SECOND = COUNT_SECOND + 1
+                rval, frame = cap.read()
+            cap.release()
+            # 判断暴恐图片
+            pornScoreArr = sorted(pornScoreArr)
+            violenceScoreArr = sorted(violenceScoreArr)
+            violence_sensitivity_level = 0
+            if (violenceScoreArr[-1] < VIOLENCESCORE_MIN):
+                violence_sensitivity_level = 0
+            elif (violenceScoreArr[-1] >= VIOLENCESCORE_MIN and violenceScoreArr[-1] <= VIOLENCESCORE_MAX):
+                violence_sensitivity_level = 1
+            elif (violenceScoreArr[-1] > VIOLENCESCORE_MAX):
+                violence_sensitivity_level = 2
+
+            # 判断色情图片
+            porn_sensitivity_level = 0
+            if (pornScoreArr[-1] < PORNSCORE_MIN):
+                porn_sensitivity_level = 0
+            elif (pornScoreArr[-1] >= PORNSCORE_MIN and pornScoreArr[-1] <= PORNSCORE_MAX):
+                porn_sensitivity_level = 1
+            elif (pornScoreArr[-1] > PORNSCORE_MAX):
+                porn_sensitivity_level = 2
+
+            # 增加最大敏感类型
+            if float(violenceScoreArr[-1]) > float(pornScoreArr[-1]):
+                max_sensitivity_type = 'violence'
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
+            elif float(violenceScoreArr[-1]) < float(pornScoreArr[-1]):
+                max_sensitivity_type = 'porn'
+                max_sensitivity_level = porn_sensitivity_level
+                max_sensitivity_percent = pornScoreArr[-1]
+            else:
+                max_sensitivity_type = 'violence_porn'
+                max_sensitivity_level = violence_sensitivity_level
+                max_sensitivity_percent = violenceScoreArr[-1]
+
+            resultMap = {}
+            resultMap['video_url'] = settings.VIDEO_URL + f
+            resultMap['violence_sensitivity_level'] = violence_sensitivity_level
+            resultMap['porn_sensitivity_level'] = porn_sensitivity_level
+            resultMap['video_evidence_information'] = contentList
+            resultMap['violence_evidence_information'] = violenceList
+            resultMap['porn_evidence_information'] = pornList
+            resultMap['interval'] = self.get_two_float(float(self.get_two_float(
+                (COUNT+1) / fps, 2)) - float(self.get_two_float((COUNT) / fps, 2)), 3)
+            resultMap['duration'] = int(clip.duration)
+            resultMap['fps'] = fps
+            t = time.time()
+            endTime = int(round(t * 1000))
+            print(endTime - startTime)
+            resultMap['taketimes'] = endTime - startTime
+            resultMap['max_sensitivity_type'] = max_sensitivity_type
+            resultMap['max_sensitivity_level'] = max_sensitivity_level
+            resultMap['max_sensitivity_percent'] = max_sensitivity_percent
+            resultMap['violence_percent'] = self.get_two_float(violenceScoreArr[-1], 2)
+            resultMap['porn_percent'] = self.get_two_float(pornScoreArr[-1], 2)
+            resultMap['screenshot_url'] = settings.VIDEO_URL + \
+                settings.TEMP_PATH + uuidStr + "/" + "0.jpg"
+            resultMap['serial_number'] = serial_number
+        return resultMap
+        
 
 
 if __name__ == '__main__':
