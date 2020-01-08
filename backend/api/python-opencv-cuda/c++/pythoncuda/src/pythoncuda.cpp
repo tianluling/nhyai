@@ -251,7 +251,7 @@ namespace cv
 
 		    //要对fn进行排序,不然fn是乱序的
 			sort(fn.begin(),fn.end(), [](cv::String a, cv::String b) {
-				return stoi(a.substr(a.rfind("\\") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("\\") + 1, b.rfind(".")));
+				return stoi(a.substr(a.rfind("/") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("/") + 1, b.rfind(".")));
 			});
 			
 			if (count == 0) {
@@ -272,9 +272,9 @@ namespace cv
 			}
 
 			//sort(names.begin(), names.end(), [](cv::String a, cv::String b) {return stoi(a) < stoi(b); });
-			sort(names.begin(), names.end(), [](cv::String a, cv::String b) {
-				return stoi(a.substr(a.rfind("\\") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("\\") + 1, b.rfind(".")));
-			});
+			// sort(names.begin(), names.end(), [](cv::String a, cv::String b) {
+			// 	return stoi(a.substr(a.rfind("/") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("/") + 1, b.rfind(".")));
+			// });
 
 			std::cout << "images length:" << images.size() << std::endl;
 

@@ -146,10 +146,20 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
     size_t count = fn.size();
     std::vector<cv::String> check_img_list;
 
+    //要对fn进行排序,不然fn是乱序的
+    // sort(fn.begin(), fn.end(), [](cv::String a, cv::String b) {return stoi(a) < stoi(b); });
+	sort(fn.begin(),fn.end(), [](cv::String a, cv::String b) {
+		return stoi(a.substr(a.rfind("/") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("/") + 1, b.rfind(".")));
+	});
+
     if (count == 0) {
         std::cout << "File " << directory_name << " not exits" << std::endl;
         // return check_img_list;
     }
+
+    // for (size_t k=0; k<fn.size(); ++k){
+    //     std::cout << "fn:" << fn[k] << std::endl;
+    // }
     
     for (size_t k=0; k<fn.size(); ++k)
     {
@@ -161,9 +171,21 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
         cv::String name = filename.substr(0, filename.rfind("."));
         filenames.push_back(filename);
         names.push_back(name);
+        // std::cout << "name" << name << std::endl;
     }
 
-    sort(names.begin(), names.end(),[](cv::String a, cv::String b) {return stoi(a) < stoi(b); });
+    // sort(names.begin(), names.end(), [](cv::String c, cv::String d) {return stoi(c) < stoi(d); });
+    
+    // for (size_t k=0; k<names.size(); ++k){
+    //     std::cout << "name:" << names[k] << std::endl;
+    // }
+
+    // for (size_t k=0; k<images.size(); ++k){
+    //     std::cout << "image:" << images[k] << std::endl;
+    // }
+	// sort(names.begin(), names.end(), [](cv::String a, cv::String b) {
+	// 	return stoi(a.substr(a.rfind("\\") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("\\") + 1, b.rfind(".")));
+	// });
 
     std::cout << "images length:" << images.size() << std::endl;
 
@@ -230,27 +252,27 @@ int main()
     float ratio=0.75;
     std::vector<string> check_img_list;
 
-    // int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
-    // cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
-
-    // int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
-    // cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
-
-    // check_img_list = readDirectory(path, useCuda, ratio);
-    // for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
-    //      cout << check_img_list[j] << endl;
-    // }
-
-    // test pythoncuda.hpp
-    int good_matcher_cpu =  cv::pythoncuda::cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+    int good_matcher_cpu = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
     cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
 
-    int good_matcher_gpu = cv::pythoncuda::gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
     cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
 
-    check_img_list = cv::pythoncuda::readDirectory(path, useCuda, ratio);
+    check_img_list = readDirectory(path, useCuda, ratio);
     for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
          cout << check_img_list[j] << endl;
     }
+
+    // test pythoncuda.hpp
+    // int good_matcher_cpu =  cv::pythoncuda::cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+    // cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
+
+    // int good_matcher_gpu = cv::pythoncuda::gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    // cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
+
+    // check_img_list = cv::pythoncuda::readDirectory(path, useCuda, ratio);
+    // for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
+    //      cout << check_img_list[j] << endl;
+    // }
 
 }

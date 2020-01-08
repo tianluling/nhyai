@@ -860,7 +860,7 @@ class video:
                     if filesize == 0:
                         totalFrameNumber = totalFrameNumber - 1
                     else:
-                        img_path = temp_path + '/' + imageName
+                        img_path = temp_path + imageName
                         img_names.append(imageName)
                         img_paths.append(img_path)
                         COUNT += 1
@@ -873,7 +873,7 @@ class video:
             filterList = list()
             filterCountList = list()
             for value in imgList:
-                filterList.append(temp_path + '/'+value)
+                filterList.append(temp_path +value)
                 filterCountList.append(int(value.split(".")[0]))
 
             jsonResultInfos = settings.VIOLENCE.check_violences(filterList)[
@@ -902,8 +902,9 @@ class video:
                         violenceScoreArr[COUNT] = violenceScoreArr[filterCountList[filterCount-1]]
                     else:
                         if jsonResultInfos != False:
-                            jsonResultInfo = jsonResultInfos[filterCountList[filterCount]]
+                            jsonResultInfo = jsonResultInfos[filterCount]
                             violencePercent = jsonResultInfo.get('violence')
+                            violenceScore = float(violencePercent)
                         else:
                             violencePercent = 0
                             violenceScore = float(violencePercent)
