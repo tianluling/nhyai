@@ -2,9 +2,10 @@ import numpy as np
 import cv2
 import os
 from time import time
+import re
 
-class gpuopencv:
-    def __init__(self, cuda):
+class Gpuopencv(object):
+    def __init__(self):
         pass
         
     def draw_flow(img, flow, step=16):
@@ -99,3 +100,64 @@ class gpuopencv:
         for value in check_img_list:
             imglist.append(value[value.rfind("\\")+1:])
         return imglist
+    
+    def get_img_p_hash(self,img):
+        hash_len = 32
+        gray_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        resize_gray_img = cv2.resize(gray_img, (hash_len, hash_len), cv2.INTER_AREA)
+        h, w = resize_gray_img.shape[:2]
+        vis0 = np.zeros((h, w), np.float32)
+        vis0[:h, :w] = resize_gray_img
+        vis1 = cv2.dct(cv2.dct(vis0))
+        vis1.resize(hash_len, hash_len)
+        img_list = vis1.flatten()
+        avg = sum(img_list) * 1. / len(img_list)
+        avg_list = []
+        for i in img_list:
+            if i < avg:
+                tmp = '0'
+            else:
+                tmp = '1'
+            avg_list.append(tmp)
+        p_hash_str = ''
+        for x in range(0, hash_len * hash_len, 4):
+            p_hash_str += '%x' % int(''.join(avg_list[x:x + 4]), 2)
+        return p_hash_str
+
+
+    def ham_dist(self,x, y):
+        assert len(x) == len(y)
+        return sum([ch1 != ch2 for ch1, ch2 in zip(x, y)])
+
+    def compare_img_p_hash(self,img1, img2):
+        hash_img1 = self.get_img_p_hash(img1)
+        hash_img2 = self.get_img_p_hash(img2)
+        return self.ham_dist(hash_img1, hash_img2)
+
+    def read_directory(self,directory_name):
+        array_img_list = [] 
+        array_img_list = os.listdir(directory_name)
+        array_img_list.sort(key = lambda x:int(re.match(r'(\d+)',x).group()))
+        check_img_list = []
+        img1 = None
+        img2 = None
+        flag = True
+        for index,fileName in enumerate(array_img_list):
+            if len(check_img_list)==0:
+                img1 = cv2.imread(directory_name + "/" + array_img_list[index])
+            else:
+                img1 = cv2.imread(directory_name + "/" + check_img_list[len(check_img_list)-1])
+            if(index<len(array_img_list)-1):
+                img2 = cv2.imread(directory_name + "/" + array_img_list[index+1])
+                score = self.compare_img_p_hash(img1,img2)
+                if score>50:
+                    if len(check_img_list)==0:
+                        check_img_list.append(array_img_list[index])
+                        check_img_list.append(array_img_list[index+1])   
+                    else:
+                        check_img_list.append(array_img_list[index+1])
+                    flag = not flag
+                else:
+                    if len(check_img_list)==0:
+                        check_img_list.append(array_img_list[index])
+        return  check_img_list
