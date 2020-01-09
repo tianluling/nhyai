@@ -118,13 +118,18 @@ namespace cv
 			auto start_time = std::chrono::high_resolution_clock::now();
 
 			// Check if 2 images are equals
-			Mat original_gray, image_to_compare_gray, dst;
-			cv::cvtColor(original, original_gray, cv::COLOR_BGR2GRAY);
-			original_gray.convertTo(original_gray, CV_8UC1);
-			cv::cvtColor(image_to_compare, image_to_compare_gray, cv::COLOR_BGR2GRAY);
-			image_to_compare_gray.convertTo(image_to_compare_gray, CV_8UC1);
+			Mat original_hsv, original_channels[3];
+			Mat image_to_compare_hsv, image_to_compare_channels[3];
+			Mat dst;
 
-			absdiff(original_gray, image_to_compare_gray, dst);
+			cv::cvtColor(original, original_hsv, cv::COLOR_BGR2HSV);
+			cv::split(original_hsv, original_channels);
+			original_channels[2].convertTo(original_channels[2], CV_8UC1);
+			cv::cvtColor(image_to_compare, image_to_compare_hsv, cv::COLOR_BGR2HSV);
+			cv::split(image_to_compare_hsv, image_to_compare_channels);
+			image_to_compare_channels[2].convertTo(image_to_compare_channels[2], CV_8UC1);
+
+			absdiff(original_channels[2], image_to_compare_channels[2], dst);
 			cv::Scalar s = sum(dst);
 
 			if (s == cv::Scalar::all(0)) {
@@ -145,8 +150,8 @@ namespace cv
 			//特征点匹配
 			cv::Mat desc_1, desc_2;
 			//提取特征点并计算特征描述子
-			orb->detectAndCompute(original_gray, cv::Mat(), kp_1, desc_1);
-			orb->detectAndCompute(image_to_compare_gray, cv::Mat(), kp_2, desc_2);
+			orb->detectAndCompute(original_hsv, cv::Mat(), kp_1, desc_1);
+			orb->detectAndCompute(image_to_compare_hsv, cv::Mat(), kp_2, desc_2);
 
 			std::vector<std::vector<cv::DMatch>> matches;
 
@@ -285,7 +290,7 @@ namespace cv
 					cv::Mat original;
 					if (check_img_list.size() != 0) {
 						String str = check_img_list[check_img_list.size() - 1];
-						int a =  stoi(str.substr(str.rfind("\\") + 1, str.rfind(".")));
+						// int a =  stoi(str.substr(str.rfind("\\") + 1, str.rfind(".")));
 						original = images[stoi(str.substr(str.rfind("\\") + 1, str.rfind(".")))];
 					}
 					else {
@@ -298,7 +303,7 @@ namespace cv
 						// cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
 					}
 					else {
-						good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+						good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
 						// cout << i <<" , good_matcher with cpu:" << good_matcher  << endl;
 						// cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
 					}

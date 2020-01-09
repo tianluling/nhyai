@@ -869,7 +869,7 @@ class video:
             totalFrameNumber = COUNT
             COUNT = 0
             #过滤相似度图片begin
-            imgList = gpuopencv.readDirectory(temp_path,True,0.8,90)
+            imgList = gpuopencv.readDirectory(temp_path,False,0.75,120)
             filterList = list()
             filterCountList = list()
             for value in imgList:
