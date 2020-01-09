@@ -26,7 +26,7 @@ from decimal import getcontext
 from moviepy.editor import VideoFileClip
 import subprocess
 import math
-from api.common import gpuopencv
+from api.common import Gpuopencv
 
 class video:
     def __init__(self):
@@ -869,7 +869,9 @@ class video:
             totalFrameNumber = COUNT
             COUNT = 0
             #过滤相似度图片begin
-            imgList = gpuopencv.readDirectory(temp_path,True,0.8,90)
+            #imgList = gpuopencv.readDirectory(temp_path,True,0.8,90)
+            gpuopencv = Gpuopencv()
+            imgList = gpuopencv.read_directory(temp_path)
             filterList = list()
             filterCountList = list()
             for value in imgList:
