@@ -39,6 +39,6 @@
 </script>
 
 <style scoped>
-	.privacyPolicy{padding-bottom: 1rem}
-	.privacyPolicy p{font-size: 0.34rem;color: #333333;margin: 0.2rem 0.4rem;text-align: justify;text-indent: 2em;line-height: 0.5rem;}
+	.privacyPolicy{padding-bottom: 50px}
+	.privacyPolicy p{font-size: 14px;color: #333333;margin: 10px 15px;text-align: justify;text-indent: 2em;line-height: 20px;}
 </style>
