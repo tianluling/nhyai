@@ -21,13 +21,19 @@ int cpuFindSimilaritiesBetweenImages(Mat &original, Mat &image_to_compare, float
     auto start_time = std::chrono::high_resolution_clock::now(); 
     
     // Check if 2 images are equals
-    Mat original_gray,image_to_compare_gray , dst;
-    cv::cvtColor(original, original_gray, cv::COLOR_BGR2GRAY);
-    original_gray.convertTo(original_gray, CV_8UC1);
-    cv::cvtColor(image_to_compare, image_to_compare_gray, cv::COLOR_BGR2GRAY);
-    image_to_compare_gray.convertTo(image_to_compare_gray, CV_8UC1);
+    // Mat original_gray,image_to_compare_gray , dst;
+    Mat original_hsv, original_channels[3];
+    Mat image_to_compare_hsv, image_to_compare_channels[3];
+    Mat dst;
 
-    absdiff(original_gray, image_to_compare_gray, dst);
+    cv::cvtColor(original, original_hsv, cv::COLOR_BGR2HSV);
+    cv::split(original_hsv, original_channels);
+    original_channels[2].convertTo(original_channels[2], CV_8UC1);
+    cv::cvtColor(image_to_compare, image_to_compare_hsv, cv::COLOR_BGR2HSV);
+    cv::split(image_to_compare_hsv, image_to_compare_channels);
+    image_to_compare_channels[2].convertTo(image_to_compare_channels[2], CV_8UC1);
+
+    absdiff(original_channels[2], image_to_compare_channels[2], dst);
     cv::Scalar s = sum(dst);
 
     if (s == cv::Scalar::all(0)) {
@@ -47,8 +53,8 @@ int cpuFindSimilaritiesBetweenImages(Mat &original, Mat &image_to_compare, float
     //特征点匹配
     cv::Mat desc_1, desc_2;
     //提取特征点并计算特征描述子
-    orb->detectAndCompute(original_gray, cv::Mat(), kp_1, desc_1);
-    orb->detectAndCompute(image_to_compare_gray, cv::Mat(), kp_2, desc_2);
+    orb->detectAndCompute(original_hsv, cv::Mat(), kp_1, desc_1);
+    orb->detectAndCompute(image_to_compare_hsv, cv::Mat(), kp_2, desc_2);
 
     std::vector<std::vector<cv::DMatch>> matches;
 
@@ -146,10 +152,20 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
     size_t count = fn.size();
     std::vector<cv::String> check_img_list;
 
+    //要对fn进行排序,不然fn是乱序的
+    // sort(fn.begin(), fn.end(), [](cv::String a, cv::String b) {return stoi(a) < stoi(b); });
+	sort(fn.begin(),fn.end(), [](cv::String a, cv::String b) {
+		return stoi(a.substr(a.rfind("/") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("/") + 1, b.rfind(".")));
+	});
+
     if (count == 0) {
         std::cout << "File " << directory_name << " not exits" << std::endl;
         // return check_img_list;
     }
+
+    // for (size_t k=0; k<fn.size(); ++k){
+    //     std::cout << "fn:" << fn[k] << std::endl;
+    // }
     
     for (size_t k=0; k<fn.size(); ++k)
     {
@@ -161,9 +177,21 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
         cv::String name = filename.substr(0, filename.rfind("."));
         filenames.push_back(filename);
         names.push_back(name);
+        // std::cout << "name" << name << std::endl;
     }
 
-    sort(names.begin(), names.end(),[](cv::String a, cv::String b) {return stoi(a) < stoi(b); });
+    // sort(names.begin(), names.end(), [](cv::String c, cv::String d) {return stoi(c) < stoi(d); });
+    
+    // for (size_t k=0; k<names.size(); ++k){
+    //     std::cout << "name:" << names[k] << std::endl;
+    // }
+
+    // for (size_t k=0; k<images.size(); ++k){
+    //     std::cout << "image:" << images[k] << std::endl;
+    // }
+	// sort(names.begin(), names.end(), [](cv::String a, cv::String b) {
+	// 	return stoi(a.substr(a.rfind("\\") + 1, a.rfind("."))) < stoi(b.substr(b.rfind("\\") + 1, b.rfind(".")));
+	// });
 
     std::cout << "images length:" << images.size() << std::endl;
 
@@ -178,7 +206,7 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
                 // cout << i <<" , good_matcher with gpu:" << good_matcher  << endl;
                 // cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
             }else {
-                good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio  + 0.01);
+                good_matcher = cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
                 // cout << i <<" , good_matcher with cpu:" << good_matcher  << endl;
                 // cout << i <<" , file path:" << names[i]  << ".jpg" << endl;
             }
@@ -219,14 +247,14 @@ std::vector<cv::String> readDirectory(cv::String directory_name, bool useCuda, f
 
 int main()
 {
-    // Mat original=imread("/var/www/gallery/media/videos/capture_out_images/b5ce827c-17f6-11ea-bffa-408d5c891351/0.jpg");
-    // Mat image_to_compare=imread("/var/www/gallery/media/videos/capture_out_images/b5ce827c-17f6-11ea-bffa-408d5c891351/10.jpg");
+    Mat original=imread("/var/www/gallery/media/videos/capture_out_images/5cfe084a-31e4-11ea-bf2d-408d5c891351/1.jpg");
+    Mat image_to_compare=imread("/var/www/gallery/media/videos/capture_out_images/5cfe084a-31e4-11ea-bf2d-408d5c891351/38.jpg");
 
-    Mat original=imread("/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/python/find_similarities_between_images/images/black_and_white.jpg");
-    Mat image_to_compare=imread("/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/python/find_similarities_between_images/images/blurred.jpg");
+    // Mat original=imread("/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/python/find_similarities_between_images/images/black_and_white.jpg");
+    // Mat image_to_compare=imread("/home/nhydev/github/ai/nhyai/backend/api/python-opencv-cuda/python/find_similarities_between_images/images/blurred.jpg");
 
-    cv::String path = "/var/www/gallery/media/videos/capture_out_images/cc2174fc-1fae-11ea-bffa-408d5c891351/*.jpg";
-    bool useCuda = true;
+    cv::String path = "/var/www/gallery/media/videos/capture_out_images/16e261c6-124a-11ea-ae52-408d5c891351/*.jpg";
+    bool useCuda = false;
     float ratio=0.75;
     std::vector<string> check_img_list;
 
@@ -236,21 +264,21 @@ int main()
     // int good_matcher_gpu = gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
     // cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
 
-    // check_img_list = readDirectory(path, useCuda, ratio);
-    // for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
-    //      cout << check_img_list[j] << endl;
-    // }
-
-    // test pythoncuda.hpp
-    int good_matcher_cpu =  cv::pythoncuda::cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
-    cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
-
-    int good_matcher_gpu = cv::pythoncuda::gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
-    cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
-
-    check_img_list = cv::pythoncuda::readDirectory(path, useCuda, ratio);
+    check_img_list = readDirectory(path, useCuda, ratio);
     for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
          cout << check_img_list[j] << endl;
     }
+
+    // test pythoncuda.hpp
+    // int good_matcher_cpu =  cv::pythoncuda::cpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio + 0.01);
+    // cout << "good_matcher with cpu:" << good_matcher_cpu  << endl;
+
+    // int good_matcher_gpu = cv::pythoncuda::gpuFindSimilaritiesBetweenImages(original, image_to_compare, ratio);
+    // cout << "good_matcher with gpu:" << good_matcher_gpu  << endl;
+
+    // check_img_list = cv::pythoncuda::readDirectory(path, useCuda, ratio);
+    // for (unsigned int j = 0; j < check_img_list.size() ; ++j) {
+    //      cout << check_img_list[j] << endl;
+    // }
 
 }

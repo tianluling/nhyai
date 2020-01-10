@@ -131,27 +131,39 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     if maxtype == 'violence':
         max_sensitivity_level = violence_sensitivity_level
         max_sensitivity_percent = violence_percent
-        content = result["text_content"]
-        web_text = result["sensitive_info"]["web_text"]
-        app_text = result["sensitive_info"]["app_text"]
+        if result.get('text_content'):
+            content = result["text_content"]
+        if result.get('sensitive_info'):
+            web_text = result["sensitive_info"]["web_text"]
+        if result.get('sensitive_info'):
+            app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'porn':
         max_sensitivity_level = porn_sensitivity_level
         max_sensitivity_percent = porn_percent
-        content = result["text_content"]
-        web_text = result["sensitive_info"]["web_text"]
-        app_text = result["sensitive_info"]["app_text"]
+        if result.get('text_content'):
+            content = result["text_content"]
+        if result.get('sensitive_info'):
+            web_text = result["sensitive_info"]["web_text"]
+        if result.get('sensitive_info'):
+            app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'violence_porn':
         max_sensitivity_level = violence_sensitivity_level
         max_sensitivity_percent = violence_percent
-        content = result["text_content"]
-        web_text = result["sensitive_info"]["web_text"]
-        app_text = result["sensitive_info"]["app_text"]
+        if result.get('text_content'):
+            content = result["text_content"]
+        if result.get('sensitive_info'):
+            web_text = result["sensitive_info"]["web_text"]
+        if result.get('sensitive_info'):
+            app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Text.value:
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
-        content = result["text_content"]
-        web_text = result["sensitive_info"]["web_text"]
-        app_text = result["sensitive_info"]["app_text"]
+        if result.get('text_content'):
+            content = result["text_content"]
+        if result.get('sensitive_info'):
+            web_text = result["sensitive_info"]["web_text"]
+        if result.get('sensitive_info'):
+            app_text = result["sensitive_info"]["app_text"]
     elif maxtype == 'text' and file_type == FILETYPE.Content.value:
         max_sensitivity_level = None
         max_sensitivity_percent = "0.00"
@@ -739,7 +751,8 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                 if historyHashRecord.exists():
                     resultMap = json.loads(historyHashRecord[0].inspection_result.replace("'","\""))
                 else:
-                    resultMap = video().check_video_V2(file_path, orientation, serial_number)
+                    #resultMap = video().check_video_V2(file_path, orientation, serial_number)
+                    resultMap = video().check_video_imgs_similarity_filter(file_path, orientation, serial_number)
                     #保存hash值记录
                     file_id = iHistoryRecord.file_id
                     file_type = FILETYPE.Video.value
@@ -838,7 +851,14 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                     serializer.save(data=resultMap, ret=ret,
                                     msg=msg, video=iserializer.video)
                 else:
-                    resultMap = video().check_video_V2(file_path, orientation, serial_number)
+                    start = time.clock()
+                    #resultMap = video().check_video_V2(file_path, orientation, serial_number)
+
+                    resultMap = video().check_video_imgs_similarity_filter(file_path, orientation, serial_number)
+
+                    elapsed = (time.clock() - start)
+                    print("Time used:",elapsed)
+
                     ret = 0
                     msg = "成功"
                     serializer.save(data=resultMap, ret=ret,
