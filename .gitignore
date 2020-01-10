@@ -46,3 +46,7 @@ backend/api/yahoo/open_nsfw/__pycache__/*.pyc
 backend/api/python-opencv-cuda/c++/pythoncuda/test/*.o
 backend/api/python-opencv-cuda/python/__pycache__/*.pyc
 backend/api/preprocess/TOOLS/__pycache__/*.pyc
+backend/api/CarPlateIdentity/carIdentityData/cnn_char_train/*
+backend/api/CarPlateIdentity/carIdentityData/cnn_plate_train/*
+backend/api/CarPlateIdentity/carIdentityData/model/char_recongnize/*
+backend/api/CarPlateIdentity/carIdentityData/model/plate_recongnize/*

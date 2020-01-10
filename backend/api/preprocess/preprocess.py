@@ -11,7 +11,7 @@ class preprocess:
 
     def licensePlateDectiion(self,path):
         # this folder is used to save the image
-        temp_folder = '/tmp'
+        temp_folder = '/tmp/'
 
         # ap = argparse.ArgumentParser()
         # ap.add_argument("-i", "--image", type=str, required=True, help="path to image")
@@ -22,36 +22,40 @@ class preprocess:
         # cv2.imwrite(temp_folder + '1 - original.png', img)
 
         # hsv transform - value = gray image
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        hue, saturation, value = cv2.split(hsv)
+        # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # hue, saturation, value = cv2.split(hsv)
+
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         # cv2.imshow('gray', value)
         # cv2.imwrite(temp_folder + '2 - gray.png', value)
 
         # kernel to use for morphological operations
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
         # applying topHat/blackHat operations
-        topHat = cv2.morphologyEx(value, cv2.MORPH_TOPHAT, kernel)
-        blackHat = cv2.morphologyEx(value, cv2.MORPH_BLACKHAT, kernel)
+        # topHat = cv2.morphologyEx(value, cv2.MORPH_TOPHAT, kernel)
+        # blackHat = cv2.morphologyEx(value, cv2.MORPH_BLACKHAT, kernel)
         # cv2.imshow('topHat', topHat)
         # cv2.imshow('blackHat', blackHat)
         # cv2.imwrite(temp_folder + '3 - topHat.png', topHat)
         # cv2.imwrite(temp_folder + '4 - blackHat.png', blackHat)
 
         # add and subtract between morphological operations
-        add = cv2.add(value, topHat)
-        subtract = cv2.subtract(add, blackHat)
+        # add = cv2.add(value, topHat)
+        # subtract = cv2.subtract(add, blackHat)
         # cv2.imshow('subtract', subtract)
         # cv2.imwrite(temp_folder + '5 - subtract.png', subtract)
 
         # applying gaussian blur on subtract image
-        blur = cv2.GaussianBlur(subtract, (5, 5), 0)
+        # blur = cv2.GaussianBlur(subtract, (5, 5), 0)
+        gauss = cv2.GaussianBlur(gray, (3, 3), 1)
         # cv2.imshow('blur', blur)
         # cv2.imwrite(temp_folder + '6 - blur.png', blur)
 
         # thresholding
-        thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 19, 9)
-        # cv2.imshow('thresh', thresh)
+        # thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 19, 9)
+        thresh = cv2.adaptiveThreshold(gauss, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 9)
+        cv2.imshow('thresh', thresh)
         # cv2.imwrite(temp_folder + '7 - thresh.png', thresh)
 
         # cv2.findCountours() function changed from OpenCV3 to OpenCV4: now it have only two parameters instead of 3
@@ -100,7 +104,7 @@ class preprocess:
         # using values from ctrs to draw new contours
         cv2.drawContours(imageContours, ctrs, -1, (255, 255, 255))
         cv2.imshow("contoursPossibleChars", imageContours)
-        # cv2.imwrite(temp_folder + '9 - contoursPossibleChars.png', imageContours)
+        cv2.imwrite(temp_folder + '9 - contoursPossibleChars.png', imageContours)
 
         plates_list = []
         listOfListsOfMatchingChars = []
@@ -267,6 +271,89 @@ class preprocess:
 
         cv2.waitKey(0)
 
+    def licensePlateDectiionV2(self,path):
+        # 读取图片
+        rawImage = cv2.imread(path)
+        # 高斯模糊，将图片平滑化，去掉干扰的噪声
+        image = cv2.GaussianBlur(rawImage, (5, 5), 0)
+        # 图片灰度化
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        # Sobel算子（X方向）
+        Sobel_x = cv2.Sobel(image, cv2.CV_16S, 1, 0)
+        # Sobel_y = cv2.Sobel(image, cv2.CV_16S, 0, 1)
+        absX = cv2.convertScaleAbs(Sobel_x)  # 转回uint8
+        # absY = cv2.convertScaleAbs(Sobel_y)
+        # dst = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
+        image = absX
+        # 二值化：图像的二值化，就是将图像上的像素点的灰度值设置为0或255,图像呈现出明显的只有黑和白
+        ret, image = cv2.threshold(image, 0, 255, cv2.THRESH_OTSU)
+        # 闭操作：闭操作可以将目标区域连成一个整体，便于后续轮廓的提取。
+        kernelX = cv2.getStructuringElement(cv2.MORPH_RECT, (17, 5))
+        image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernelX)
+        # 膨胀腐蚀(形态学处理)
+        kernelX = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 1))
+        kernelY = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 19))
+        image = cv2.dilate(image, kernelX)
+        image = cv2.erode(image, kernelX)
+        image = cv2.erode(image, kernelY)
+        image = cv2.dilate(image, kernelY)
+        # 平滑处理，中值滤波
+        image = cv2.medianBlur(image, 15)
+        # 查找轮廓
+        contours, w1 = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        for item in contours:
+            rect = cv2.boundingRect(item)
+            x = rect[0]
+            y = rect[1]
+            weight = rect[2]
+            height = rect[3]
+            if weight > (height * 2):
+                # 裁剪区域图片
+                chepai = rawImage[y:y + height, x:x + weight]
+                cv2.imshow('chepai'+str(x), chepai)
+
+        # 绘制轮廓
+        image = cv2.drawContours(rawImage, contours, -1, (0, 0, 255), 3)
+        cv2.imshow('image', image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def onaptivethreshold(self, x):
+        value = cv2.getTrackbarPos("value", "Threshold")
+        if(value < 3):
+            value = 3
+        if(value % 2 == 0):
+            value = value + 1
+        args = cv2.adaptiveThreshold(self.gauss, self.maxvalue, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, value, 9)
+        gaus = cv2.adaptiveThreshold(self.gauss, self.maxvalue, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, value, 9)
+        # thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 19, 9)
+        cv2.imshow("Args", args)
+        cv2.imshow("Gaus", gaus)
+
+    def testThreshold(self, path):
+        img = cv2.imread(path)
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hue, saturation, value = cv2.split(hsv)
+        cv2.imshow('gray1', gray)
+        cv2.imshow('gray2', value)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        topHat = cv2.morphologyEx(value, cv2.MORPH_TOPHAT, kernel)
+        blackHat = cv2.morphologyEx(value, cv2.MORPH_BLACKHAT, kernel)
+        add = cv2.add(value, topHat)
+        subtract = cv2.subtract(add, blackHat)
+        self.gauss = cv2.GaussianBlur(gray, (3, 3), 1)
+        # self.gauss = cv2.GaussianBlur(subtract, (5, 5), 0)
+        self. maxvalue = 255
+
+        cv2.namedWindow("Threshold")
+        cv2.createTrackbar("value", "Threshold", 0, 80, self.onaptivethreshold)
+        cv2.imshow("Threshold", img)
+        cv2.waitKey(0)
+
 if __name__ == '__main__':
-    path = '/home/nhydev/github/ai/nhyai/backend/api/preprocess/images/2.png'
+    path = '/home/nhydev/github/ai/nhyai/backend/api/preprocess/images/17.png'
+    # path = '/var/www/gallery/media/videos/capture_out_images/5cfe084a-31e4-11ea-bf2d-408d5c891351/37.jpg'
     preprocess().licensePlateDectiion(path)
+    # preprocess().testThreshold(path)
