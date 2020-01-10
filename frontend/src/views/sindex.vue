@@ -584,8 +584,8 @@
                             this.$showMessageShort('请选择mp4格式的视频！');
                             return;
 						}
-                        if(file.size>20971520*20){
-                            this.$showMessageShort('请选择小于20M的视频！');
+                        if(file.size>52428800){
+                            this.$showMessageShort('请选择小于50M的视频！');
                             return;
                         }
                         that.checkType = 2;
@@ -595,7 +595,7 @@
                         this.isUploading = true;
                         this.toPractice();
 					}else if(fileType.substr(0, 4) === "text"){
-                        if(file.size>10485760*10){
+                        if(file.size>1048576*10){
                             this.$showMessageShort('请选择小于10M的文件！');
                             return;
                         }

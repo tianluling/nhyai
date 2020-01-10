@@ -77,7 +77,7 @@
 						<div class="video_original">
 							<div>
 								<img src="../assets/image/video/video_play_logo.png" alt="">
-								<p>支持视频格式：mp4，大小限制<20M</p>
+								<p>支持视频格式：mp4，大小限制<50M</p>
 								<div class="local_upload">
 									<!--<p>本地上传</p>-->
 									<input id="datafile" name="datafile" type="file" accept="video/mp4" class="inputfile" @change="changeImage($event)">
@@ -475,8 +475,8 @@
                 this.imageIsBig = false;
                 this.imageRight = false;
                 const file = e.target.files[0];
-                if(file.size>20971520){
-                    this.$message.error('请上传小于20M的视频！');
+                if(file.size>52428800){
+                    this.$message.error('请上传小于50M的视频！');
 //                    this.showMessage('请上传小于20M的视频！');
                     return;
 				}

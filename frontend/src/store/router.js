@@ -21,6 +21,8 @@ const wordRecognition=resolve=>require(['../views/wordRecognition'],resolve);
 const voiceRecognition=resolve=>require(['../views/voiceRecognition'],resolve);
 const videoRecognition=resolve=>require(['../views/videoRecognition'],resolve);
 const writeRecognition=resolve=>require(['../views/writeRecognition'],resolve);
+const privacyPolicy=resolve=>require(['../views/appPager/privacyPolicy'],resolve);
+const userServerPolicy=resolve=>require(['../views/appPager/userServerPolicy'],resolve);
 const record=resolve=>require(['../views/record'],resolve);
 
 Vue.config.productionTip = false
@@ -64,6 +66,8 @@ const router = new VueRouter({
         {path:'/voiceRecognition',meta:{title:'语音识别-南海云AI平台'},component:voiceRecognition},  //语音识别
         {path:'/writeRecognition',meta:{title:'文本检测-南海云AI平台'},component:writeRecognition},  //语音识别
         {path:'/videoRecognition',meta:{title:'视频识别-南海云AI平台',keepAlive:true},component:videoRecognition},  //视频识别
+        {path:'/privacyPolicy',meta:{title:'隐私政策'},component:privacyPolicy},  //视频识别
+        {path:'/userServerPolicy',meta:{title:'用户服务协议'},component:userServerPolicy},  //视频识别
 
 
         {path:'/',redirect:'/sindex'}
