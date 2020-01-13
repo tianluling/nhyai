@@ -51,6 +51,7 @@ if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
 import hashlib
+from CarPlateIdentity.carPlateIdentity import CarPlateIdentity
 
 #对文件进行hash
 def get_file_md5(f):
@@ -1556,23 +1557,32 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         file_path = iserializer.image.path
         # print (file_path)
         check_result = OCR().getWordRecognition(file_path, bill_model)
-        arr = check_result['res']
+        # arr = check_result['res']
+        carPlateIdentity = CarPlateIdentity()
+        ret, car_num = carPlateIdentity.car_plate_identity(file_path)
         dataMap = {}
-        count = 0
-
-        dataMap["plate_no"] = ""
-
-        for each in arr:
-            name = ""
-            if(each['name'] == '车牌号'):
-                name = "plate_no"
-                count = count + 1
-            dataMap[name] = each['text']
-            # dataMap[each['name']] = each['text']
-        # result = check_result
-        if (len(arr) == 0 or count < 1 or dataMap["plate_no"] == "其他"):
+        check_result = {}
+        # count = 0
+        if ret == False:
             ret = 1
             msg = "请上传车牌图片"
+        else:
+            dataMap['plate_no'] = car_num
+            check_result['text'] = car_num
+
+        # dataMap["plate_no"] = ""
+
+        # for each in arr:
+        #     name = ""
+        #     if(each['name'] == '车牌号'):
+        #         name = "plate_no"
+        #         count = count + 1
+        #     dataMap[name] = each['text']
+            # dataMap[each['name']] = each['text']
+        # result = check_result
+        # if (len(arr) == 0 or count < 1 or dataMap["plate_no"] == "其他"):
+        #     ret = 1
+        #     msg = "请上传车牌图片"
         serializer.save(data=dataMap, ret=ret, msg=msg,
                         image=iserializer.image)
 
