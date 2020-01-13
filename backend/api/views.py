@@ -1566,6 +1566,8 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         if ret == False:
             ret = 1
             msg = "请上传车牌图片"
+            dataMap['plate_no'] = "请上传车牌图片"
+            check_result['text'] = "请上传车牌图片"
         else:
             dataMap['plate_no'] = car_num
             check_result['text'] = car_num
