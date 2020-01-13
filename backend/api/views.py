@@ -78,18 +78,22 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     duration = ""
 
     if filetype == FILETYPE.Image.value:
-        file_name = serializer.image.name.split('/')[1]
+        if result.get('file_name'):
+            file_name = result['file_name']
         file_url = settings.FILE_URL + serializer.image.url
     elif file_type == FILETYPE.Video.value:
-        file_name = serializer.video.name.split('/')[1]
+        if result.get('file_name'):
+            file_name = result['file_name']
         file_url = settings.FILE_URL + serializer.video.url
         screenshot_url = result["screenshot_url"]
         duration = result["duration"]
     elif file_type == FILETYPE.Audio.value:
-        file_name = serializer.speech.name.split('/')[1]
+        if result.get('file_name'):
+            file_name = result['file_name']
         file_url = settings.FILE_URL + serializer.speech.url
     elif file_type == FILETYPE.Text.value:
-        file_name = serializer.text.name.split('/')[1]
+        if result.get('file_name'):
+            file_name = result['file_name']
         file_url = settings.FILE_URL + serializer.text.url
     elif file_type == FILETYPE.Content.value:
         file_name = ""
@@ -536,7 +540,8 @@ class OcrGeneralViewSet(viewsets.ModelViewSet):
             dataArr.append(each["text"])
         result = {
             'content': dataArr,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         serializer.save(data=dataArr, ret=ret, msg=msg,
                         image=iserializer.image)
@@ -607,7 +612,8 @@ class OcrIDCardViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -654,6 +660,7 @@ class FileImageTerrorismUploadViewSet(viewsets.ModelViewSet):
         resultMap['text'] = ocr_result['text']
         resultMap['sensitive_info'] = sensitive_list
         resultMap['web_text'] = sensitive_list['web_text']
+        resultMap['file_name'] = self.request.FILES['image'].name
 
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
@@ -704,6 +711,7 @@ class FileVisionPornUploadViewSet(viewsets.ModelViewSet):
         resultMap['text'] = ocr_result['text']
         resultMap['sensitive_info'] = sensitive_list
         resultMap['web_text'] = sensitive_list['web_text']
+        resultMap['file_name'] = self.request.FILES['image'].name
         # print (check_result)
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
@@ -848,6 +856,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                     ret = 0
                     msg = "成功"
                     resultMap = json.loads(historyHashRecord[0].inspection_result.replace("'","\""))
+                    resultMap['file_name'] = self.request.FILES['video'].name
                     serializer.save(data=resultMap, ret=ret,
                                     msg=msg, video=iserializer.video)
                 else:
@@ -868,6 +877,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
                     file_type = FILETYPE.Video.value
                     file_name = iserializer.video.name.split('/')[1]
                     file_url = settings.FILE_URL + iserializer.video.url
+                    resultMap['file_name'] = self.request.FILES['video'].name
                     UpdateHistoryHashRecord(file_id, file_name, file_url, file_type, resultMap,file_md5)
 
                 # 更新历史记录
@@ -901,6 +911,7 @@ class VideoFileUploadViewSet(viewsets.ModelViewSet):
             resultMap['serial_number'] = serial_number
             resultMap['progress'] = "50%"
             resultMap['status'] = 3
+            resultMap['file_name'] = self.request.FILES['video'].name
 
             serializer.save(data=resultMap, ret=ret,
                             msg=msg, video=iserializer.video, screenshot=iserializer.screenshot)
@@ -1017,6 +1028,7 @@ class AudioFileInspectionViewSet(viewsets.ModelViewSet):
 
             # 更新历史记录
             resultMap['text'] = check_result
+            resultMap['file_name'] = self.request.FILES['speech'].name
             UpdateHistoryRecord(iserializer, FILETYPE.Audio.value,
                                 resultMap, 'audio', None, None)
 
@@ -1090,6 +1102,7 @@ class ImageFileUploadViewSet(viewsets.ModelViewSet):
         resultMap['text'] = ocr_result['text']
         resultMap['sensitive_info'] = sensitive_list
         resultMap['web_text'] = sensitive_list['web_text']
+        resultMap['file_name'] = self.request.FILES['image'].name
 
         serializer.save(data=resultMap, ret=ret,
                         msg=msg, image=iserializer.image)
@@ -1200,7 +1213,8 @@ class OcrDrivinglicenseViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -1297,7 +1311,8 @@ class OcrVehiclelicenseViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -1384,7 +1399,8 @@ class OcrBusinesslicenseViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -1499,7 +1515,8 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -1554,7 +1571,8 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
@@ -1641,7 +1659,8 @@ class OcrBusinessCardViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text']
+            'text': check_result['text'],
+            'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
                             result, 'ocr', None, None)
