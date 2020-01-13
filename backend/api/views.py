@@ -80,20 +80,28 @@ def UpdateHistoryRecord(serializer, filetype, result, maxtype, violence, porn):
     if filetype == FILETYPE.Image.value:
         if result.get('file_name'):
             file_name = result['file_name']
+        else:
+            file_name = serializer.image.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.image.url
     elif file_type == FILETYPE.Video.value:
         if result.get('file_name'):
             file_name = result['file_name']
+        else:
+            file_name = serializer.video.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.video.url
         screenshot_url = result["screenshot_url"]
         duration = result["duration"]
     elif file_type == FILETYPE.Audio.value:
         if result.get('file_name'):
             file_name = result['file_name']
+        else:
+            file_name = serializer.speech.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.speech.url
     elif file_type == FILETYPE.Text.value:
         if result.get('file_name'):
             file_name = result['file_name']
+        else:
+            file_name = serializer.text.name.split('/')[1]
         file_url = settings.FILE_URL + serializer.text.url
     elif file_type == FILETYPE.Content.value:
         file_name = ""
