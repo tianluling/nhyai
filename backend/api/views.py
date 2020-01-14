@@ -51,7 +51,6 @@ if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
 import hashlib
-from CarPlateIdentity.carPlateIdentity import CarPlateIdentity
 
 #对文件进行hash
 def get_file_md5(f):
@@ -1558,8 +1557,9 @@ class OcrVehicleplateViewSet(viewsets.ModelViewSet):
         # print (file_path)
         check_result = OCR().getWordRecognition(file_path, bill_model)
         # arr = check_result['res']
-        carPlateIdentity = CarPlateIdentity()
-        ret, car_num = carPlateIdentity.car_plate_identity(file_path)
+        # carPlateIdentity = CarPlateIdentity()
+        # ret, car_num = carPlateIdentity.car_plate_identity(file_path)
+        ret, car_num = settings.CARPLATEIDENTITY.car_plate_identity(file_path)
         dataMap = {}
         check_result = {}
         # count = 0

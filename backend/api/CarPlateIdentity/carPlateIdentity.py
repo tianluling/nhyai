@@ -19,6 +19,39 @@ class CarPlateIdentity:
         self.char_h = 20
         self.plate_model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/plate_recongnize/model.ckpt-510.meta')
         self.char_model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/char_recongnize/model.ckpt-580.meta')
+        
+        # 加载CNN车牌过滤模型
+        self.g1 = tf.Graph()
+        self.plate_sess1 = tf.Session(graph=self.g1)
+        with self.plate_sess1.as_default():
+            with self.plate_sess1.graph.as_default():
+                self.plate_model_dir = os.path.dirname(self.plate_model_path)
+                self.plate_saver = tf.train.import_meta_graph(self.plate_model_path)
+                self.plate_saver.restore(self.plate_sess1, tf.train.latest_checkpoint(self.plate_model_dir))
+
+                self.plate_graph = tf.get_default_graph()
+                self.plate_net1_x_place = self.plate_graph.get_tensor_by_name('x_place:0')
+                self.plate_net1_keep_place = self.plate_graph.get_tensor_by_name('keep_place:0')
+                self.plate_net1_out = self.plate_graph.get_tensor_by_name('out_put:0')
+                self.plate_net_outs = tf.nn.softmax(self.plate_net1_out)
+                self.plate_preds = tf.argmax(self.plate_net_outs,1) #预测结果
+                self.plate_probs = tf.reduce_max(self.plate_net_outs,reduction_indices=[1]) #结果概率值
+
+        # 加载字符匹配模型
+        self.g2 = tf.Graph()
+        self.char_sess2 = tf.Session(graph=self.g2)
+        with self.char_sess2.as_default():
+            with self.char_sess2.graph.as_default():
+                self.char_model_dir = os.path.dirname(self.char_model_path)
+                self.char_saver = tf.train.import_meta_graph(self.char_model_path)
+                self.char_saver.restore(self.char_sess2, tf.train.latest_checkpoint(self.char_model_dir))
+
+                self.char_graph = tf.get_default_graph()
+                self.char_net2_x_place = self.char_graph.get_tensor_by_name('x_place:0')
+                self.char_net2_keep_place = self.char_graph.get_tensor_by_name('keep_place:0')
+                self.char_net2_out = self.char_graph.get_tensor_by_name('out_put:0')
+                self.char_net_out = tf.nn.softmax(self.char_net2_out)
+                self.char_preds = tf.argmax(self.char_net_out,1)
 
     def hist_image(self, img):
         assert img.ndim==2
@@ -401,62 +434,84 @@ class CarPlateIdentity:
         char_img_list = self.get_chars(binary_plate)
         return char_img_list
 
-    def cnn_select_carPlate(self, plate_list,model_path):
+    def cnn_select_carPlate(self, plate_list):
         if len(plate_list) == 0:
             return False,plate_list
-        g1 = tf.Graph()
-        sess1 = tf.Session(graph=g1)
-        with sess1.as_default():
-            with sess1.graph.as_default():
-                model_dir = os.path.dirname(model_path)
-                saver = tf.train.import_meta_graph(model_path)
-                saver.restore(sess1, tf.train.latest_checkpoint(model_dir))
-                graph = tf.get_default_graph()
-                net1_x_place = graph.get_tensor_by_name('x_place:0')
-                net1_keep_place = graph.get_tensor_by_name('keep_place:0')
-                net1_out = graph.get_tensor_by_name('out_put:0')
 
-                input_x = np.array(plate_list)
-                net_outs = tf.nn.softmax(net1_out)
-                preds = tf.argmax(net_outs,1) #预测结果
-                probs = tf.reduce_max(net_outs,reduction_indices=[1]) #结果概率值
-                pred_list,prob_list = sess1.run([preds,probs],feed_dict={net1_x_place:input_x,net1_keep_place:1.0})
-                # 选出概率最大的车牌
-                result_index,result_prob = -1,0.
-                for i,pred in enumerate(pred_list):
-                    if pred==1 and prob_list[i]>result_prob:
-                        result_index,result_prob = i,prob_list[i]
-                if result_index == -1:
-                    return False,plate_list[0]
-                else:
-                    return True,plate_list[result_index]
+        input_x = np.array(plate_list)
+        pred_list,prob_list = self.plate_sess1.run([self.plate_preds,self.plate_probs],feed_dict={self.plate_net1_x_place:input_x,self.plate_net1_keep_place:1.0})
+        # 选出概率最大的车牌
+        result_index,result_prob = -1,0.
+        for i,pred in enumerate(pred_list):
+            if pred==1 and prob_list[i]>result_prob:
+                result_index,result_prob = i,prob_list[i]
+        if result_index == -1:
+            return False,plate_list[0]
+        else:
+            return True,plate_list[result_index]
 
-    def cnn_recongnize_char(self, img_list,model_path):
-        g2 = tf.Graph()
-        sess2 = tf.Session(graph=g2)
+        # g1 = tf.Graph()
+        # sess1 = tf.Session(graph=g1)
+        # with sess1.as_default():
+        #     with sess1.graph.as_default():
+        #         model_dir = os.path.dirname(model_path)
+        #         saver = tf.train.import_meta_graph(model_path)
+        #         saver.restore(sess1, tf.train.latest_checkpoint(model_dir))
+        #         graph = tf.get_default_graph()
+        #         net1_x_place = graph.get_tensor_by_name('x_place:0')
+        #         net1_keep_place = graph.get_tensor_by_name('keep_place:0')
+        #         net1_out = graph.get_tensor_by_name('out_put:0')
+
+        #         input_x = np.array(plate_list)
+        #         net_outs = tf.nn.softmax(net1_out)
+        #         preds = tf.argmax(net_outs,1) #预测结果
+        #         probs = tf.reduce_max(net_outs,reduction_indices=[1]) #结果概率值
+        #         pred_list,prob_list = sess1.run([preds,probs],feed_dict={net1_x_place:input_x,net1_keep_place:1.0})
+        #         # 选出概率最大的车牌
+        #         result_index,result_prob = -1,0.
+        #         for i,pred in enumerate(pred_list):
+        #             if pred==1 and prob_list[i]>result_prob:
+        #                 result_index,result_prob = i,prob_list[i]
+        #         if result_index == -1:
+        #             return False,plate_list[0]
+        #         else:
+        #             return True,plate_list[result_index]
+
+    def cnn_recongnize_char(self, img_list):
+        # g2 = tf.Graph()
+        # sess2 = tf.Session(graph=g2)
         text_list = []
 
         if len(img_list) == 0:
             return text_list
-        with sess2.as_default():
-            with sess2.graph.as_default():
-                model_dir = os.path.dirname(model_path)
-                saver = tf.train.import_meta_graph(model_path)
-                saver.restore(sess2, tf.train.latest_checkpoint(model_dir))
-                graph = tf.get_default_graph()
-                net2_x_place = graph.get_tensor_by_name('x_place:0')
-                net2_keep_place = graph.get_tensor_by_name('keep_place:0')
-                net2_out = graph.get_tensor_by_name('out_put:0')
+        
+        data = np.array(img_list)
+        # 数字、字母、汉字，从67维向量找到概率最大的作为预测结果
+        my_preds= self.char_sess2.run(self.char_preds, feed_dict={self.char_net2_x_place: data, self.char_net2_keep_place: 1.0})
 
-                data = np.array(img_list)
-                # 数字、字母、汉字，从67维向量找到概率最大的作为预测结果
-                net_out = tf.nn.softmax(net2_out)
-                preds = tf.argmax(net_out,1)
-                my_preds= sess2.run(preds, feed_dict={net2_x_place: data, net2_keep_place: 1.0})
+        for i in my_preds:
+            text_list.append(char_table[i])
+        return text_list
 
-                for i in my_preds:
-                    text_list.append(char_table[i])
-                return text_list
+        # with sess2.as_default():
+        #     with sess2.graph.as_default():
+        #         model_dir = os.path.dirname(model_path)
+        #         saver = tf.train.import_meta_graph(model_path)
+        #         saver.restore(sess2, tf.train.latest_checkpoint(model_dir))
+        #         graph = tf.get_default_graph()
+        #         net2_x_place = graph.get_tensor_by_name('x_place:0')
+        #         net2_keep_place = graph.get_tensor_by_name('keep_place:0')
+        #         net2_out = graph.get_tensor_by_name('out_put:0')
+
+        #         data = np.array(img_list)
+        #         # 数字、字母、汉字，从67维向量找到概率最大的作为预测结果
+        #         net_out = tf.nn.softmax(net2_out)
+        #         preds = tf.argmax(net_out,1)
+        #         my_preds= sess2.run(preds, feed_dict={net2_x_place: data, net2_keep_place: 1.0})
+
+        #         for i in my_preds:
+        #             text_list.append(char_table[i])
+        #         return text_list
 
     def car_plate_identity(self, car_path):
         
@@ -471,7 +526,7 @@ class CarPlateIdentity:
         car_plate_list = self.locate_carPlate(img,pred_img)
 
         # CNN车牌过滤
-        ret,car_plate = self.cnn_select_carPlate(car_plate_list,self.plate_model_path)
+        ret,car_plate = self.cnn_select_carPlate(car_plate_list)
         car_num = ""
         if ret == False:
             print("未检测到车牌")
@@ -484,7 +539,7 @@ class CarPlateIdentity:
         char_img_list = self.extract_char(car_plate)
 
         # CNN字符识别
-        text = self.cnn_recongnize_char(char_img_list,self.char_model_path)
+        text = self.cnn_recongnize_char(char_img_list)
         # print(text)
         car_num = ''.join(text)
         # print(car_num)
@@ -493,7 +548,7 @@ class CarPlateIdentity:
 
 if __name__ == '__main__':
     carPlateIdentity = CarPlateIdentity()
-    path = 'backend/api/CarPlateIdentity/carIdentityData/images/44.jpg'
+    path = 'backend/api/CarPlateIdentity/carIdentityData/images/1.jpg'
     status, car_num = carPlateIdentity.car_plate_identity(path)
     print(status)
     print(car_num)

@@ -14,6 +14,7 @@ import os
 import pandas as pd
 from api.yahoo.open_nsfw.classify_nsfw import nsfw
 from api.violence import violence
+from CarPlateIdentity.carPlateIdentity import CarPlateIdentity
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -206,6 +207,9 @@ VIOLENCESCORE_MAX = 80
 #色情级别比例
 PORNSCORE_MIN = 50
 PORNSCORE_MAX = 80
+
+#车牌识别
+CARPLATEIDENTITY = CarPlateIdentity()
 
 #文件服务地址
 FILE_URL = 'http://172.31.4.31:8000'
