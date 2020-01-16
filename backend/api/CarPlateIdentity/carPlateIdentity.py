@@ -169,17 +169,43 @@ class CarPlateIdentity:
 
         return car_img
 
-    def pre_process(self, orig_img):
+    def pHash(self, img):
+        """get image pHash value"""
+        #加载并调整图片为32x32灰度图片       
+        img=cv2.resize(img,(64,64),interpolation=cv2.INTER_CUBIC)
+        img=cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+            #创建二维列表
+        h, w = img.shape[:2]
+        vis0 = np.zeros((h,w), np.float32)
+        vis0[:h,:w] = img       #填充数据
+
+        #二维Dct变换
+        vis1 = cv2.dct(cv2.dct(vis0))
+        #cv.SaveImage('a.jpg',cv.fromarray(vis0)) #保存图片
+        vis1.resize(32,32)
+
+        #把二维list变成一维list
+        # img_list=flatten(vis1.tolist()) 
+        img_list = [val for sublist in vis1 for val in sublist]
+
+        #计算均值
+        avg = sum(img_list)*1./len(img_list)
+        avg_list = ['0' if i<avg else '1' for i in img_list]
+
+        #得到哈希值
+        return ''.join(['%x' % int(''.join(avg_list[x:x+4]),2) for x in range(0,32*32,4)])
+
+    def pre_process(self, orig_img):
         gray_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
-        #cv2.imshow('gray_img', gray_img)
+        # cv2.imshow('gray_img', gray_img)
 
         blur_img = cv2.blur(gray_img, (3, 3))
-        #cv2.imshow('blur', blur_img)
+        # cv2.imshow('blur', blur_img)
 
         sobel_img = cv2.Sobel(blur_img, cv2.CV_16S, 1, 0, ksize=3)
         sobel_img = cv2.convertScaleAbs(sobel_img)
-        #cv2.imshow('sobel', sobel_img)
+        # cv2.imshow('sobel', sobel_img)
 
         hsv_img = cv2.cvtColor(orig_img, cv2.COLOR_BGR2HSV)
 
@@ -189,16 +215,19 @@ class CarPlateIdentity:
         blue_img = blue_img.astype('float32')
 
         mix_img = np.multiply(sobel_img, blue_img)
-        #cv2.imshow('mix', mix_img)
+        # cv2.imshow('mix', mix_img)
 
         mix_img = mix_img.astype(np.uint8)
 
         ret, binary_img = cv2.threshold(mix_img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-        #cv2.imshow('binary',binary_img)
+        # cv2.imshow('binary',binary_img)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(21,5))
         close_img = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
-        #cv2.imshow('close', close_img)
+        # cv2.imshow('close', close_img)
+
+        # phash = self.pHash(close_img)
+        # print (phash)
 
         return close_img
 
@@ -293,25 +322,33 @@ class CarPlateIdentity:
 
         cv2MajorVersion = cv2.__version__.split(".")[0]
         if int(cv2MajorVersion) >= 4:
-            contours, hierarchy = cv2.findContours(pred_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours, heriachy = cv2.findContours(pred_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         else:
             cloneImg,contours,heriachy = cv2.findContours(pred_image,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
-        
+        # print (len(contours))
+
         for i,contour in enumerate(contours):
-            cv2.drawContours(temp1_orig_img, contours, i, (0, 255, 255), 2)
+            cv2.drawContours(temp1_orig_img, contours, i, (0, 255, 255))
             # 获取轮廓最小外接矩形，返回值rotate_rect
             rotate_rect = cv2.minAreaRect(contour)
             # 根据矩形面积大小和长宽比判断是否是车牌
             if self.verify_scale(rotate_rect):
-                ret,rotate_rect2 = self.verify_color(rotate_rect,temp2_orig_img)
-                if ret == False:
-                    continue
+                # ret,rotate_rect2 = self.verify_color(rotate_rect,temp2_orig_img)
+                # print ('检测到车牌')
+                # print (rotate_rect)
+                # print (rotate_rect2)
+                # if ret == False:
+                #     continue
                 # 车牌位置矫正
-                car_plate = self.img_Transform(rotate_rect2, temp2_orig_img)
+                # car_plate = self.img_Transform(rotate_rect2, temp2_orig_img)
+                car_plate = self.img_Transform(rotate_rect, temp2_orig_img)
+                # phash = self.pHash(car_plate)
+                # print (phash)
                 car_plate = cv2.resize(car_plate,(self.car_plate_w,self.car_plate_h)) #调整尺寸为后面CNN车牌识别做准备
                 #========================调试看效果========================#
-                box = cv2.boxPoints(rotate_rect2)
+                # box = cv2.boxPoints(rotate_rect2)
+                box = cv2.boxPoints(rotate_rect)
                 for k in range(4):
                     n1,n2 = k%4,(k+1)%4
                     cv2.line(temp1_orig_img,(box[n1][0],box[n1][1]),(box[n2][0],box[n2][1]),(255,0,0),2)
@@ -319,7 +356,8 @@ class CarPlateIdentity:
                 #========================调试看效果========================#
                 carPlate_list.append(car_plate)
 
-        # cv2.imshow('contour', temp1_orig_img)
+        # cv2.imshow('temp1_orig_img', temp1_orig_img)
+
         return carPlate_list
 
     # 获取车牌每列边缘像素点个数
@@ -418,8 +456,10 @@ class CarPlateIdentity:
         chars_top,chars_bottom = h_proj_list[h_maxIndex][0],h_proj_list[h_maxIndex][1]
 
         plates = car_plate[chars_top:chars_bottom+1,:]
-        cv2.imwrite('./carIdentityData/opencv_output/car.jpg',car_plate)
-        cv2.imwrite('./carIdentityData/opencv_output/plate.jpg', plates)
+        # cv2.imwrite('./carIdentityData/opencv_output/car.jpg',car_plate)
+        # cv2.imwrite('./carIdentityData/opencv_output/plate.jpg', plates)
+        # cv2.imshow('car_plate',car_plate)
+        # cv2.imshow('plates',plates)
         char_addr_list = self.horizontal_cut_chars(plates)
 
         for i,addr in enumerate(char_addr_list):
@@ -489,6 +529,7 @@ class CarPlateIdentity:
         # 数字、字母、汉字，从67维向量找到概率最大的作为预测结果
         my_preds= self.char_sess2.run(self.char_preds, feed_dict={self.char_net2_x_place: data, self.char_net2_keep_place: 1.0})
 
+        # print (my_preds)
         for i in my_preds:
             text_list.append(char_table[i])
         return text_list
@@ -544,6 +585,7 @@ class CarPlateIdentity:
         car_num = ''.join(text)
         # print(car_num)
 
+        # cv2.waitKey(0)
         return ret, car_num
 
 if __name__ == '__main__':
