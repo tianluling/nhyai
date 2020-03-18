@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import FileUpload, FileImageTerrorismUpload, FileVisionPornUpload
 from .models import VideoFileUpload, AudioFileUpload, AudioFileInspection, ImageFileUpload, WordRecognitionInspection
-from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, HistoryRecord, OcrBusinessCard
+from .models import WordRecognition, OcrGeneral, OcrIDCard, OcrDrivinglicense, OcrVehiclelicense, OcrBusinesslicense, OcrBankcard, OcrVehicleplate,OcrHandWritten,HistoryRecord, OcrBusinessCard
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -243,7 +243,7 @@ class OcrBankcardSerializer(serializers.HyperlinkedModelSerializer):
     data = serializers.JSONField(True)
 
     class Meta:
-        model = OcrBankcard
+        model = OcrHandWritten
         fields = ('image', 'image_url', 'system_id',
                   'channel_id', 'user_id', 'ret', 'msg', 'data')
 
@@ -259,7 +259,7 @@ class OcrHandWrittenSerializer(serializers.HyperlinkedModelSerializer):
     data = serializers.JSONField(True)
 
     class Meta:
-        model = OcrBankcard
+        model = OcrVehicleplate
         fields = ('image', 'image_url', 'system_id',
                   'channel_id', 'user_id', 'ret', 'msg', 'data')
 
@@ -275,7 +275,7 @@ class OcrVehicleplateSerializer(serializers.HyperlinkedModelSerializer):
     data = serializers.JSONField(True)
 
     class Meta:
-        model = OcrBankcard
+        model = OcrVehicleplate
         fields = ('image', 'image_url', 'system_id',
                   'channel_id', 'user_id', 'ret', 'msg', 'data')
 
