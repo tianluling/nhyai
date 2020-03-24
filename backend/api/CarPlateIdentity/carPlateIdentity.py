@@ -11,7 +11,7 @@ char_table = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', '
 
 class CarPlateIdentity:
     """高级车牌识别"""
-    def __init__(self):
+    def __init__(self, isgpu):
         self = self
         self.car_plate_w =136
         self.car_plate_h = 36
@@ -22,7 +22,11 @@ class CarPlateIdentity:
         
         # 加载CNN车牌过滤模型
         self.g1 = tf.Graph()
-        self.plate_sess1 = tf.Session(graph=self.g1)
+        if isgpu:
+            self.plate_sess1 = tf.Session(graph=self.g1)
+        else:
+            self.plate_sess1 = tf.Session(graph=self.g1, config=tf.ConfigProto(device_count={'gpu':0}))
+        
         with self.plate_sess1.as_default():
             with self.plate_sess1.graph.as_default():
                 self.plate_model_dir = os.path.dirname(self.plate_model_path)
@@ -39,7 +43,11 @@ class CarPlateIdentity:
 
         # 加载字符匹配模型
         self.g2 = tf.Graph()
-        self.char_sess2 = tf.Session(graph=self.g2)
+        if isgpu:
+            self.char_sess2 = tf.Session(graph=self.g2)
+        else:
+            self.char_sess2 = tf.Session(graph=self.g2, config=tf.ConfigProto(device_count={'gpu':0}))
+        
         with self.char_sess2.as_default():
             with self.char_sess2.graph.as_default():
                 self.char_model_dir = os.path.dirname(self.char_model_path)
@@ -589,7 +597,8 @@ class CarPlateIdentity:
         return ret, car_num
 
 if __name__ == '__main__':
-    carPlateIdentity = CarPlateIdentity()
+    isgpu = True
+    carPlateIdentity = CarPlateIdentity(isgpu)
     path = 'backend/api/CarPlateIdentity/carIdentityData/images/1.jpg'
     status, car_num = carPlateIdentity.car_plate_identity(path)
     print(status)

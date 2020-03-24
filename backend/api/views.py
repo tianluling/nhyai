@@ -51,6 +51,7 @@ if(platform.system() == "Windows"):
     import win32com.client as wc
     import pythoncom
 import hashlib
+from handwrite.handwrite import HandWrite
 
 #对文件进行hash
 def get_file_md5(f):
@@ -1505,8 +1506,10 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
 
         file_path = iserializer.image.path
         # print (file_path)
-        check_result = OCR().getWordRecognition(file_path, bill_model)
-        arr = check_result['res']
+        # check_result = OCR().getWordRecognition(file_path, bill_model)
+        check_result = HandWrite().getWord(file_path)
+        print (check_result)
+        arr = check_result['data']
         dataArr = []
         dataMap = {}
         dataMap["handwritten_content"] = ""
@@ -1523,7 +1526,7 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         # 更新历史记
         result = {
             'content': dataMap,
-            'text': check_result['text'],
+            'text': check_result['data'],
             'file_name': self.request.FILES['image'].name
         }
         UpdateHistoryRecord(iserializer, FILETYPE.Image.value,
