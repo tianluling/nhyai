@@ -1508,7 +1508,7 @@ class OcrHandWrittenViewSet(viewsets.ModelViewSet):
         # print (file_path)
         # check_result = OCR().getWordRecognition(file_path, bill_model)
         check_result = HandWrite().getWord(file_path)
-        print (check_result)
+        # print (check_result)
         arr = check_result['data']
         dataArr = []
         dataMap = {}
