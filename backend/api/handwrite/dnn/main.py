@@ -61,19 +61,22 @@ def rotate_cut_img(im,box,leftAdjust=0.0,rightAdjust=0.0):
 
 
 def text_ocr(img,scale,maxScale,TEXT_LINE_SCORE):
-    boxes,scores = textModel(img,scale=scale,maxScale=maxScale)
-    result = []
-    im= Image.fromarray(img)
-    for i,box in enumerate(boxes):
-        if scores[i]>TEXT_LINE_SCORE:
-            tmpImg = rotate_cut_img(im,box,leftAdjust=0.01,rightAdjust=0.01)
-            tmpPath = os.path.join(os.getcwd(),"backend","api","handwrite","test", str(i) + '.jpg')
-            tmpImg.save(tmpPath, quality=95)
-            text = ocrModel(tmpImg)
-            if text['text']!='':
-                text['box'] = [ int(x) for x in box]
-                text['textprob']=round(float(scores[i]),2)
-                result.append(text)
-    result = sorted(result,key=lambda x:sum(x['box'][1::2]))
+    try:
+        boxes,scores = textModel(img,scale=scale,maxScale=maxScale)
+        result = []
+        im= Image.fromarray(img)
+        for i,box in enumerate(boxes):
+            if scores[i]>TEXT_LINE_SCORE:
+                tmpImg = rotate_cut_img(im,box,leftAdjust=0.01,rightAdjust=0.01)
+                tmpPath = os.path.join(os.getcwd(),"backend","api","handwrite","test", str(i) + '.jpg')
+                tmpImg.save(tmpPath, quality=95)
+                text = ocrModel(tmpImg)
+                if text['text']!='':
+                    text['box'] = [ int(x) for x in box]
+                    text['textprob']=round(float(scores[i]),2)
+                    result.append(text)
+        result = sorted(result,key=lambda x:sum(x['box'][1::2]))
+    except:
+        result = '不支持的文件内容'
     return result
 
