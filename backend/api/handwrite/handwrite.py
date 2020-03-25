@@ -32,6 +32,6 @@ class HandWrite:
         return res
 
 
-# if __name__ == '__main__':
-    # handWriteTest = HandWrite()
-    # handword = handWriteTest.getWord(os.path.join(os.getcwd(),"backend","api","handwrite","test","img.jpeg"))
+if __name__ == '__main__':
+    handWriteTest = HandWrite()
+    handword = handWriteTest.getWord(os.path.join(os.getcwd(),"backend","api","handwrite","test","img.jpeg"))
