@@ -53,10 +53,10 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/driving_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/driving_sample.png"),
                 dialogVisible: false,
-                jsonDemo:'{"license_type":"中华人民共和国机动车驾驶证","card_id":"619333199912213125","driver":"艾米",' +
-				'"sex":"女","nationality":"中国","address":"深圳市南山区高薪科技园科技中一路腾讯大厦","birthday":"1990-12-21","issue_date":"2015-01-01","be_class":"C1","valid_start":"2015-01-01","valid_end":"2021-01-01"}',
+                jsonDemo:'{"license_type":"中华人民共和国机动车驾驶证","card_id":"110100199706013218 ","driver":"阿星",' +
+				'"sex":"男","nationality":"中国","address":"二七区马寨镇光明路1号","birthday":" 1997-06-01","issue_date":" 2019-03-28","be_class":"C2","valid_start":"2019-03-28","valid_end":"2025-03-28"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",

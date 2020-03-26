@@ -48,9 +48,9 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/visiting_licence_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/visiting_licence_sample.png"),
                 dialogVisible: false,
-                jsonDemo:'{"business_name":"李明","position":"产品经理","company":"腾讯","email":"8888asss@tencent.com","address":"深圳市南山区深南大道10000号腾讯大厦","phone":"13888882222","telephone":"","qq":"16828","webchat":"limig"}',
+                jsonDemo:'{"business_name":"赵云","position":"项目经理","company":"海南蓝天白云有限公司","email":"706030107@qq.com","address":"海南省老城高新技术开发区海南生态软件园","phone":"17600205328","telephone":"","qq":"706030107","webchat":""}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",

@@ -51,9 +51,9 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/running_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/running_sample.png"),
                 dialogVisible: false,
-                jsonDemo:'{"license_type":"中华人民共和国机动车行驶证","plate_no":"沪AA1234","vehicle_type":"小型轿车","owner":"李明","address":"上海徐汇区田林路397号腾云大厦6F","use_character":"非营运","model":"大众汽车牌SVW71612RS","vin":"ABCDEFGH123456789","engine_no":"8B54321","register_date":"2011-10-18","issue_date":"2011-10-18"}',
+                jsonDemo:'{"license_type":"中华人民共和国机动车行驶证","plate_no":"琼A888HH","vehicle_type":"小型轿车","owner":"阿星","address":"二七区马寨镇光明路1号","use_character":"非营运","model":"红旗汽车牌HQ5523DBD","vin":"SUVJJDD32709855","engine_no":"326511","register_date":"2019-06-20","issue_date":"2019-06-20"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",

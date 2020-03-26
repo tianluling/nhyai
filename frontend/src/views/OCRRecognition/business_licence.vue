@@ -29,12 +29,12 @@
 					<span class="original_style">识别结果</span>
 					<div id="show_json" v-show="showJson.license_type">
 						<p>证件类型：{{showJson.license_type}}</p>
-						<p>注册号：{{showJson.business_id}}</p>
+						<p>统一社会信用代码：{{showJson.business_id}}</p>
 						<p>名称：{{showJson.business_name}}</p>
 						<p>类型：{{showJson.business_type}}</p>
 						<p>公司地址：{{showJson.address}}</p>
-						<p>经营者：{{showJson.operator}}</p>
-						<p>组成形式：{{showJson.registered_capital}}</p>
+						<p>法定代表人：{{showJson.operator}}</p>
+						<p>注册资本：{{showJson.registered_capital}}</p>
 						<p>注册日期：{{showJson.register_date}}</p>
 						<p>经营期限：{{showJson.business_term}}</p>
 						<p>经营范围：{{showJson.scope}}</p>
@@ -52,7 +52,7 @@
             return {
                 dialogImageUrl: require("../../assets/image/business_licence_sample.jpg"),
                 dialogVisible: false,
-                jsonDemo:'{"license_type":"营业执照","business_id":"91440300708461136T","business_name":"深圳市腾讯计算机系统有限公司","business_type":"有限责任公司","address":"深圳市南山区深南大道10000号","operator":"马化腾","registered_capital":"公司","register_date":"1998年11月11日","business_term":"长期","scope":"计算机软、硬件的设计、技术开发、销售、数据库及计算机网络服务；"}',
+                jsonDemo:'{"license_type":"营业执照","business_id":"91469027MA5RC58J61","business_name":"海南南天云网络科技有限公司","business_type":"有限责任公司","address":"海南省老城高新技术产业示范区海南生态软件园","operator":"王天云","registered_capital":"壹仟万元人民币","register_date":"2015年11月03日","business_term":"2015年11月03日至长期","scope":"从事互联网技术及计算机领域内的技术开发、技术转让、技术咨询、技术服务,计算机系统集成,网络工程。(一般经营项目一般经营项目自主经营，许可经营项目凭相关许可证或者批准文件经营）（依法须经批准的项目，经相关部门批准后方可开展经营活动。）"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",

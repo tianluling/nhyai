@@ -139,8 +139,13 @@
 					<div style="width: 70%;margin: 0 auto;">
 						<el-carousel  type="card" height="250px"  trigger="click"><!--:interval="4000"-->
 							<el-carousel-item v-for="(item,index) in recommendedList" :key="index">
-								<img :src="item.imgUrl" alt="">
-								<h3 class="medium">{{ item.imgUrl }}</h3>
+								<div class="content-outer">
+									<img :src="item.imgUrl" alt="" style="opacity: 0.7;object-fit: cover;">
+									<div class="content_usage">
+										<p class="usage_title">{{ item.title }}</p>
+										<p class="describe">{{ item.describe}}</p>
+									</div>
+								</div>
 							</el-carousel-item>
 						</el-carousel>
 					</div>
@@ -204,7 +209,7 @@
                 options:{background:"rgba(0, 0, 0, 0.3)",fullscreen:false,target:document.querySelector(".show_json_outer")},
                 fileList: [],
                 isImage:1,
-                recommendedList:[{'imgUrl':"../../static/imgs/usage_image1.png"},{'imgUrl':'../../static/imgs/usage_image2.png'},{'imgUrl':'../../static/imgs/usage_image03.png'}],
+                recommendedList:[{'imgUrl':"../../static/imgs/usage_image1.png",title:'游戏、直播平台监控',describe:'实现对游戏图片、视频的、直播等内容的实时自动审核，实时自动审核'},{'imgUrl':'../../static/imgs/usage_image2.png',title:'用户原创内容审核',describe:'用户原创内容存在大量的色情、暴力等敏感图片让应用面临业务违规风险'},{'imgUrl':'../../static/imgs/usage_image03.png',title:'社交、电商内容审核',describe:'在社交，电商类应用中，高效识别涉爆涉恐图像，有效减少人力成本并降低业务违规风险'}],
                 srcList:[],
                 url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
                 completeNumber:0,
@@ -597,6 +602,11 @@
 	.yellow_result_suggest span{color: #ff4949;}
 	.current_width_style{width: 1000px;margin: 0 auto;}
 	.current_width_style_1040{width: 1040px;margin: 0 auto;}
+
+	.content-outer{height: 250px;position: relative;}
+	.content_usage{position: absolute;width:100%;top: 50%;transform: translateY(-50%);opacity: 0.7;}
+	.usage_title{text-align: center;font-size: 18px;color: white;}
+	.describe{margin: 15px 30px 0 30px;font-size: 14px;color: white;display: none;text-align: center}
 
 	.advantage_product{padding: 65px 0 30px ;overflow: hidden;background-color: #f2f2f5;}
 	.advantage_product .title{text-align: center;color: #000000;margin: 10px 0;font-size: 30px;}

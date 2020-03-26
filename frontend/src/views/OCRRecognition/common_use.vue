@@ -40,7 +40,7 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/common_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/common_sample.png"),
                 dialogVisible: false,
                 jsonDemo:'{"name":"艾米","sex":"女","nation":"汉","birthday":"1986年4月23日","address":"上海徐汇区田林路397号腾云大厦6F","idNumber":"310104198604230289"}',
                 buttonWord:"开始检测",
@@ -63,12 +63,10 @@
             var loading = this.$loading({fullscreen:false,target:document.querySelector(".outer_add")});
             this.intervalid1 = setTimeout(() => {
 //                this.showJson = JSON.parse(this.jsonDemo);
-                document.getElementById('show_common_json').innerHTML= "夏天的飞鸟，飞到我窗前唱歌，又飞去了。\n" +'<br/>'+
-                    "秋天的黄叶，他们没有什么可唱，只叹息一声，飞落在那里。\n"+'<br/>'+
-                    "Stray birds of summer to my windows to sing and fly away.\n"+'<br/>' +
-                    "And yellow leaves of autumn,which have no songs,flutter and fall there with a sign. \n"+'<br/>' +
-                    "飞鸟集\n" +'<br/>'+
-                    "STRAY BIRDS";
+                document.getElementById('show_common_json').innerHTML= "赠汪伦\n" +'<br/>'+
+                    "【唐】李白\n"+'<br/>'+
+                    "李白乘舟将欲行,忽闻岸上踏歌声。"+'<br/>' +
+                    "桃花潭水深千尺,不及汪伦送我情。";
                 clearInterval(this.intervalid1);
                 this.isCheck= false;
                 loading.close();

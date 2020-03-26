@@ -42,9 +42,9 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/car_number_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/car_number_sample.png"),
                 dialogVisible: false,
-                jsonDemo:'{"plate_no":"京N0L9U8"}',
+                jsonDemo:'{"plate_no":"琼A996N0"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 isForce:false,

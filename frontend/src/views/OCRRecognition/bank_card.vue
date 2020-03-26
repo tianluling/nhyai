@@ -45,9 +45,9 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/back_sample.jpg"),
+                dialogImageUrl: require("../../assets/image/back_sample.png"),
                 dialogVisible: false,
-                jsonDemo:'{"bank_name":"招商银行","bank_cardno":"6225760088888888","expiry_date":"2022年08月","card_type":"信用卡","card_name":"未识别"}',
+                jsonDemo:'{"bank_name":"中国工商银行","bank_cardno":"6225970010000000","expiry_date":"2022年07月","card_type":"信用卡","card_name":"未识别"}',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",

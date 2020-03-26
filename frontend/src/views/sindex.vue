@@ -346,7 +346,7 @@
 										<span>证件类型不是银行卡，请上传银行卡照片！</span>
 									</div>
 								</td>
-								<td v-else-if="preLookInfo.channel_id==14">{{videoUrl.text.app_text}}</td>
+								<td v-else-if="preLookInfo.channel_id==14">{{videoUrl.text}}</td>
 								<td v-else>无文本内容</td>
 							</tr>
 						</table>

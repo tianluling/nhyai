@@ -41,9 +41,9 @@
     export default {
         data() {
             return {
-                dialogImageUrl: require("../../assets/image/hand_writer_sample.jpg"),
-                dialogVisible: false,
-                jsonDemo:'["亲爱的","今天外面很冷噢","出门要多穿衣服","不要着凉","甜甜"]',
+                dialogImageUrl: require("../../assets/image/hand_writer_sample.png"),
+                dialogVisible: false,//
+                jsonDemo:'["人生就像一盒巧克力","你永远都不知道下一块会是什么味道","Liffe was like a box of chocalates.You never know","what you\'re going to get.","《阿甘正传》"]',
                 buttonWord:"开始检测",
                 imageName:"",
                 showPercent:"概率：1.75%",
@@ -65,6 +65,7 @@
         methods: {
             uploadImage(e){
                 this.isLoading = true;
+                this.showJson = {};
                 this.imageRight = false;
                 var formData = new FormData();
                 formData.append('image', $('#datafile')[0].files[0]);

@@ -128,3 +128,9 @@
 .hide .el-upload--picture-card {
     display: none;
 }
+.el-carousel__item--card.is-active .describe{
+    display: block!important;
+}
+.el-carousel__item--card.is-active img{
+    opacity: 1!important;
+}
