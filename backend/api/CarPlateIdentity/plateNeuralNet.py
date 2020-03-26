@@ -155,12 +155,12 @@ class plate_cnn_net:
 
 if __name__ == '__main__':
     cur_dir = sys.path[0]
-    data_dir = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/cnn_plate_train')
-    test_dir = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/cnn_plate_test')
-    train_model_path = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/model/plate_recongnize/model.ckpt')
-    model_path = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/model/plate_recongnize/model.ckpt-510')
+    data_dir = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/cnn_plate_train')
+    test_dir = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/cnn_plate_test')
+    train_model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/plate_recongnize/model.ckpt')
+    model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/plate_recongnize/model.ckpt-510')
 
-    train_flag = 0
+    train_flag = 1
     net = plate_cnn_net()
 
     if train_flag == 1:

@@ -17,3 +17,8 @@ conda install cudatoolkit
 ## pip install torch torchvision   
 ## python版本nms无须执行下一步      
 pushd text/detector/utils && sh make.sh && popd
+
+
+pip install -Iv tensorflow_estimator==1.3.0
+
+conda install tensorflow_estimator

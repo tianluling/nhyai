@@ -50,3 +50,14 @@ backend/api/CarPlateIdentity/carIdentityData/cnn_char_train/*
 backend/api/CarPlateIdentity/carIdentityData/cnn_plate_train/*
 backend/api/CarPlateIdentity/carIdentityData/model/char_recongnize/*
 backend/api/CarPlateIdentity/carIdentityData/model/plate_recongnize/*
+backend/api/CarPlateIdentity/__pycache__/*.pyc
+backend/api/handwrite/models/*
+backend/api/handwrite/test/*
+backend/api/handwrite/darknet/obj/*
+backend/api/handwrite/__pycache__/*.pyc
+backend/api/handwrite/dnn/__pycache__/*.pyc
+backend/api/handwrite/helper/__pycache__/*.pyc
+backend/api/handwrite/darknet/obj/*
+backend/api/handwrite/darknet/darknet
+backend/api/handwrite/darknet/libdarknet.so
+backend/api/handwrite/darknet/libdarknet.a

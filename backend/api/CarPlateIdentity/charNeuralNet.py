@@ -178,14 +178,14 @@ class char_cnn_net:
 
 if __name__ == '__main__':
     cur_dir = sys.path[0]
-    data_dir = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/cnn_char_train')
-    test_dir = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/cnn_char_test')
+    data_dir = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/cnn_char_train')
+    test_dir = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/cnn_char_test')
     # train_model_path = os.path.join(cur_dir, 'carIdentityData/model/char_recongnize/model.ckpt')
     # model_path = os.path.join(cur_dir,'carIdentityData/model/char_recongnize/model.ckpt-660')
-    train_model_path = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/model/char_recongnize/model.ckpt')
-    model_path = os.path.abspath('backend/api/preprocess/CarPlateIdentity/code/carIdentityData/model/char_recongnize/model.ckpt-550')
+    train_model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/char_recongnize/model.ckpt')
+    model_path = os.path.abspath('backend/api/CarPlateIdentity/carIdentityData/model/char_recongnize/model.ckpt-550')
 
-    train_flag = 0
+    train_flag = 1
     net = char_cnn_net()
 
     if train_flag == 1:
